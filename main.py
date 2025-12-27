@@ -9,7 +9,7 @@ import os
 print("="*60)
 print(" VALIDAPY - SISTEMA DE CONTRATOS")
 print("="*60)
-print("Versão 3.0 - Sistema Final")
+print("Versão Primária")
 print("="*60)
 
 # Testa se os módulos estão disponíveis
