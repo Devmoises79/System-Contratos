@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidaPy :: Cyber Contracts</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts (Cyberpunk style) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --cyber-blue: #0066ff;
+            --matrix-green: #00ff41;
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(10, 15, 25, 0.85);
+            --terminal-text: #e0e0ff;
+            --hacker-green: #00ff88;
+            --warning-red: #ff0066;
+            --purple-glow: #9d00ff;
+            --grid-color: rgba(0, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--terminal-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(to bottom, rgba(0, 102, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 102, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: relative;
+        }
+        
+        /* Matrix background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(157, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Static border glow instead of scanning line */
+        .border-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                var(--neon-blue), 
+                var(--cyber-blue), 
+                var(--purple-glow), 
+                var(--neon-blue));
+            background-size: 200% 100%;
+            animation: gradient-flow 3s linear infinite;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        
+        /* Neon text effects */
+        .neon-text {
+            color: var(--neon-blue);
+            text-shadow: 
+                0 0 10px var(--neon-blue),
+                0 0 20px var(--neon-blue),
+                0 0 30px var(--neon-blue);
+        }
+        
+        .cyber-text {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        /* Navbar Cyberpunk */
+        .navbar {
+            background: rgba(5, 10, 20, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neon-blue);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .navbar-brand::before {
+            content: '⟠';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: var(--neon-blue);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .nav-link {
+            color: var(--terminal-text) !important;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0 10px;
+            padding: 8px 15px !important;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .nav-link:hover::before {
+            left: 100%;
+        }
+        
+        .nav-link:hover {
+            color: var(--neon-blue) !important;
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        }
+        
+        /* Gestor Info Panel */
+        .gestor-panel {
+            background: linear-gradient(145deg, rgba(10, 20, 40, 0.9), rgba(5, 10, 25, 0.9));
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.2);
+        }
+        
+        .gestor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 243, 255, 0.2);
+        }
+        
+        .gestor-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+        
+        .gestor-info h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
+        
+        .gestor-info p {
+            color: rgba(224, 224, 255, 0.7);
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .gestor-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .gestor-stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(15, 25, 45, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+        }
+        
+        .gestor-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+        }
+        
+        .gestor-stat-label {
+            font-size: 0.8rem;
+            color: rgba(224, 224, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Stats Cards - Cyberpunk Style */
+        .stat-card {
+            background: linear-gradient(145deg, rgba(10, 20, 40, 0.9), rgba(5, 10, 25, 0.9));
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(0, 243, 255, 0.1) 50%, 
+                transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+            box-shadow: 
+                0 10px 30px rgba(0, 243, 255, 0.2),
+                0 0 40px rgba(0, 243, 255, 0.1),
+                inset 0 0 20px rgba(0, 243, 255, 0.05);
+        }
+        
+        .stat-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
+        }
+        
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ffffff, var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+        
+        .stat-label {
+            color: rgba(224, 224, 255, 0.7);
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        
+        /* Tabs Cyberpunk */
+        .nav-tabs {
+            border: none;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+        
+        .nav-tabs .nav-link {
+            background: rgba(10, 20, 40, 0.7);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px 10px 0 0;
+            color: rgba(224, 224, 255, 0.7);
+            padding: 15px 25px !important;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(145deg, rgba(0, 102, 255, 0.2), rgba(0, 243, 255, 0.1));
+            border: 1px solid var(--neon-blue);
+            border-bottom: none;
+            color: var(--neon-blue);
+            box-shadow: 
+                0 -5px 20px rgba(0, 243, 255, 0.2),
+                0 0 30px rgba(0, 243, 255, 0.1);
+            position: relative;
+        }
+        
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            background: rgba(10, 15, 25, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                var(--neon-blue), 
+                var(--cyber-blue), 
+                var(--purple-glow), 
+                var(--neon-blue));
+            animation: gradient-flow 3s linear infinite;
+        }
+        
+        /* Form Sections */
+        .form-section {
+            background: rgba(15, 25, 45, 0.6);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--neon-blue), var(--cyber-blue));
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title i {
+            font-size: 1.8rem;
+        }
+        
+        /* Form Controls */
+        .form-control, .form-select {
+            background: rgba(5, 15, 30, 0.8) !important;
+            border: 1px solid rgba(0, 243, 255, 0.3) !important;
+            color: var(--terminal-text) !important;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(10, 25, 50, 0.9) !important;
+            border-color: var(--neon-blue) !important;
+            box-shadow: 
+                0 0 20px rgba(0, 243, 255, 0.3),
+                inset 0 0 10px rgba(0, 243, 255, 0.1) !important;
+            color: #ffffff !important;
+        }
+        
+        .form-label {
+            color: rgba(224, 224, 255, 0.9);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Buttons Cyberpunk */
+        .btn-cyber {
+            background: linear-gradient(45deg, rgba(0, 102, 255, 0.8), rgba(0, 243, 255, 0.8));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+        
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-cyber:hover::before {
+            left: 100%;
+        }
+        
+        .btn-cyber:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 30px rgba(0, 243, 255, 0.4),
+                0 0 40px rgba(0, 243, 255, 0.2);
+        }
+        
+        .btn-outline-cyber {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-cyber:hover {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Table Cyberpunk */
+        .table {
+            background: rgba(10, 20, 40, 0.7);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background: linear-gradient(to bottom, rgba(0, 102, 255, 0.3), rgba(0, 20, 40, 0.8));
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            padding: 15px;
+            border-bottom: 2px solid var(--neon-blue);
+        }
+        
+        .table tbody td {
+            background: rgba(15, 25, 45, 0.5);
+            color: var(--terminal-text);
+            border-top: 1px solid rgba(0, 243, 255, 0.1);
+            padding: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+        }
+        
+        .table tbody tr:hover td {
+            background: rgba(0, 243, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        /* Modal Cyberpunk */
+        .modal-content {
+            background: rgba(10, 15, 25, 0.95);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            color: var(--terminal-text);
+            box-shadow: 
+                0 0 50px rgba(0, 243, 255, 0.4),
+                0 0 100px rgba(0, 102, 255, 0.2);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--neon-blue);
+            background: linear-gradient(to right, 
+                rgba(0, 102, 255, 0.2), 
+                transparent);
+        }
+        
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .btn-close {
+            filter: invert(1) sepia(1) saturate(5) hue-rotate(175deg);
+        }
+        
+        /* Alerts Cyberpunk */
+        .alert {
+            background: rgba(10, 20, 40, 0.9);
+            border: 1px solid;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        .alert-success {
+            border-color: var(--hacker-green);
+            color: var(--hacker-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+        
+        .alert-danger {
+            border-color: var(--warning-red);
+            color: var(--warning-red);
+            box-shadow: 0 0 20px rgba(255, 0, 102, 0.2);
+        }
+        
+        .alert-info {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+        }
+        
+        .alert-warning {
+            border-color: #ffaa00;
+            color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
+        }
+        
+        /* Quick Actions Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            background: rgba(15, 25, 45, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-blue);
+            transform: translateY(-5px);
+            box-shadow: 
+                0 10px 25px rgba(0, 243, 255, 0.2),
+                0 0 30px rgba(0, 243, 255, 0.1);
+        }
+        
+        .action-btn i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .action-btn span {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--terminal-text);
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        /* Loading Spinner */
+        .spinner-cyber {
+            border: 3px solid rgba(0, 243, 255, 0.3);
+            border-top: 3px solid var(--neon-blue);
+            border-radius: 50%;
+            animation: spin-cyber 1s linear infinite;
+        }
+        
+        @keyframes spin-cyber {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Terminal effect for empty states */
+        .terminal-effect {
+            background: rgba(0, 20, 40, 0.9);
+            border: 1px solid var(--neon-blue);
+            padding: 30px;
+            border-radius: 10px;
+            position: relative;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-effect::before {
+            content: '>>>';
+            position: absolute;
+            top: 30px;
+            left: 20px;
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 10px 15px !important;
+                font-size: 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .gestor-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .gestor-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .gestor-avatar {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 15, 25, 0.8);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, var(--cyber-blue), var(--neon-blue));
+        }
+        
+        /* Glitch effect for headers */
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--warning-red);
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: 2px 0 var(--cyber-blue);
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+        
+        /* DataTable custom */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            color: var(--terminal-text) !important;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            background: rgba(5, 15, 30, 0.8) !important;
+            border: 1px solid rgba(0, 243, 255, 0.3) !important;
+            color: var(--terminal-text) !important;
+            border-radius: 8px;
+            padding: 8px 15px;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            background: rgba(10, 20, 40, 0.7) !important;
+            border: 1px solid rgba(0, 243, 255, 0.2) !important;
+            color: var(--terminal-text) !important !important;
+            border-radius: 5px;
+            margin: 0 2px;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(45deg, rgba(0, 102, 255, 0.5), rgba(0, 243, 255, 0.5)) !important;
+            border-color: var(--neon-blue) !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Static Border Glow (não interfere na usabilidade) -->
+    <div class="border-glow"></div>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                CONNECT SYSTEM <span class="cyber-text" style="font-size: 0.7em; margin-left: 5px;"> Gestão De Contratos </span>
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <span class="nav-link">
+                    <i class="fas fa-user-shield me-2"></i>
+                    <span class="status-indicator" style="background: var(--hacker-green); box-shadow: 0 0 10px var(--hacker-green); width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>ADMIN
+                </span>
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-terminal me-2"></i>DASHBOARD
+                </a>
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home me-2"></i>INÍCIO
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" style="position: fixed; top: 80px; right: 20px; z-index: 1000; min-width: 300px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4 px-lg-5">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="section-title glitch" data-text="PAINEL DO GESTOR">
+                    <i class="fas fa-brain-circuit"></i>
+                    PAINEL DO GESTOR
+                </h1>
+                <p class="text-muted mb-0" style="color: rgba(0, 243, 255, 0.7) !important;">
+                    <i class="fas fa-broadcast-tower me-2"></i>
+                    SISTEMA DE GERENCIAMENTO DE CONTRATOS - NÍVEL DE ACESSO: ADMINISTRADOR
+                </p>
+            </div>
+        </div>
+
+        <!-- Gestor Info Panel -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="gestor-panel">
+                    <div class="gestor-header">
+                        <div class="gestor-avatar">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="gestor-info">
+                            <h3>GESTOR DO SISTEMA</h3>
+                            <p><i class="fas fa-id-badge me-1"></i> Administrador Principal</p>
+                            <p><i class="fas fa-envelope me-1"></i> admin@connectsystem.com</p>
+                            <p><i class="fas fa-calendar-alt me-1"></i> Último acesso: Agora</p>
+                        </div>
+                    </div>
+                    
+                    <div class="gestor-stats">
+                        <div class="gestor-stat">
+                            <div class="gestor-stat-value">{{ total_contratos }}</div>
+                            <div class="gestor-stat-label">Contratos Totais</div>
+                        </div>
+                        <div class="gestor-stat">
+                            <div class="gestor-stat-value">{{ month_contracts }}</div>
+                            <div class="gestor-stat-label">Este Mês</div>
+                        </div>
+                        <div class="gestor-stat">
+                            <div class="gestor-stat-value">{{ ramos|length }}</div>
+                            <div class="gestor-stat-label">Ramos Ativos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-file-contract stat-icon"></i>
+                    <h3 class="stat-number">{{ total_contratos }}</h3>
+                    <p class="stat-label">CONTRATOS ATIVOS</p>
+                    <div class="mt-3">
+                        <small style="color: rgba(0, 243, 255, 0.7);">
+                            <i class="fas fa-server me-1"></i> BANCO DE DADOS SINCRONIZADO
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-credit-card stat-icon"></i>
+                    <h3 class="stat-number">{{ valor_total|currency }}</h3>
+                    <p class="stat-label">VALOR TOTAL</p>
+                    <div class="mt-3">
+                        <small style="color: rgba(0, 243, 255, 0.7);">
+                            <i class="fas fa-chart-line me-1"></i> VISÃO FINANCEIRA
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-alt stat-icon"></i>
+                    <h3 class="stat-number">{{ month_contracts }}</h3>
+                    <p class="stat-label">ESTE MÊS</p>
+                    <div class="mt-3">
+                        <small style="color: rgba(0, 243, 255, 0.7);">
+                            <i class="fas fa-bolt me-1"></i> ALTA ATIVIDADE
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-database stat-icon"></i>
+                    <h3 class="stat-number">{{ ramos|length }}</h3>
+                    <p class="stat-label">SETORES CADASTRADOS</p>
+                    <div class="mt-3">
+                        <small style="color: rgba(0, 243, 255, 0.7);">
+                            <i class="fas fa-network-wired me-1"></i> CATEGORIAS ATIVAS
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="terminal-effect mb-4">
+                    <p class="mb-2" style="color: var(--neon-blue);">
+                        <i class="fas fa-terminal me-1"></i>STATUS DO SISTEMA: <span style="color: var(--hacker-green);">OPERACIONAL</span>
+                    </p>
+                    <p class="mb-2" style="color: rgba(224, 224, 255, 0.8);">
+                        <i class="fas fa-microchip me-2"></i>CONTRATOS PROCESSADOS: <span style="color: var(--neon-blue);">{{ total_contratos }}</span>
+                    </p>
+                    <p class="mb-2" style="color: rgba(224, 224, 255, 0.8);">
+                        <i class="fas fa-shield-alt me-2"></i>NÍVEL DE SEGURANÇA: <span style="color: var(--hacker-green);">MÁXIMO</span>
+                    </p>
+                    <p class="mb-0" style="color: rgba(224, 224, 255, 0.8);">
+                        <i class="fas fa-user-tie me-2"></i>GESTOR ATUAL: <span style="color: var(--neon-blue);">Administrador do Sistema</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Interface -->
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button">
+                            <i class="fas fa-list me-2"></i>BANCO DE CONTRATOS
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button">
+                            <i class="fas fa-plus-circle me-2"></i>CRIAR CONTRATO
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button">
+                            <i class="fas fa-search me-2"></i>BUSCAR CONTRATO
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="dashboardTabsContent">
+                    
+                    <!-- TAB 1: Contract Database -->
+                    <div class="tab-pane fade show active" id="list" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="cyber-text" style="color: var(--neon-blue);">
+                                <i class="fas fa-database me-2"></i>BANCO DE CONTRATOS
+                            </h4>
+                            <div>
+                                <button class="btn btn-outline-cyber me-2" onclick="exportTable()">
+                                    <i class="fas fa-file-export me-1"></i>EXPORTAR DADOS
+                                </button>
+                                <button class="btn btn-cyber" onclick="loadContracts()">
+                                    <i class="fas fa-sync-alt me-1"></i>ATUALIZAR
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="contractsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nº CONTRATO</th>
+                                        <th>CONTRATANTE</th>
+                                        <th>CONTRATADO</th>
+                                        <th>VALOR</th>
+                                        <th>DATA CRIAÇÃO</th>
+                                        <th>AÇÕES</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contrato in all_contratos %}
+                                    <tr class="contract-row" data-id="{{ contrato.numero_contrato }}">
+                                        <td><strong style="color: var(--neon-blue);">{{ contrato.numero_contrato }}</strong></td>
+                                        <td>{{ contrato.empresa_contratante[:25] }}{% if contrato.empresa_contratante|length > 25 %}...{% endif %}</td>
+                                        <td>{{ contrato.empresa_contratada[:25] }}{% if contrato.empresa_contratada|length > 25 %}...{% endif %}</td>
+                                        <td style="color: var(--hacker-green);">{{ contrato.valor|currency }}</td>
+                                        <td>{{ contrato.data_criacao|date if contrato.data_criacao else 'N/A' }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-cyber me-1" 
+                                                    onclick="viewContract('{{ contrato.numero_contrato }}')"
+                                                    title="VISUALIZAR CONTRATO">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <a href="{{ url_for('download_pdf', numero=contrato.numero_contrato) }}" 
+                                               class="btn btn-sm btn-outline-cyber"
+                                               title="BAIXAR PDF">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-database fa-3x mb-3" style="color: rgba(0, 243, 255, 0.3);"></i>
+                                            <p class="text-muted mb-3" style="color: rgba(224, 224, 255, 0.5);">
+                                                NENHUM CONTRATO ENCONTRADO NO BANCO DE DADOS
+                                            </p>
+                                            <button class="btn btn-cyber" onclick="switchToCreateTab()">
+                                                <i class="fas fa-plus me-1"></i> CRIAR PRIMEIRO CONTRATO
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Quick Stats -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>{{ total_contratos }}</strong> contratos no banco
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Todos os contratos estão ativos e válidos
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Última atualização: Agora
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 2: Create Contract -->
+                    <div class="tab-pane fade" id="create" role="tabpanel">
+                        <h4 class="cyber-text mb-4" style="color: var(--neon-blue);">
+                            <i class="fas fa-file-medical me-2"></i>NOVO CONTRATO
+                        </h4>
+                        
+                        <form id="createContractForm">
+                            <!-- Client Data -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-user-shield"></i> DADOS DO CONTRATANTE
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">EMPRESA CONTRATANTE</label>
+                                        <input type="text" class="form-control" name="empresa_contratante" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">CNPJ DO CONTRATANTE</label>
+                                        <input type="text" class="form-control" name="cnpj_contratante" 
+                                               oninput="formatarCNPJ(this)" placeholder="00.000.000/0000-00">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">RAMO DE ATIVIDADE</label>
+                                        <select class="form-select" name="ramo_contratante" id="ramosContratante">
+                                            <option value="">SELECIONE UM RAMO...</option>
+                                            {% for ramo in ramos %}
+                                            <option value="{{ ramo.descricao }}">{{ ramo.descricao }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">RESPONSÁVEL LEGAL</label>
+                                        <input type="text" class="form-control" name="responsavel_contratante" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">E-MAIL</label>
+                                        <input type="email" class="form-control" name="email_contratante" placeholder="empresa@dominio.com">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">TELEFONE</label>
+                                        <input type="text" class="form-control" name="telefone_contratante" 
+                                               oninput="formatarTelefone(this)" placeholder="(11) 99999-9999">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Provider Data -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-handshake"></i> DADOS DO CONTRATADO
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">EMPRESA CONTRATADA</label>
+                                        <input type="text" class="form-control" name="empresa_contratada" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">CNPJ DO CONTRATADO</label>
+                                        <input type="text" class="form-control" name="cnpj_contratada" 
+                                               oninput="formatarCNPJ(this)" placeholder="00.000.000/0000-00">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">RAMO DE ATIVIDADE</label>
+                                        <select class="form-select" name="ramo_contratada" id="ramosContratada">
+                                            <option value="">SELECIONE UM RAMO...</option>
+                                            {% for ramo in ramos %}
+                                            <option value="{{ ramo.descricao }}">{{ ramo.descricao }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">RESPONSÁVEL LEGAL</label>
+                                        <input type="text" class="form-control" name="responsavel_contratada" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">E-MAIL</label>
+                                        <input type="email" class="form-control" name="email_contratada" placeholder="contato@empresa.com">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">TELEFONE</label>
+                                        <input type="text" class="form-control" name="telefone_contratada" 
+                                               oninput="formatarTelefone(this)" placeholder="(11) 99999-9999">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contract Details -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-file-contract"></i> DETALHES DO CONTRATO
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">VALOR DO CONTRATO</label>
+                                        <input type="text" class="form-control" name="valor" 
+                                               oninput="formatarValor(this)" required placeholder="R$ 0,00">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PRAZO</label>
+                                        <input type="text" class="form-control" name="prazo" placeholder="ex: 12 meses">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">TIPO DE SERVIÇO</label>
+                                        <select class="form-select" name="tipo_servico" id="tiposServico">
+                                            <option value="">SELECIONE UM TIPO...</option>
+                                            {% for tipo in tipos %}
+                                            <option value="{{ tipo.descricao }}">{{ tipo.descricao }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">DATA DE INÍCIO</label>
+                                        <input type="date" class="form-control" name="data_inicio">
+                                    </div>
+                                    
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">DATA DE TÉRMINO</label>
+                                        <input type="date" class="form-control" name="data_termino">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">ESPECIFICAÇÃO DOS SERVIÇOS</label>
+                                    <textarea class="form-control" name="especificacao_servico" rows="4" 
+                                              placeholder="Descreva detalhadamente os serviços a serem prestados..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="reset" class="btn btn-outline-cyber">
+                                    <i class="fas fa-eraser me-1"></i> LIMPAR FORMULÁRIO
+                                </button>
+                                
+                                <button type="submit" class="btn btn-cyber">
+                                    <i class="fas fa-save me-1"></i> CRIAR CONTRATO E GERAR PDF
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div id="loading" class="mt-4 text-center" style="display: none;">
+                            <div class="spinner-cyber" style="width: 50px; height: 50px;"></div>
+                            <p class="mt-3" style="color: var(--neon-blue);">
+                                <i class="fas fa-cogs me-1"></i> PROCESSANDO CONTRATO...
+                            </p>
+                        </div>
+                        
+                        <div id="resultMessage" class="mt-3"></div>
+                    </div>
+                    
+                    <!-- TAB 3: Contract Search -->
+                    <div class="tab-pane fade" id="search" role="tabpanel">
+                        <h4 class="cyber-text mb-4" style="color: var(--neon-blue);">
+                            <i class="fas fa-search me-2"></i>BUSCAR CONTRATO
+                        </h4>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: rgba(10, 20, 40, 0.8); border-color: rgba(0, 243, 255, 0.3); color: var(--neon-blue);">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="searchTerm" 
+                                           placeholder="Digite número do contrato, nome da empresa ou CNPJ...">
+                                    <button class="btn btn-cyber" type="button" onclick="searchContracts()">
+                                        <i class="fas fa-search me-1"></i> BUSCAR
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="searchFilter">
+                                    <option value="all">BUSCA COMPLETA</option>
+                                    <option value="numero">Nº DO CONTRATO</option>
+                                    <option value="contratante">CONTRATANTE</option>
+                                    <option value="contratado">CONTRATADO</option>
+                                    <option value="cnpj">CNPJ</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="searchResults">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i> 
+                                DIGITE UM TERMO DE BUSCA PARA VER OS RESULTADOS
+                            </div>
+                        </div>
+                        
+                        <div id="searchLoading" class="text-center" style="display: none;">
+                            <div class="spinner-cyber" style="width: 40px; height: 40px; margin: 0 auto;"></div>
+                            <p class="mt-2" style="color: var(--neon-blue);">
+                                <i class="fas fa-search me-1"></i> BUSCANDO CONTRATOS...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Action Panel -->
+        <div class="row mt-5">
+            <div class="col">
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="fas fa-rocket"></i> ACESSO RÁPIDO
+                    </h5>
+                    
+                    <div class="action-grid">
+                        <div class="action-btn" onclick="switchToCreateTab()">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>NOVO CONTRATO</span>
+                        </div>
+                        <div class="action-btn" onclick="loadContracts()">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>ATUALIZAR DADOS</span>
+                        </div>
+                        <div class="action-btn" onclick="exportTable()">
+                            <i class="fas fa-file-export"></i>
+                            <span>EXPORTAR DADOS</span>
+                        </div>
+                        <div class="action-btn" onclick="generateReport()">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>RELATÓRIOS</span>
+                        </div>
+                        <div class="action-btn" onclick="showSystemInfo()">
+                            <i class="fas fa-info-circle"></i>
+                            <span>SOBRE O SISTEMA</span>
+                        </div>
+                        <div class="action-btn" onclick="window.open('{{ url_for('index') }}', '_self')">
+                            <i class="fas fa-home"></i>
+                            <span>PÁGINA INICIAL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Footer -->
+        <div class="row mt-5">
+            <div class="col">
+                <div class="terminal-effect">
+                    <p class="mb-2" style="color: rgba(0, 243, 255, 0.7);">
+                        <i class="fas fa-microchip me-2"></i>SISTEMA: ValidaPy v2.0
+                    </p>
+                    <p class="mb-2" style="color: rgba(224, 224, 255, 0.5);">
+                        <i class="fas fa-user-tie me-2"></i>GESTOR: Administrador do Sistema
+                    </p>
+                    <p class="mb-0" style="color: rgba(224, 224, 255, 0.5);">
+                        <i class="fas fa-clock me-2"></i>UPTIME: 99.9% | CONTRATOS: {{ total_contratos }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Contract Details -->
+    <div class="modal fade" id="contractModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title cyber-text">
+                        <i class="fas fa-file-contract me-2"></i>VISUALIZAR CONTRATO
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="contractDetails">
+                    <div class="text-center py-5">
+                        <div class="spinner-cyber" style="width: 60px; height: 60px; margin: 0 auto;"></div>
+                        <p class="mt-3" style="color: var(--neon-blue);">
+                            <i class="fas fa-sync-alt fa-spin me-2"></i>CARREGANDO DADOS DO CONTRATO...
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-cyber" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> FECHAR
+                    </button>
+                    <button type="button" class="btn btn-cyber" id="downloadBtn" style="display: none;">
+                        <i class="fas fa-download me-1"></i> BAIXAR PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#contractsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+                },
+                pageLength: 10,
+                order: [[4, 'desc']],
+                responsive: true,
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>'
+            });
+        });
+        
+        // Formatting Functions
+        function formatarCNPJ(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            
+            input.value = value;
+        }
+        
+        function formatarValor(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = (parseFloat(value) / 100).toFixed(2);
+            value = value.replace('.', ',');
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            input.value = value ? 'R$ ' + value : '';
+        }
+        
+        function formatarTelefone(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d*)/, '($1');
+            }
+            
+            input.value = value;
+        }
+        
+        // Tab switching
+        function switchToCreateTab() {
+            new bootstrap.Tab(document.getElementById('create-tab')).show();
+        }
+        
+        // Form submission
+        $('#createContractForm').submit(function(e) {
+            e.preventDefault();
+            
+            $('#loading').show();
+            $('#resultMessage').html('');
+            
+            const valorInput = $('input[name="valor"]');
+            const valorText = valorInput.val();
+            
+            if (!valorText || valorText === 'R$ 0,00') {
+                $('#loading').hide();
+                showAlert('danger', 'VALOR INVÁLIDO: Por favor, insira um valor válido para o contrato.');
+                valorInput.focus();
+                return;
+            }
+            
+            let valor = valorText.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+            
+            let formData = new FormData(this);
+            formData.set('action', 'create_contract');
+            formData.set('valor', valor);
+            
+            $.ajax({
+                url: '{{ url_for("dashboard") }}',
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#loading').hide();
+                    
+                    if (response.success) {
+                        showAlert('success', 
+                            `CONTRATO CRIADO COM SUCESSO!<br>
+                            <small>NÚMERO DO CONTRATO: <strong>${response.numero}</strong></small><br>
+                            <small>O PDF foi gerado automaticamente e está pronto para download.</small>`);
+                        
+                        $('#createContractForm')[0].reset();
+                        
+                        setTimeout(() => {
+                            loadContracts();
+                        }, 3000);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#loading').hide();
+                    showAlert('danger', `ERRO DO SISTEMA: ${error}`);
+                }
+            });
+        });
+        
+        // Contract search
+        function searchContracts() {
+            let termo = $('#searchTerm').val().trim();
+            let filtro = $('#searchFilter').val();
+            
+            if (!termo) {
+                $('#searchResults').html(`
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> 
+                        DIGITE UM TERMO PARA BUSCAR
+                    </div>
+                `);
+                return;
+            }
+            
+            $('#searchLoading').show();
+            $('#searchResults').html('');
+            
+            $.ajax({
+                url: '{{ url_for("dashboard") }}',
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                data: {
+                    action: 'search_contract',
+                    termo: termo,
+                    filtro: filtro
+                },
+                success: function(response) {
+                    $('#searchLoading').hide();
+                    
+                    if (response.success) {
+                        if (response.data.length > 0) {
+                            let html = `
+                                <div class="alert alert-success mb-3">
+                                    <i class="fas fa-check-circle me-2"></i> 
+                                    BUSCA COMPLETA: ${response.data.length} CONTRATO(S) ENCONTRADO(S)
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-success">
+                                            <tr>
+                                                <th>Nº CONTRATO</th>
+                                                <th>CONTRATANTE</th>
+                                                <th>CONTRATADO</th>
+                                                <th>VALOR</th>
+                                                <th>DATA</th>
+                                                <th>AÇÕES</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                            
+                            response.data.forEach(contrato => {
+                                const valorFormatado = new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                }).format(contrato.valor);
+                                
+                                html += `
+                                    <tr>
+                                        <td><strong style="color: var(--neon-blue);">${contrato.numero}</strong></td>
+                                        <td>${contrato.contratante.substring(0, 20)}${contrato.contratante.length > 20 ? '...' : ''}</td>
+                                        <td>${contrato.contratado.substring(0, 20)}${contrato.contratado.length > 20 ? '...' : ''}</td>
+                                        <td style="color: var(--hacker-green);">${valorFormatado}</td>
+                                        <td>${contrato.data_criacao}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-cyber me-1" 
+                                                    onclick="viewContract('${contrato.numero}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <a href="/download/${contrato.numero}" 
+                                               class="btn btn-sm btn-outline-cyber">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>`;
+                            });
+                            
+                            html += `</tbody></table></div>`;
+                            $('#searchResults').html(html);
+                        } else {
+                            $('#searchResults').html(`
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-search me-2"></i> 
+                                    NENHUM CONTRATO ENCONTRADO PARA: <strong>${termo}</strong>
+                                </div>
+                            `);
+                        }
+                    } else {
+                        $('#searchResults').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i> 
+                                ERRO NA BUSCA: PROBLEMA NA CONEXÃO COM O BANCO
+                            </div>
+                        `);
+                    }
+                },
+                error: function() {
+                    $('#searchLoading').hide();
+                    $('#searchResults').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i> 
+                            ERRO NA BUSCA: SISTEMA INDISPONÍVEL
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        // View contract details
+        function viewContract(numero) {
+            $('#contractDetails').html(`
+                <div class="text-center py-5">
+                    <div class="spinner-cyber" style="width: 60px; height: 60px; margin: 0 auto;"></div>
+                    <p class="mt-3" style="color: var(--neon-blue);">
+                        <i class="fas fa-sync-alt fa-spin me-2"></i>CARREGANDO DETALHES DO CONTRATO...
+                    </p>
+                </div>
+            `);
+            
+            $('#downloadBtn').hide();
+            
+            $.ajax({
+                url: '{{ url_for("dashboard") }}',
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                data: {
+                    action: 'get_contract_details',
+                    numero: numero
+                },
+                success: function(response) {
+                    if (response.success) {
+                        let contrato = response.data;
+                        
+                        const valorFormatado = new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                        }).format(parseFloat(contrato.valor));
+                        
+                        const dataCriacao = contrato.data_criacao ? new Date(contrato.data_criacao).toLocaleDateString('pt-BR') : 'N/A';
+                        const dataInicio = contrato.data_inicio ? new Date(contrato.data_inicio).toLocaleDateString('pt-BR') : 'N/A';
+                        const dataTermino = contrato.data_termino ? new Date(contrato.data_termino).toLocaleDateString('pt-BR') : 'N/A';
+                        
+                        let html = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-section">
+                                        <h6 class="cyber-text mb-3" style="color: var(--neon-blue);">
+                                            <i class="fas fa-user-shield me-2"></i>CONTRATANTE
+                                        </h6>
+                                        <p><strong>Empresa:</strong> ${contrato.empresa_contratante}</p>
+                                        ${contrato.cnpj_contratante ? `<p><strong>CNPJ:</strong> ${contrato.cnpj_contratante}</p>` : ''}
+                                        ${contrato.ramo_contratante ? `<p><strong>Ramo:</strong> ${contrato.ramo_contratante}</p>` : ''}
+                                        ${contrato.responsavel_contratante ? `<p><strong>Responsável:</strong> ${contrato.responsavel_contratante}</p>` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-section">
+                                        <h6 class="cyber-text mb-3" style="color: var(--neon-blue);">
+                                            <i class="fas fa-handshake me-2"></i>CONTRATADO
+                                        </h6>
+                                        <p><strong>Empresa:</strong> ${contrato.empresa_contratada}</p>
+                                        ${contrato.cnpj_contratada ? `<p><strong>CNPJ:</strong> ${contrato.cnpj_contratada}</p>` : ''}
+                                        ${contrato.ramo_contratada ? `<p><strong>Ramo:</strong> ${contrato.ramo_contratada}</p>` : ''}
+                                        ${contrato.responsavel_contratada ? `<p><strong>Responsável:</strong> ${contrato.responsavel_contratada}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-8">
+                                    <div class="form-section">
+                                        <h6 class="cyber-text mb-3" style="color: var(--neon-blue);">
+                                            <i class="fas fa-file-contract me-2"></i>DETALHES DO CONTRATO
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Número do Contrato:</strong> <span style="color: var(--neon-blue);">${contrato.numero_contrato}</span></p>
+                                                <p><strong>Valor:</strong> <span style="color: var(--hacker-green);">${valorFormatado}</span></p>
+                                                ${contrato.prazo ? `<p><strong>Prazo:</strong> ${contrato.prazo}</p>` : ''}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Criado em:</strong> ${dataCriacao}</p>
+                                                ${dataInicio !== 'N/A' ? `<p><strong>Data de Início:</strong> ${dataInicio}</p>` : ''}
+                                                ${dataTermino !== 'N/A' ? `<p><strong>Data de Término:</strong> ${dataTermino}</p>` : ''}
+                                            </div>
+                                        </div>
+                                        ${contrato.tipo_servico ? `<p><strong>Tipo de Serviço:</strong> ${contrato.tipo_servico}</p>` : ''}
+                                        ${contrato.especificacao_servico ? `
+                                        <div class="mt-3">
+                                            <strong>Especificação:</strong>
+                                            <div class="mt-2 p-3" style="background: rgba(0, 243, 255, 0.05); border-radius: 5px; border: 1px solid rgba(0, 243, 255, 0.1);">
+                                                ${contrato.especificacao_servico.replace(/\n/g, '<br>')}
+                                            </div>
+                                        </div>` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-section">
+                                        <h6 class="cyber-text mb-3" style="color: var(--neon-blue);">
+                                            <i class="fas fa-cogs me-2"></i>AÇÕES
+                                        </h6>
+                                        <div class="d-grid gap-2">
+                                            <a href="/download/${contrato.numero_contrato}" 
+                                               class="btn btn-cyber">
+                                                <i class="fas fa-download me-1"></i>BAIXAR PDF
+                                            </a>
+                                            <button class="btn btn-outline-cyber" onclick="copyContractNumber('${contrato.numero_contrato}')">
+                                                <i class="fas fa-copy me-1"></i>COPIAR NÚMERO
+                                            </button>
+                                            <button class="btn btn-outline-cyber" onclick="printContract('${contrato.numero_contrato}')">
+                                                <i class="fas fa-print me-1"></i>IMPRIMIR
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        
+                        $('#contractDetails').html(html);
+                        $('#downloadBtn').show().attr('onclick', `window.location.href='/download/${numero}'`);
+                        
+                        let modal = new bootstrap.Modal(document.getElementById('contractModal'));
+                        modal.show();
+                    } else {
+                        $('#contractDetails').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i> ${response.message}
+                            </div>
+                        `);
+                    }
+                },
+                error: function() {
+                    $('#contractDetails').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i> 
+                            ERRO AO CARREGAR DETALHES. TENTE NOVAMENTE MAIS TARDE.
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        // Helper functions
+        function loadContracts() {
+            location.reload();
+        }
+        
+        function copyContractNumber(numero) {
+            navigator.clipboard.writeText(numero).then(() => {
+                showAlert('info', `NÚMERO DO CONTRATO COPIADO: ${numero}`);
+            });
+        }
+        
+        function printContract(numero) {
+            window.open('/download/' + numero, '_blank');
+        }
+        
+        function exportTable() {
+            showAlert('info', 'FUNCIONALIDADE DE EXPORTAÇÃO EM DESENVOLVIMENTO. DISPONÍVEL NA PRÓXIMA ATUALIZAÇÃO.');
+        }
+        
+        function generateReport() {
+            showAlert('info', 'PAINEL DE ANÁLISE EM DESENVOLVIMENTO. EM BREVE DISPONÍVEL.');
+        }
+        
+        function showSystemInfo() {
+            showAlert('info', 
+                `VALIDAPY v2.0 :: SISTEMA DE CONTRATOS CYBER<br>
+                <small>Sistema Avançado de Gerenciamento de Contratos</small><br>
+                <small>Desenvolvido com Flask, MySQL e Python</small>`);
+        }
+        
+        function showAlert(type, message) {
+            $('#resultMessage').html(`
+                <div class="alert alert-${type}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                    ${message}
+                </div>
+            `);
+            
+            setTimeout(() => {
+                $('#resultMessage').empty();
+            }, 5000);
+        }
+        
+        // Auto-hide alerts
+        setTimeout(() => {
+            $('.alert').alert('close');
+        }, 5000);
+        
+        // Enter key search
+        $('#searchTerm').keypress(function(e) {
+            if (e.which === 13) {
+                searchContracts();
+            }
+        });
+    </script>
+</body>
+</html>

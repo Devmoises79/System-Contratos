@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONNECT SYSTEM - Sistema de Contratos</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --cyber-blue: #0066ff;
+            --dark-bg: #0a0a0f;
+            --terminal-text: #e0e0ff;
+            --hacker-green: #00ff88;
+            --grid-color: rgba(0, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--terminal-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(to bottom, rgba(0, 102, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 102, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: relative;
+        }
+        
+        /* Static border glow */
+        .border-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                var(--neon-blue), 
+                var(--cyber-blue), 
+                #9d00ff, 
+                var(--neon-blue));
+            background-size: 200% 100%;
+            animation: gradient-flow 3s linear infinite;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(157, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .cyber-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .cyber-title::before {
+            content: '⟠';
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            color: var(--neon-blue);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .neon-text {
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 20px rgba(0, 243, 255, 0.5),
+                0 0 40px rgba(0, 243, 255, 0.3);
+        }
+        
+        .tagline {
+            font-size: 1.5rem;
+            color: rgba(224, 224, 255, 0.8);
+            margin-bottom: 40px;
+            max-width: 700px;
+            line-height: 1.6;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Cyber Button */
+        .btn-cyber {
+            background: linear-gradient(45deg, rgba(0, 102, 255, 0.8), rgba(0, 243, 255, 0.8));
+            border: none;
+            color: white;
+            padding: 18px 50px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 30px rgba(0, 243, 255, 0.4),
+                0 0 60px rgba(0, 243, 255, 0.2);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-cyber:hover::before {
+            left: 100%;
+        }
+        
+        .btn-cyber:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 15px 40px rgba(0, 243, 255, 0.6),
+                0 0 80px rgba(0, 243, 255, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 100px 20px;
+            background: rgba(5, 10, 20, 0.9);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, rgba(10, 20, 40, 0.9), rgba(5, 10, 25, 0.9));
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--neon-blue);
+            box-shadow: 
+                0 20px 40px rgba(0, 243, 255, 0.3),
+                0 0 60px rgba(0, 243, 255, 0.2),
+                inset 0 0 30px rgba(0, 243, 255, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.5));
+        }
+        
+        .feature-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .feature-desc {
+            color: rgba(224, 224, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        /* Terminal Effect */
+        .terminal {
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 30px;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 40px rgba(0, 243, 255, 0.3),
+                inset 0 0 20px rgba(0, 243, 255, 0.1);
+            margin: 40px auto;
+            max-width: 800px;
+        }
+        
+        .terminal::before {
+            content: '>_';
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: var(--neon-blue);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .terminal-text {
+            color: var(--hacker-green);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-left: 50px;
+            min-height: 100px;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+            font-weight: bold;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* Footer */
+        .footer {
+            background: rgba(0, 10, 20, 0.95);
+            padding: 50px 20px;
+            border-top: 1px solid rgba(0, 243, 255, 0.2);
+            text-align: center;
+        }
+        
+        .cyber-footer-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cyber-title {
+                font-size: 2.5rem;
+                letter-spacing: 3px;
+            }
+            
+            .cyber-title::before {
+                left: -35px;
+                font-size: 2rem;
+            }
+            
+            .tagline {
+                font-size: 1.2rem;
+                padding: 0 15px;
+            }
+            
+            .btn-cyber {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+            
+            .feature-icon {
+                font-size: 3rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 15, 25, 0.8);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, var(--neon-blue), var(--cyber-blue));
+            border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, var(--cyber-blue), var(--neon-blue));
+        }
+        
+        /* Alert position */
+        .alert-custom {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Static Border Glow (não interfere na usabilidade) -->
+    <div class="border-glow"></div>
+    
+    <!-- Alert Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-custom alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="container text-center">
+            <div class="cyber-title neon-text">
+                CONNECT SYSTEM
+            </div>
+            <div class="subtitle" style="font-family: 'Orbitron', sans-serif; color: var(--neon-blue); font-size: 1.2rem; letter-spacing: 3px; margin-bottom: 10px;">
+                SISTEMA DE CONTRATOS
+            </div>
+            <p class="tagline">
+                Sistema avançado de gerenciamento de contratos com segurança de ponta. 
+                Processe, armazene e gerencie seus contratos com tecnologia de última geração.
+            </p>
+            <a href="{{ url_for('dashboard') }}" class="btn-cyber">
+                <i class="fas fa-rocket me-2"></i> ACESSAR PAINEL DE CONTROLE
+            </a>
+            
+            <!-- Terminal Effect -->
+            <div class="terminal mt-5">
+                <div class="terminal-text" id="terminal-content">
+                    <!-- O conteúdo será inserido pelo JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">RECURSOS DO SISTEMA</h2>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3 class="feature-title">SEGURANÇA AVANÇADA</h3>
+                        <p class="feature-desc">
+                            Protocolos de criptografia de última geração garantem que seus contratos estejam protegidos contra qualquer ameaça.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="feature-title">PROCESSAMENTO RÁPIDO</h3>
+                        <p class="feature-desc">
+                            Análise automatizada de contratos e processamento inteligente para máxima eficiência e precisão.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h3 class="feature-title">ARMAZENAMENTO SEGURO</h3>
+                        <p class="feature-desc">
+                            Armazenamento distribuído com verificação de integridade, garantindo disponibilidade 24/7 dos dados.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3 class="feature-title">AUTOMAÇÃO INTELIGENTE</h3>
+                        <p class="feature-desc">
+                            Automação de fluxos de trabalho com contratos inteligentes e notificações em tempo real.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-network"></i>
+                        </div>
+                        <h3 class="feature-title">ANÁLISE EM TEMPO REAL</h3>
+                        <p class="feature-desc">
+                            Visualização avançada de dados e análise preditiva para monitoramento de performance.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="feature-title">CONFORMIDADE</h3>
+                        <p class="feature-desc">
+                            Verificação automática de conformidade e atualizações regulatórias em todas as jurisdições.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Call to Action -->
+    <section class="hero" style="min-height: 50vh;">
+        <div class="hero-bg"></div>
+        <div class="container text-center">
+            <h2 class="section-title">PRONTO PARA COMEÇAR?</h2>
+            <p class="tagline" style="max-width: 600px;">
+                Junte-se ao futuro do gerenciamento de contratos. Seguro, automatizado e inteligente.
+            </p>
+            <a href="{{ url_for('dashboard') }}" class="btn-cyber mt-3">
+                <i class="fas fa-terminal me-2"></i> INICIAR SISTEMA
+            </a>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="cyber-footer-text mb-3">
+                CONNECT SYSTEM - SISTEMA DE CONTRATOS v2.0
+            </p>
+            <p style="color: rgba(224, 224, 255, 0.6);">
+                <i class="fas fa-shield-alt me-1"></i> Sistema Seguro | 
+                <i class="fas fa-server ms-2 me-1"></i> 99.9% Disponibilidade | 
+                <i class="fas fa-bolt ms-2 me-1"></i> Processamento Rápido
+            </p>
+            <p style="color: rgba(224, 224, 255, 0.4); margin-top: 20px; font-size: 0.9rem;">
+                © 2024 ValidaPy. Todos os direitos reservados.
+            </p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Texto completo do terminal - REMOVIDA A LINHA DE CONTRATOS PROCESSADOS
+        const terminalText = `STATUS DO SISTEMA: <span style="color: var(--hacker-green);">OPERACIONAL</span><br>
+NÍVEL DE SEGURANÇA: <span style="color: var(--hacker-green);">ENCRIPTAÇÃO ATIVA</span><br>
+PRONTO PARA COMANDOS<span class="blink">_</span>`;
+
+        // Terminal typing effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const terminalContent = document.getElementById('terminal-content');
+            let currentText = '';
+            let i = 0;
+            
+            function typeWriter() {
+                if (i < terminalText.length) {
+                    currentText += terminalText.charAt(i);
+                    terminalContent.innerHTML = currentText;
+                    i++;
+                    
+                    // Velocidade de digitação variável
+                    let speed = 50;
+                    
+                    // Acelera um pouco nos espaços e tags HTML
+                    if (terminalText.charAt(i) === ' ' || terminalText.charAt(i) === '<') {
+                        speed = 30;
+                    }
+                    
+                    setTimeout(typeWriter, speed);
+                }
+            }
+            
+            // Inicia o efeito de digitação após um pequeno delay
+            setTimeout(typeWriter, 1000);
+            
+            // Auto-hide alerts
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert-custom');
+                alerts.forEach(alert => {
+                    alert.classList.remove('show');
+                });
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
