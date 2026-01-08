@@ -14,10 +14,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 try:
     from database import Database
     from contrato import Contrato
-    print("✅ Módulos importados com sucesso!")
+    print(" Módulos importados com sucesso!")
 except ImportError as e:
-    print(f"❌ Erro ao importar módulos: {e}")
-    print("⚠️ Certifique-se que database.py e contrato.py estão no diretório")
+    print(f" Erro ao importar módulos: {e}")
+    print(" Certifique-se que database.py e contrato.py estão no diretório")
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -26,9 +26,9 @@ app.secret_key = os.urandom(24)
 try:
     db = Database()
     contrato_manager = Contrato(db)
-    print("✅ Banco de dados conectado!")
+    print(" Banco de dados conectado!")
 except Exception as e:
-    print(f"❌ Erro ao conectar ao banco: {e}")
+    print(f" Erro ao conectar ao banco: {e}")
     db = None
     contrato_manager = None
 
@@ -254,15 +254,15 @@ app.jinja_env.filters['date'] = format_date
 # =============== INICIALIZAÇÃO ===============
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("🚀 VALIDAPY WEB - Sistema Simplificado")
+    print(" VALIDAPY WEB - Sistema Simplificado")
     print("="*60)
     
     # Cria pastas se não existirem
     if not os.path.exists('templates'):
         os.makedirs('templates')
     
-    print("\n📊 Sistema pronto!")
-    print("🌐 Acesse: http://localhost:5000")
+    print("\n Sistema pronto!")
+    print(" Acesse: http://localhost:5000")
     print("="*60)
     
     app.run(debug=True, host='0.0.0.0', port=5000)

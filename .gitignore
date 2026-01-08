@@ -2,3 +2,4 @@ config.json
 
 database.py
 
+__pycache__/
