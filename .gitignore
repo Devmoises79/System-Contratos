@@ -1,0 +1,71 @@
+# Ambiente virtual
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Configurações com senhas
+.env
+.env.local
+.env.production
+config_local.py
+config.json
+*.cnf
+*.my.cnf
+
+# MySQL local (dados do banco - NUNCA versionar!)
+*.sql
+*.dump
+*.backup
+*.bak
+*.ibd
+*.frm
+*.myd
+*.myi
+*.opt
+data/
+mysql-data/
+
+# Uploads e arquivos de usuários
+static/uploads/
+static/logos/
+static/contratos/
+uploads/
+media/
+
+# Logs
+logs/
+*.log
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos de teste
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.coverage.*
+*.cover
+
+# Distribuição
+build/
+dist/
+*.egg-info/
