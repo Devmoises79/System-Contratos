@@ -1,247 +1,142 @@
-### 📄 ValidaPy — Sistema de Gerenciamento de Contratos
+## 📄 System-Contratos
 
-* O ValidaPy é um sistema de gerenciamento de contratos desenvolvido em Python, com interface em linha de comando (CLI), integração  com MySQL e geração automática de contratos em PDF.
+Sistema web para gerenciamento corporativo de contratos, empresas e usuários.
 
-* O sistema permite cadastrar, consultar, organizar e auditar contratos de prestação de serviços, oferecendo validações, histórico e estrutura extensível.
-
-# 🚀 Funcionalidades
-
-- ✔️ Cadastro completo de contratos
-- ✔️ Geração automática de PDF profissional
-- ✔️ Numeração única de contratos
-- ✔️ Validação e formatação de CNPJ
-- ✔️ Registro de contratante e contratada
-- ✔️ Seleção de ramos de atividade e tipos de serviço
-- ✔️ Persistência em banco de dados MySQL
-- ✔️ Busca de contratos por número ou empresa
-- ✔️ Listagem geral de contratos
-- ✔️ Verificação da integridade dos PDFs
-- ✔️ Logs de ações do sistema
-- ✔️ Estatísticas básicas (total, valor médio, contratos por mês)
-- ✔️ Menu administrativo para manutenção do banco
-
-# 🧠 Tecnologias Utilizadas
-
-- 🐍 Python 3.8+
-
-- 🗄️ MySQL
-
-- 📄 FPDF2 (geração de PDF)
-
-- 📦 mysql-connector-python
-
-- 🧩 Programação orientada a objetos
-
-- 🖥️ Interface CLI (terminal)
+* ⚠️ Status: Projeto em desenvolvimento ativo. Estrutura arquitetural consolidada e novas funcionalidades sendo implementadas.
 
 
-# 📂 Estrutura do Projeto
+# 📌 Sobre o Projeto
+
+O System-Contratos é uma aplicação web desenvolvida com foco em organização modular, controle de acesso e boas práticas de backend.
+
+O sistema permite:
+
+- Gestão de contratos
+
+- Administração de empresas
+
+- Controle de usuários
+
+- Permissões baseadas em perfil (RBAC)
+
+- Estrutura organizada por domínio
+
+- Tratamento de erros personalizados
+
+*O projeto está em evolução contínua, com foco em escalabilidade e arquitetura limpa.
+
+# Stack Tecnológica
+
+*Backend:
+
+- Python
+
+- Flask
+
+- Arquitetura modular
+
+- Integração com APIs REST
+
+- ORM para abstração do banco de dados
+
+*Frontend:
+
+- HTML5
+
+- CSS3
+
+- JavaScript
+
+- Bootstrap
+
+*Banco de Dados:
+
+- MySQL
+
+# 🏗️ Estrutura Atual do Projeto
 
 ```bash
 System-Contratos/
-├── contratos/              # PDFs gerados automaticamente
-├── contrato.py             # Lógica de contratos e geração de PDF
-├── database.py             # Conexão e operações com MySQL
-├── main.py                 # Interface CLI e fluxo principal
-├── config.json             # Configurações do banco de dados
+│
+├── admin/
+├── auth/
+├── core/
+├── models/
+├── static/
+│   └── css/
+├── templates/
+│   ├── admin/
+│   ├── auth/
+│   ├── contratos/
+│   ├── dashboard/
+│   ├── empresa/
+│   ├── erros/
+│   ├── base.html
+│   └── login.html
+│
+├── app.py
+├── config.py
+├── contrato.py
+├── teste_conexao.py
 ├── .gitignore
-└── README.md
+└── readme.md
 ```
 
-# ⚙️ Pré-requisitos
+* A organização segue separação de responsabilidades, facilitando manutenção, evolução e escalabilidade.
 
-* Antes de executar o sistema, certifique-se de ter:
+# 🔐 Controle de Acesso e Perfis
 
-- Python 3.9 ou superior
+O sistema implementa controle de acesso baseado em papéis (RBAC), com dois níveis administrativos distintos:
 
-- MySQL Server em execução
+# 🔹 Administrador do Sistema
 
-- Banco de dados configurado conforme a necessidade do projeto
+- Gerencia o sistema globalmente
 
+- Controle estrutural da aplicação
 
-# 📦 Instalação
+- Administração geral de empresas
 
-- 1️⃣ Clone o repositório
+# 🔹 Administrador da Empresa
 
-``` bash
-git clone https://github.com/Devmoises79/System-Contratos.git
-cd System-Contratos
-```
+- Gerencia usuários da própria empresa
 
+- Administra contratos internos
 
-- 2️⃣ Crie um ambiente virtual (opcional, recomendado)
+- Acessa dashboards e estatísticas específicas
 
-``` bash
-python -m venv venv
-source venv/bin/activate   # Linux/Mac
-venv\Scripts\activate      # Windows
-```
+# 🔹 Demais Perfis
 
+- Gestor
 
-- 3️⃣ Instale as dependências
+- Analista
 
-``` bash
-pip install mysql-connector-python fpdf2
-```
+- Assistente
 
-# 🔧 Configuração do Banco de Dados
+- Cada perfil possui permissões e visualizações específicas.
 
-- Edite o arquivo config.json com as credenciais do seu MySQL:
 
-```bash
-{
-  "host": "localhost",
-  "user": "seu_usuario",
-  "password": "sua_senha",
-  "database": "validapy"
-}
-```
+# 🛡️ Recursos de Segurança
 
-- O sistema cria e valida automaticamente as tabelas na inicialização.
+- Autenticação de usuários
 
+- Controle granular de permissões
 
-# ▶️ Como Executar
+- Bloqueio de IP
 
-* Execute o sistema pelo terminal:
+- Páginas de erro personalizadas (403, 404, 500)
 
-- python main.py
+- Separação entre camadas administrativas e autenticação
 
+# Direcionamento Futuro
 
-* Ao iniciar, o sistema exibirá o menu principal:
+- Ampliação das APIs REST
 
-```bash
-1. Criar novo contrato
-2. Listar todos os contratos
-3. Buscar contrato
-4. Ver ramos de atividade
-5. Ver tipos de serviço
-6. Verificar arquivos PDF
-7. Configurar sistema
-8. Sair
-```
+- Testes automatizados
 
+- Refatoração arquitetural contínua
 
+- Auditoria e logs estruturados
 
-# 📝 Cadastro de Contrato
+# 📎 Observação
 
-- Durante o cadastro, o sistema coleta:
-
-- Dados do contratante e contratada
-
-- CNPJ (com validação e formatação)
-
-- Ramo de atividade
-
-- Tipo de serviço
-
-- Valor do contrato
-
-- Prazo
-
-- Datas opcionais
-
-- Especificação detalhada dos serviços
-
-
-
-* Ao confirmar:
-
-- O contrato é salvo no banco
-
-- Um PDF é gerado automaticamente
-
-- Um log da operação é registrado
-
-
-
-# 📄 Geração de PDF
-
-Os contratos são gerados com:
-
-- Cabeçalho profissional
-
-- Número único do contrato
-
-- Dados completos das partes
-
-- Valor formatado em padrão brasileiro
-
-- Campo para assinaturas
-
-- Rodapé automático
-
-
-
-# 📂 Os arquivos são salvos em:
-
-```bash
-/contratos/
-```
-
-
-# 📊 Estatísticas do Sistema
-
-* O sistema permite visualizar:
-
-- Total de contratos cadastrados
-
-- Valor total contratado
-
-- Valor médio dos contratos
-
-- Quantidade de contratos por mês
-
-
-
-# 🛠️ Configurações Administrativas
-
-* Menu de configurações permite:
-
-- Recriar tabelas do banco
-
-- Visualizar estatísticas do banco
-
-- Limpar dados de teste
-
-- Auditoria básica de registros
-
-
-
-# 🔒 Boas Práticas Implementadas
-
-- Separação de responsabilidades (CLI, regras de negócio, banco)
-
-- Validações de entrada
-
-- Tratamento de exceções
-
-- Logs de ações
-
-- Organização modular
-
-- Código orientado à extensibilidade
-
-
-# 🗺️ Roadmap (Próximas Evoluções/features)
-
-- ⬜ Interface gráfica (Web ou Desktop)
-- ⬜ Autenticação de usuários
-- ⬜ Controle de permissões
-- ⬜ Exportação para Excel
-- ⬜ Upload de contratos assinados
-- ⬜ API REST (FastAPI ou Flask)
-- ⬜ Testes automatizados
-
-
-# 👨‍💻 Autor
-
-* Moisés Aniceto
-* GitHub: https://github.com/Devmoises79
-
-
-* Projeto desenvolvido para estudo, portfólio e evolução em backend Python, bancos de dados e automação documental.
-
-# 📜 Licença
-
-* Este projeto está sob a licença MIT.
-* Sinta-se livre para estudar, modificar e evoluir.
+Este projeto está sendo desenvolvido como prática avançada de backend, modelagem de domínio e controle de acesso em aplicações web corporativas.
