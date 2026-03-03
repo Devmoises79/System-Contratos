@@ -1,0 +1,48 @@
+<!-- templates/auth/bloqueado.html -->
+{% extends "base.html" %}
+
+{% block title %}Acesso Bloqueado - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+        <div class="stat-card p-0 overflow-hidden">
+            <div style="height: 6px; background: linear-gradient(90deg, #ef4444 0%, #dc2626 50%, #ef4444 100%);"></div>
+            
+            <div class="p-5 text-center">
+                <div class="stat-icon danger d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                    <i class="bi bi-shield"></i>
+                </div>
+                
+                <h2 class="fw-bold mb-3" style="color: #1f2937;">Acesso Bloqueado</h2>
+                
+                <div class="p-3 mb-4" style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 12px; text-align: left;">
+                    <p class="small mb-2" style="color: #ef4444;">
+                        <span class="fw-medium">IP:</span> 
+                        <span class="font-monospace">{{ ip }}</span>
+                    </p>
+                    <p class="small mb-2" style="color: #ef4444;">
+                        <span class="fw-medium">Motivo:</span> 
+                        {{ motivo|default('Múltiplas tentativas de login inválidas') }}
+                    </p>
+                    <p class="small mb-0" style="color: #ef4444;">
+                        <span class="fw-medium">Tempo restante:</span> 
+                        <span class="fw-bold">{{ minutos }} minutos</span>
+                    </p>
+                </div>
+                
+                <p class="small mb-4" style="color: #6b7280;">
+                    Após o tempo de bloqueio, tente novamente. 
+                    Se o problema persistir, contate o administrador do sistema.
+                </p>
+                
+                <a href="{{ url_for('login') }}" class="btn w-100 py-2 d-flex align-items-center justify-content-center gap-2"
+                   style="background: #3b82f6; color: white; border: none;">
+                    <i class="bi bi-arrow-left"></i>
+                    Voltar ao Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+<!-- templates/admin/sistema/logs.html -->
+{% extends "base.html" %}
+
+{% block title %}Logs do Sistema - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Logs do Sistema</h1>
+            <p class="text-gray-500 mt-1">Auditoria completa de atividades</p>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-day text-blue-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">LOGS HOJE</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ logs_hoje }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-week text-green-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">ÚLTIMOS 7 DIAS</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ logs_semana }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-purple-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">ÚLTIMOS 30 DIAS</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ logs_mes }}</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Módulo</label>
+                <select name="modulo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Todos</option>
+                    {% for modulo in modulos %}
+                    <option value="{{ modulo.modulo }}" {% if filtros.modulo == modulo.modulo %}selected{% endif %}>{{ modulo.modulo|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                <input type="text" name="usuario" value="{{ filtros.usuario }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Nome">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+                <input type="date" name="data_fim" value="{{ filtros.data_fim }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" 
+                        class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition shadow-sm">
+                    <i class="fas fa-filter mr-2"></i>
+                    Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabela de Logs -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulo</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nível</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for log in logs %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ log.data_criacao.strftime('%d/%m/%Y %H:%M:%S') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-gray-600">
+                                        {{ log.usuario_nome[:1] if log.usuario_nome else 'S' }}
+                                    </span>
+                                </div>
+                                <span class="ml-2 text-sm font-medium text-gray-800">
+                                    {{ log.usuario_nome or 'Sistema' }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ log.empresa_nome or '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ log.acao }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ log.modulo }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{{ log.ip_address }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if log.nivel == 'erro' %}bg-red-100 text-red-800
+                                {% elif log.nivel == 'aviso' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ log.nivel }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação -->
+        {% if total_paginas > 1 %}
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+                Mostrando página <span class="font-medium">{{ pagina }}</span> 
+                de <span class="font-medium">{{ total_paginas }}</span> 
+                ({{ total_registros }} registros)
+            </p>
+            <div class="flex items-center space-x-2">
+                {% if pagina > 1 %}
+                <a href="{{ url_for('admin_sistema.logs', pagina=pagina-1, modulo=filtros.modulo, usuario=filtros.usuario, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}" 
+                   class="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for p in range(1, total_paginas + 1) %}
+                    {% if p == pagina %}
+                    <span class="px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded">{{ p }}</span>
+                    {% elif p >= pagina - 2 and p <= pagina + 2 %}
+                    <a href="{{ url_for('admin_sistema.logs', pagina=p, modulo=filtros.modulo, usuario=filtros.usuario, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}" 
+                       class="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagina < total_paginas %}
+                <a href="{{ url_for('admin_sistema.logs', pagina=pagina+1, modulo=filtros.modulo, usuario=filtros.usuario, data_inicio=filtros.data_inicio, data_fim=filtros.data_fim) }}" 
+                   class="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

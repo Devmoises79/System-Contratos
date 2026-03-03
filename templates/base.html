@@ -1,0 +1,513 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidaPy - {% block title %}Sistema de Contratos{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: #f3f4f6; /* Cinza fundo */
+        }
+        
+        /* Cores do sistema */
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-light: #f3f4f6;
+            --border-color: #e5e7eb;
+        }
+        
+        /* Animações */
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        /* Cards estilo dashboard */
+        .stat-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .stat-icon.primary { background: #dbeafe; color: #3b82f6; }
+        .stat-icon.success { background: #d1fae5; color: #10b981; }
+        .stat-icon.warning { background: #fed7aa; color: #f59e0b; }
+        .stat-icon.danger { background: #fee2e2; color: #ef4444; }
+        .stat-icon.secondary { background: #ede9fe; color: #8b5cf6; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: #1f2937;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin: 0.25rem 0;
+            transition: all 0.2s;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #dbeafe;
+            color: #3b82f6;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 24px;
+        }
+        
+        /* Gráficos estilo imagem */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .chart-bar {
+            background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+            border-radius: 8px 8px 0 0;
+            transition: height 0.3s ease;
+        }
+        
+        .chart-line {
+            stroke: #2563eb;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .chart-grid line {
+            stroke: #e5e7eb;
+            stroke-width: 1;
+        }
+        
+        .chart-label {
+            fill: #6b7280;
+            font-size: 12px;
+        }
+        
+        /* Badges */
+        .badge-active {
+            background: #d1fae5;
+            color: #10b981;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-inactive {
+            background: #fee2e2;
+            color: #ef4444;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-trial {
+            background: #fed7aa;
+            color: #f59e0b;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        
+        /* Progress bars */
+        .progress-bar-primary {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+        
+        /* Gradientes */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+        
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .bg-gradient-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .bg-gradient-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        /* Text colors */
+        .text-primary-custom { color: #3b82f6; }
+        .text-success-custom { color: #10b981; }
+        .text-warning-custom { color: #f59e0b; }
+        .text-danger-custom { color: #ef4444; }
+        .text-secondary-custom { color: #8b5cf6; }
+        
+        /* Border colors */
+        .border-primary-custom { border-color: #3b82f6; }
+        .border-success-custom { border-color: #10b981; }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding-top: 70px;
+            padding-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-expand-lg bg-white border-bottom fixed-top py-2" style="border-color: #e5e7eb !important;">
+        <div class="container-fluid px-4">
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') if session.usuario else url_for('login') }}">
+                <div class="bg-gradient-primary rounded-3 p-2 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <span class="text-white fw-bold">V</span>
+                </div>
+                <span class="fs-5 fw-semibold" style="color: #1f2937;">Valida<span style="color: #3b82f6;">Py</span></span>
+            </a>
+
+            <!-- Menu (se logado) -->
+            {% if session.usuario %}
+            <div class="d-flex align-items-center ms-auto">
+                <!-- Notificações -->
+                <button class="btn btn-light btn-sm rounded-circle p-2 me-3 position-relative" style="background: #f3f4f6; border: 1px solid #e5e7eb;">
+                    <i class="bi bi-bell" style="color: #6b7280;"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle" style="background: #ef4444 !important;"></span>
+                </button>
+                
+                <!-- Perfil -->
+                <div class="dropdown">
+                    <button class="btn d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: #f3f4f6; border: 1px solid #e5e7eb;">
+                        <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-medium" style="width: 32px; height: 32px;">
+                            {{ session.usuario.nome[:1] }}{{ session.usuario.nome.split()[-1][:1] if session.usuario.nome.split()|length > 1 else '' }}
+                        </div>
+                        <span class="d-none d-md-block" style="color: #1f2937;">{{ session.usuario.nome }}</span>
+                        <i class="bi bi-chevron-down" style="color: #6b7280;"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text text-muted small">{{ session.usuario.perfil|replace('_', ' ')|title }}</span></li>
+                        <li><span class="dropdown-item-text text-muted small">{{ session.empresa.nome if session.empresa else '' }}</span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="document.getElementById('feedback-modal').classList.add('show')"><i class="bi bi-star me-2" style="color: #f59e0b;"></i>Feedback</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Sidebar (apenas se logado) -->
+    {% if session.usuario %}
+    <div class="sidebar">
+        <div class="p-3">
+            <!-- Menu de Navegação -->
+            <div class="mb-3">
+                <p class="text-muted small fw-semibold text-uppercase px-2 mb-2" style="color: #6b7280 !important;">Principal</p>
+                
+                <a href="{{ url_for('dashboard') }}" class="nav-link d-flex align-items-center {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-pie-chart me-2"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="{{ url_for('listar_contratos') }}" class="nav-link d-flex align-items-center {% if request.endpoint == 'listar_contratos' %}active{% endif %}">
+                    <i class="bi bi-file-text me-2"></i>
+                    <span>Contratos</span>
+                </a>
+            </div>
+            
+            {% if session.usuario.perfil == 'admin_sistema' %}
+            <div class="mb-3">
+                <p class="text-muted small fw-semibold text-uppercase px-2 mb-2" style="color: #6b7280 !important;">Administração</p>
+                
+                <a href="{{ url_for('admin_sistema.empresas') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-building me-2"></i>
+                    <span>Empresas</span>
+                </a>
+                
+                <a href="{{ url_for('admin_sistema.ips_bloqueados') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-shield me-2"></i>
+                    <span>IPs Bloqueados</span>
+                </a>
+                
+                <a href="{{ url_for('admin_sistema.logs') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-clock-history me-2"></i>
+                    <span>Logs</span>
+                </a>
+                
+                <a href="{{ url_for('admin_sistema.feedbacks') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-star me-2"></i>
+                    <span>Feedbacks</span>
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if session.usuario.perfil == 'admin_empresa' %}
+            <div class="mb-3">
+                <p class="text-muted small fw-semibold text-uppercase px-2 mb-2" style="color: #6b7280 !important;">Empresa</p>
+                
+                <a href="{{ url_for('admin_empresa.usuarios') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-people me-2"></i>
+                    <span>Usuários</span>
+                </a>
+                
+                <a href="{{ url_for('admin_empresa.configuracoes') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-gear me-2"></i>
+                    <span>Configurações</span>
+                </a>
+                
+                <a href="{{ url_for('admin_empresa.estatisticas') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    <span>Estatísticas</span>
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if session.usuario.perfil in ['gestor', 'assistente', 'analista'] %}
+            <div class="mb-3">
+                <p class="text-muted small fw-semibold text-uppercase px-2 mb-2" style="color: #6b7280 !important;">Ferramentas</p>
+                
+                <a href="{{ url_for('contrato_novo') }}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    <span>Novo Contrato</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Main Content (com sidebar) -->
+    <div class="main-content">
+        <div class="container-fluid px-4">
+    {% else %}
+    <!-- Main Content (sem sidebar) -->
+    <div style="padding-top: 70px;">
+        <div class="container-fluid px-4">
+    {% endif %}
+        
+        <!-- Mensagens Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{% if category == 'danger' %}danger{% elif category == 'success' %}success{% elif category == 'warning' %}warning{% else %}info{% endif %} alert-dismissible fade show flash-message" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Conteúdo da página -->
+        {% block content %}{% endblock %}
+        
+        </div>
+    </div>
+
+    <!-- Modal de Feedback -->
+    {% if session.usuario and not session.get('feedback_enviado') %}
+    <div id="feedback-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom-color: #e5e7eb;">
+                    <h5 class="modal-title" style="color: #1f2937;">Avalie o ValidaPy</h5>
+                    <button type="button" class="btn-close" onclick="closeFeedbackModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" style="color: #6b7280 !important;">Sua opinião nos ajuda a melhorar!</p>
+                    
+                    <form id="feedback-form">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="color: #1f2937;">Nota</label>
+                            <div class="d-flex justify-content-center gap-2 fs-1">
+                                {% for i in range(1, 6) %}
+                                <button type="button" onclick="setRating({{ i }})" class="star btn btn-link text-decoration-none p-0" data-rating="{{ i }}" style="color: #d1d5db;">★</button>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="nota" id="nota-feedback" value="0">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="color: #1f2937;">Recomendaria?</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="recomendaria" value="true" id="recomendaSim">
+                                    <label class="form-check-label" for="recomendaSim">Sim</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="recomendaria" value="false" id="recomendaNao">
+                                    <label class="form-check-label" for="recomendaNao">Não</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="color: #1f2937;">Sugestões</label>
+                            <textarea name="sugestao" rows="3" class="form-control" placeholder="Compartilhe sua experiência..." style="border-color: #e5e7eb;"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top-color: #e5e7eb;">
+                    <button type="button" class="btn btn-light" onclick="closeFeedbackModal()" style="background: #f3f4f6; border-color: #e5e7eb; color: #1f2937;">Agora não</button>
+                    <button type="button" class="btn" onclick="submitFeedback()" style="background: #3b82f6; color: white; border: none;">Enviar Feedback</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scripts -->
+    <script>
+        // Modal Feedback
+        const feedbackModal = document.getElementById('feedback-modal');
+        const stars = document.querySelectorAll('.star');
+        const notaInput = document.getElementById('nota-feedback');
+
+        function setRating(rating) {
+            notaInput.value = rating;
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = '#f59e0b';
+                } else {
+                    star.style.color = '#d1d5db';
+                }
+            });
+        }
+
+        function closeFeedbackModal() {
+            feedbackModal.classList.remove('show');
+            feedbackModal.style.display = 'none';
+        }
+
+        function submitFeedback() {
+            const formData = new FormData(document.getElementById('feedback-form'));
+            fetch('/feedback', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    closeFeedbackModal();
+                    alert('Obrigado pelo feedback!');
+                } else {
+                    alert('Erro ao enviar feedback.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar feedback.');
+            });
+        }
+
+        // Remover mensagens flash após 5 segundos
+        setTimeout(() => {
+            document.querySelectorAll('.flash-message').forEach(el => {
+                el.classList.add('fade-out');
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 5000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

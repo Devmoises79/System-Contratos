@@ -1,0 +1,141 @@
+<!-- templates/dashboard/assistente.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard Assistente - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Dashboard do Assistente</h1>
+            <p style="color: #6b7280;">Gerencie seus contratos e atividades</p>
+        </div>
+        <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); color: white;">
+            Assistente
+        </span>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <a href="{{ url_for('contrato_novo') }}" class="text-decoration-none">
+                <div class="stat-card text-center" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; cursor: pointer;">
+                    <i class="bi bi-plus-circle" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-semibold mt-2">Novo Contrato</h5>
+                    <p class="small mb-0" style="opacity: 0.9;">Criar um novo contrato rapidamente</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="stat-icon success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <span class="small text-uppercase" style="color: #6b7280;">MEUS CONTRATOS</span>
+                </div>
+                <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ contratos|length }}</span>
+                <p class="small text-muted mt-2">contratos criados por você</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="stat-icon warning">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <span class="small text-uppercase" style="color: #6b7280;">PENDENTES</span>
+                </div>
+                <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">
+                    {{ contratos|selectattr('status', 'equalto', 'rascunho')|list|length }}
+                </span>
+                <p class="small text-muted mt-2">aguardando aprovação</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meus Últimos Contratos -->
+    <div class="stat-card p-0 overflow-hidden">
+        <div class="p-4 d-flex align-items-center justify-content-between" style="border-bottom: 1px solid #e5e7eb;">
+            <h5 class="fw-semibold mb-0" style="color: #1f2937;">Meus Últimos Contratos</h5>
+            <a href="{{ url_for('listar_contratos') }}" class="small text-decoration-none" style="color: #3b82f6;">
+                Ver todos <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead style="background: #f3f4f6;">
+                    <tr>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Nº Contrato</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Contratante</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Valor</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Status</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contrato in contratos %}
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td class="px-4 py-3">
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none" style="color: #3b82f6; font-weight: 500;">
+                                {{ contrato.numero_contrato }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-3" style="color: #1f2937;">{{ contrato.contratante_nome }}</td>
+                        <td class="px-4 py-3 fw-medium" style="color: #1f2937;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        <td class="px-4 py-3">
+                            <span class="badge 
+                                {% if contrato.status == 'ativo' %}badge-active
+                                {% elif contrato.status == 'rascunho' %}badge-trial
+                                {% else %}badge-inactive{% endif %}">
+                                {{ contrato.status|capitalize }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3" style="color: #6b7280;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="stat-icon primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-file-text"></i>
+                            </div>
+                            <p style="color: #6b7280;">Você ainda não criou nenhum contrato.</p>
+                            <a href="{{ url_for('contrato_novo') }}" class="btn btn-link text-decoration-none" style="color: #3b82f6;">
+                                Criar meu primeiro contrato
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Atividades Recentes -->
+    <div class="stat-card">
+        <h5 class="fw-semibold mb-4" style="color: #1f2937;">Atividades Recentes</h5>
+        
+        <div class="timeline">
+            {% for contrato in contratos[:5] %}
+            <div class="d-flex gap-3 mb-3">
+                <div class="stat-icon primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-size: 1rem;">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <p class="small fw-medium mb-1" style="color: #1f2937;">
+                        Contrato <span style="color: #3b82f6;">{{ contrato.numero_contrato }}</span> criado
+                    </p>
+                    <p class="small mb-0" style="color: #6b7280;">{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="small text-center py-3" style="color: #6b7280;">Nenhuma atividade recente</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

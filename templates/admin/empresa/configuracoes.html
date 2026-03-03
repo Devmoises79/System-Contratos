@@ -1,0 +1,252 @@
+<!-- templates/admin/empresa/configuracoes.html -->
+{% extends "base.html" %}
+
+{% block title %}Configurações da Empresa - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Configurações da Empresa</h1>
+            <p class="text-gray-500 mt-1">Personalize as informações e aparência</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Tabs -->
+        <div class="border-b border-gray-200">
+            <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                <button class="tab-button active py-4 px-1 border-b-2 border-blue-600 font-medium text-sm text-blue-600">
+                    Informações Gerais
+                </button>
+                <button class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    Personalização
+                </button>
+                <button class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    Logo
+                </button>
+            </nav>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="p-6">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Tab 1: Informações Gerais -->
+            <div class="tab-panel" id="tab1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa *</label>
+                        <input type="text" name="nome" value="{{ empresa.nome }}" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                        <input type="text" value="{{ empresa.cnpj }}" disabled 
+                               class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500">
+                        <p class="text-xs text-gray-500 mt-1">CNPJ não pode ser alterado</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" name="email" value="{{ empresa.email }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="text" name="telefone" value="{{ empresa.telefone }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="(11) 99999-9999">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+                        <input type="text" name="celular" value="{{ empresa.celular }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="(11) 99999-9999">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                        <textarea name="endereco" rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ empresa.endereco }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Personalização (Cores) -->
+            <div class="tab-panel hidden" id="tab2">
+                <div class="space-y-6">
+                    <p class="text-sm text-gray-600">Escolha as cores que representam sua empresa</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor Primária</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" name="cor_primaria" value="{{ empresa.paleta_cores.primaria }}" 
+                                       class="w-12 h-12 p-1 border rounded-lg">
+                                <input type="text" value="{{ empresa.paleta_cores.primaria }}" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
+                                       readonly>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Botões principais, links, destaques</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor Secundária</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" name="cor_secundaria" value="{{ empresa.paleta_cores.secundaria }}" 
+                                       class="w-12 h-12 p-1 border rounded-lg">
+                                <input type="text" value="{{ empresa.paleta_cores.secundaria }}" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
+                                       readonly>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Elementos de sucesso, confirmações</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor de Destaque</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" name="cor_destaque" value="{{ empresa.paleta_cores.destaque }}" 
+                                       class="w-12 h-12 p-1 border rounded-lg">
+                                <input type="text" value="{{ empresa.paleta_cores.destaque }}" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
+                                       readonly>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Alertas, avisos, elementos importantes</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor do Texto</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" name="cor_texto" value="{{ empresa.paleta_cores.texto }}" 
+                                       class="w-12 h-12 p-1 border rounded-lg">
+                                <input type="text" value="{{ empresa.paleta_cores.texto }}" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
+                                       readonly>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor de Fundo</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" name="cor_fundo" value="{{ empresa.paleta_cores.fundo }}" 
+                                       class="w-12 h-12 p-1 border rounded-lg">
+                                <input type="text" value="{{ empresa.paleta_cores.fundo }}" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
+                                       readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                        <h4 class="text-sm font-medium text-gray-700 mb-4">Preview</h4>
+                        <div class="flex items-center space-x-4">
+                            <button class="px-4 py-2 rounded-lg text-white" 
+                                    style="background-color: {{ empresa.paleta_cores.primaria }}">
+                                Botão Primário
+                            </button>
+                            <button class="px-4 py-2 rounded-lg text-white" 
+                                    style="background-color: {{ empresa.paleta_cores.secundaria }}">
+                                Botão Secundário
+                            </button>
+                            <span class="px-3 py-1 rounded-full text-white text-sm" 
+                                  style="background-color: {{ empresa.paleta_cores.destaque }}">
+                                Destaque
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Logo -->
+            <div class="tab-panel hidden" id="tab3">
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-8">
+                        <!-- Logo atual -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Logo Atual</label>
+                            <div class="w-32 h-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                                {% if empresa.logo_path %}
+                                <img src="{{ url_for('static', filename=empresa.logo_path.replace('static/', '')) }}" 
+                                     alt="Logo" class="w-full h-full object-contain">
+                                {% else %}
+                                <i class="fas fa-building text-4xl text-gray-400"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Upload nova logo -->
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nova Logo</label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                                <div class="space-y-1 text-center">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="logo" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                            <span>Upload de arquivo</span>
+                                            <input id="logo" name="logo" type="file" class="sr-only" accept="image/png, image/jpeg, image/gif">
+                                        </label>
+                                        <p class="pl-1">ou arraste e solte</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF até 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                        <div class="flex">
+                            <i class="fas fa-info-circle text-blue-600 mr-3"></i>
+                            <p class="text-sm text-blue-700">
+                                A logo será exibida no cabeçalho do sistema e nos contratos gerados.
+                                Recomendamos imagens quadradas de pelo menos 200x200 pixels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                <a href="{{ url_for('admin_empresa.dashboard') }}" 
+                   class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition shadow-md">
+                    <i class="fas fa-save mr-2"></i>
+                    Salvar Configurações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Tabs functionality
+    document.querySelectorAll('.tab-button').forEach((button, index) => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'text-blue-600', 'border-blue-600');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+            
+            // Add active class to clicked button
+            button.classList.add('active', 'text-blue-600', 'border-blue-600');
+            button.classList.remove('text-gray-500', 'border-transparent');
+            
+            // Hide all panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            // Show selected panel
+            document.getElementById(`tab${index + 1}`).classList.remove('hidden');
+        });
+    });
+</script>
+{% endblock %}

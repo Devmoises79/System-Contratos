@@ -1,0 +1,26 @@
+<!-- templates/erros/500.html -->
+{% extends "base.html" %}
+
+{% block title %}Erro Interno - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+        <div class="stat-card p-5 text-center">
+            <div class="stat-icon danger d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            
+            <h1 class="display-1 fw-bold" style="color: #ef4444;">500</h1>
+            <h3 class="fw-semibold mb-3" style="color: #1f2937;">Erro Interno do Servidor</h3>
+            <p class="mb-4" style="color: #6b7280;">Ocorreu um erro inesperado. Nossa equipe foi notificada.</p>
+            
+            <a href="{{ url_for('dashboard') }}" class="btn py-2 px-4"
+               style="background: #3b82f6; color: white; border: none;">
+                <i class="bi bi-arrow-repeat me-2"></i>
+                Tentar Novamente
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

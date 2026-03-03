@@ -1,0 +1,146 @@
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Login - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+        <!-- Card de Login - estilo igual ao dashboard -->
+        <div class="stat-card p-0 overflow-hidden">
+            <!-- Barra superior gradiente igual aos cards do dashboard -->
+            <div style="height: 6px; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);"></div>
+            
+            <div class="p-5">
+                <!-- Logo e título -->
+                <div class="text-center mb-4">
+                    <div class="stat-icon primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                        V
+                    </div>
+                    <h2 class="fw-bold" style="color: #1f2937;">Bem-vindo ao <span style="color: #3b82f6;">ValidaPy</span></h2>
+                    <p class="small" style="color: #6b7280;">Sistema de Gerenciamento de Contratos</p>
+                </div>
+
+                <!-- Formulário de Login -->
+                <form method="POST" action="{{ url_for('login') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    
+                    <!-- Campo Email -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium" style="color: #1f2937;">E-mail</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
+                                <i class="bi bi-envelope" style="color: #6b7280;"></i>
+                            </span>
+                            <input type="email" class="form-control border-start-0 ps-0" name="email" 
+                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
+                                   placeholder="seu@email.com" value="{{ request.form.get('email', '') }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Campo Senha -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium" style="color: #1f2937;">Senha</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
+                                <i class="bi bi-lock" style="color: #6b7280;"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0 ps-0" name="senha" 
+                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
+                                   placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <!-- Opções adicionais -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="lembrar" name="lembrar" 
+                                   style="border-color: #e5e7eb;">
+                            <label class="form-check-label small" for="lembrar" style="color: #6b7280;">Lembrar de mim</label>
+                        </div>
+                        <a href="{{ url_for('recuperar_senha') }}" class="small text-decoration-none" style="color: #3b82f6;">
+                            Esqueceu a senha?
+                        </a>
+                    </div>
+
+                    <!-- Mensagens flash -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" 
+                                     style="background: {% if category == 'danger' %}#fee2e2{% else %}#d1fae5{% endif %}; 
+                                            border: 1px solid {% if category == 'danger' %}#fecaca{% else %}#a7f3d0{% endif %}; 
+                                            color: {% if category == 'danger' %}#ef4444{% else %}#10b981{% endif %};">
+                                    <i class="bi bi-{{ 'exclamation-circle' if category == 'danger' else 'check-circle' }} me-2"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Botão de Login - estilo igual aos botões do dashboard -->
+                    <button type="submit" class="btn w-100 py-2 mb-3 d-flex align-items-center justify-content-center gap-2"
+                            style="background: #3b82f6; color: white; border: none;">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Entrar no Sistema
+                    </button>
+                </form>
+
+                <!-- Link para cadastro -->
+                <div class="text-center mt-4 pt-3" style="border-top: 1px solid #e5e7eb;">
+                    <p class="small mb-2" style="color: #6b7280;">
+                        Não tem uma conta?
+                    </p>
+                    <a href="{{ url_for('cadastro_usuario') }}" class="btn w-100 py-2 d-flex align-items-center justify-content-center gap-2"
+                       style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb;">
+                        <i class="bi bi-person-plus"></i>
+                        Criar nova conta
+                    </a>
+                </div>
+
+                <!-- Rodapé -->
+                <div class="text-center mt-4">
+                    <p class="small mb-2" style="color: #9ca3af;">
+                        &copy; 2024 ValidaPy - Todos os direitos reservados
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 small">
+                        <a href="#" class="text-decoration-none" style="color: #6b7280;">Termos de uso</a>
+                        <span style="color: #e5e7eb;">•</span>
+                        <a href="#" class="text-decoration-none" style="color: #6b7280;">Privacidade</a>
+                        <span style="color: #e5e7eb;">•</span>
+                        <a href="#" class="text-decoration-none" style="color: #6b7280;">Suporte</a>
+                    </div>
+                    <p class="small mt-2" style="color: #9ca3af;">
+                        Versão 1.0.0
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para efeitos visuais -->
+<script>
+    document.getElementById('email')?.focus();
+
+    // Animação nos placeholders
+    const emailInput = document.getElementById('email');
+    if (emailInput && !emailInput.value) {
+        const placeholders = ['usuario@empresa.com', 'admin@sistema.com', 'gestor@empresa.com'];
+        let index = 0;
+        setInterval(() => {
+            emailInput.placeholder = placeholders[index];
+            index = (index + 1) % placeholders.length;
+        }, 2000);
+    }
+
+    // Hover effect no botão
+    document.querySelector('button[type="submit"]').addEventListener('mouseover', function() {
+        this.style.background = '#2563eb';
+    });
+    document.querySelector('button[type="submit"]').addEventListener('mouseout', function() {
+        this.style.background = '#3b82f6';
+    });
+</script>
+{% endblock %}

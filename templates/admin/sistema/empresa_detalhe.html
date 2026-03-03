@@ -1,0 +1,141 @@
+<!-- templates/admin/sistema/empresa_detalhe.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ empresa.nome }} - Detalhes - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{{ url_for('admin_sistema.empresas') }}" class="text-decoration-none" style="color: #6b7280;">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <div>
+            <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">{{ empresa.nome }}</h1>
+            <p style="color: #6b7280;">Detalhes da empresa e informações</p>
+        </div>
+    </div>
+
+    <!-- Card da Empresa -->
+    <div class="stat-card p-0 overflow-hidden">
+        <!-- Cabeçalho com gradiente -->
+        <div class="p-4" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white;">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-white rounded-4 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                    <span class="fw-bold fs-2" style="color: #3b82f6;">{{ empresa.nome[:1] }}</span>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-1">{{ empresa.nome }}</h3>
+                    <p class="mb-0 small" style="opacity: 0.9;">CNPJ: {{ empresa.cnpj }}</p>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge 
+                        {% if empresa.status == 'ativo' %}badge-active
+                        {% elif empresa.status == 'trial' %}badge-trial
+                        {% else %}badge-inactive{% endif %} px-3 py-2">
+                        {{ empresa.status|capitalize }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações -->
+        <div class="p-4 p-lg-5">
+            <!-- Cards Rápidos -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
+                        <span class="small text-uppercase d-block mb-1" style="color: #6b7280;">Usuários</span>
+                        <span class="fw-bold" style="color: #1f2937; font-size: 2rem;">{{ usuarios|length }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
+                        <span class="small text-uppercase d-block mb-1" style="color: #6b7280;">Contratos</span>
+                        <span class="fw-bold" style="color: #1f2937; font-size: 2rem;">{{ stats.total }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
+                        <span class="small text-uppercase d-block mb-1" style="color: #6b7280;">Valor Contratado</span>
+                        <span class="fw-bold" style="color: #1f2937; font-size: 1.5rem;">R$ {{ "%.2f"|format(stats.total_valor) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuários da Empresa -->
+            <h5 class="fw-semibold mb-3" style="color: #1f2937;">Usuários</h5>
+            <div class="table-responsive mb-4">
+                <table class="table table-hover">
+                    <thead style="background: #f3f4f6;">
+                        <tr>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Nome</th>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Email</th>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Perfil</th>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td class="px-4 py-2">{{ usuario.nome }}</td>
+                            <td class="px-4 py-2">{{ usuario.email }}</td>
+                            <td class="px-4 py-2">
+                                <span class="badge 
+                                    {% if usuario.perfil == 'admin_empresa' %}" style="background: #dbeafe; color: #3b82f6;"
+                                    {% elif usuario.perfil == 'gestor' %}" style="background: #d1fae5; color: #10b981;"
+                                    {% elif usuario.perfil == 'assistente' %}" style="background: #fed7aa; color: #f59e0b;"
+                                    {% else %}" style="background: #f3f4f6; color: #6b7280;{% endif %}">
+                                    {{ usuario.perfil|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-2">
+                                <span class="badge {% if usuario.ativo %}badge-active{% else %}badge-inactive{% endif %}">
+                                    {{ 'Ativo' if usuario.ativo else 'Inativo' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Contratos da Empresa -->
+            <h5 class="fw-semibold mb-3" style="color: #1f2937;">Contratos</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead style="background: #f3f4f6;">
+                        <tr>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Número</th>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Contratante</th>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Valor</th>
+                            <th class="px-4 py-2 small fw-semibold" style="color: #6b7280;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contrato in contratos %}
+                        <tr>
+                            <td class="px-4 py-2">
+                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none" style="color: #3b82f6;">
+                                    {{ contrato.numero_contrato }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-2">{{ contrato.contratante_nome }}</td>
+                            <td class="px-4 py-2 fw-medium">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                            <td class="px-4 py-2">
+                                <span class="badge 
+                                    {% if contrato.status == 'ativo' %}badge-active
+                                    {% elif contrato.status == 'rascunho' %}badge-trial
+                                    {% else %}badge-inactive{% endif %}">
+                                    {{ contrato.status|capitalize }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

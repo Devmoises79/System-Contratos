@@ -1,0 +1,62 @@
+<!-- templates/auth/redefinir_senha.html -->
+{% extends "base.html" %}
+
+{% block title %}Redefinir Senha - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+        <div class="stat-card p-0 overflow-hidden">
+            <div style="height: 6px; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);"></div>
+            
+            <div class="p-5">
+                <div class="text-center mb-4">
+                    <div class="stat-icon success d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
+                        <i class="bi bi-key"></i>
+                    </div>
+                    <h2 class="fw-bold" style="color: #1f2937;">Redefinir Senha</h2>
+                    <p class="small" style="color: #6b7280;">Digite sua nova senha abaixo</p>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium" style="color: #1f2937;">Nova Senha</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
+                                <i class="bi bi-lock" style="color: #6b7280;"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0 ps-0" name="senha" 
+                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
+                                   placeholder="••••••••" required>
+                        </div>
+                        <div class="form-text small" style="color: #6b7280;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-medium" style="color: #1f2937;">Confirmar Nova Senha</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
+                                <i class="bi bi-lock-fill" style="color: #6b7280;"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0 ps-0" name="confirmar_senha" 
+                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
+                                   placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn w-100 py-2"
+                            style="background: #3b82f6; color: white; border: none;">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Redefinir Senha
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

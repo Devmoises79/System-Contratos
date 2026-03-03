@@ -78,14 +78,15 @@ def gerar_csrf_token():
         session['_csrf_token'] = secrets.token_hex(32)
     return session['_csrf_token']
 
+# CORREÇÃO: Registrar a função, NÃO o resultado da função
+app.jinja_env.globals['csrf_token'] = gerar_csrf_token
+
 def validar_csrf_token(token):
     """Valida token CSRF"""
     token_sessao = session.pop('_csrf_token', None)
     if not token_sessao or token_sessao != token:
         return False
     return True
-
-app.jinja_env.globals['csrf_token'] = gerar_csrf_token
 
 def csrf_protegido(f):
     """Decorator para proteger rotas contra CSRF"""
@@ -358,7 +359,7 @@ def login():
             else:
                 flash(resultado['mensagem'], 'danger')
     
-    return render_template('login.html', csrf_token=gerar_csrf_token())
+    return render_template('login.html')
 
 @app.route('/logout')
 @ip_bloqueado_verificado
@@ -395,7 +396,7 @@ def recuperar_senha():
         
         return redirect(url_for('login'))
     
-    return render_template('auth/recuperar_senha.html', csrf_token=gerar_csrf_token())
+    return render_template('auth/recuperar_senha.html')
 
 @app.route('/redefinir-senha/<token>', methods=['GET', 'POST'])
 @ip_bloqueado_verificado
@@ -437,8 +438,99 @@ def redefinir_senha(token):
             flash('Senha redefinida com sucesso!', 'success')
             return redirect(url_for('login'))
     
-    return render_template('auth/redefinir_senha.html', token=token, csrf_token=gerar_csrf_token())
+    return render_template('auth/redefinir_senha.html', token=token)
 
+
+# app.py - Substitua a rota de cadastro existente por esta:
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+@ip_bloqueado_verificado
+@xss_protegido
+@sql_injection_protegido
+def cadastro_usuario():
+    """Página pública de cadastro de usuário"""
+    from models.empresa import Empresa
+    from core.database import Database
+    
+    # Busca ramos de atividade do banco
+    db = Database()
+    ramos = db.fetch_all("SELECT id, nome, descricao FROM ramos_atividade WHERE ativo = TRUE ORDER BY nome")
+    
+    if request.method == 'POST':
+        nome = sanitizar_entrada(request.form.get('nome', ''))
+        email = sanitizar_entrada(request.form.get('email', ''))
+        senha = request.form.get('senha', '')
+        confirmar_senha = request.form.get('confirmar_senha', '')
+        empresa_nome = sanitizar_entrada(request.form.get('empresa_nome', ''))
+        empresa_cnpj = apenas_digitos(request.form.get('empresa_cnpj', ''))
+        ramo_id = request.form.get('ramo_id', '')
+        novo_ramo = sanitizar_entrada(request.form.get('novo_ramo', ''))
+        
+        # Validações
+        if not nome or not email or not senha or not empresa_nome:
+            flash('Todos os campos obrigatórios devem ser preenchidos.', 'danger')
+            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+        
+        if senha != confirmar_senha:
+            flash('As senhas não conferem.', 'danger')
+            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+        
+        # Valida força da senha
+        if len(senha) < 8:
+            flash('A senha deve ter no mínimo 8 caracteres.', 'danger')
+            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+        
+        # Verifica se email já existe
+        if Usuario.get_by_email(email):
+            flash('Este email já está cadastrado.', 'danger')
+            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+        
+        try:
+            # Se usuário escolheu "Outro" e preencheu novo ramo
+            if ramo_id == 'outro' and novo_ramo:
+                # Insere novo ramo no banco
+                query = "INSERT INTO ramos_atividade (nome, descricao, ativo) VALUES (%s, %s, TRUE)"
+                ramo_id = db.execute_return_id(query, (novo_ramo, f"Ramo cadastrado por {empresa_nome}"))
+                app.logger.info(f"Novo ramo cadastrado: {novo_ramo}")
+            
+            # Cria a empresa
+            empresa = Empresa(
+                nome=empresa_nome,
+                cnpj=empresa_cnpj if empresa_cnpj else None,
+                email=email,
+                status='trial'
+            )
+            empresa.save()
+            
+            # Registra o ramo da empresa (se selecionado)
+            if ramo_id and ramo_id != 'outro':
+                # Aqui você pode criar uma relação empresa-ramo se tiver essa tabela
+                # Por enquanto, vamos apenas logar
+                app.logger.info(f"Empresa {empresa.id} associada ao ramo {ramo_id}")
+            
+            # Cria o usuário como admin da empresa
+            usuario = Usuario(
+                empresa_id=empresa.id,
+                nome=nome,
+                email=email,
+                perfil='admin_empresa',
+                ativo=True,
+                primeiro_acesso=False  # Já vai definir a senha agora
+            )
+            usuario.definir_senha(senha)
+            usuario.save()
+            
+            app.logger.info(f"Novo cadastro: {email} - Empresa: {empresa_nome}")
+            flash('Cadastro realizado com sucesso! Faça o login.', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            app.logger.error(f"Erro no cadastro: {str(e)}")
+            flash('Erro ao realizar cadastro. Tente novamente.', 'danger')
+            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+    
+    # GET - exibe formulário de cadastro com os ramos
+    return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
 # =====================================================
 # ROTAS DE DASHBOARD (PROTEGIDAS)
 # =====================================================
@@ -575,7 +667,7 @@ def contrato_novo():
         flash('Contrato criado com sucesso!', 'success')
         return redirect(url_for('listar_contratos'))
     
-    return render_template('contratos/novo.html', csrf_token=gerar_csrf_token())
+    return render_template('contratos/novo.html')
 
 @app.route('/contrato/<int:id>')
 @rota_protegida('gestor', 'assistente', 'analista', 'admin_empresa', 'admin_sistema')
@@ -626,6 +718,8 @@ def enviar_feedback():
     except Exception as e:
         app.logger.error(f"Erro ao processar feedback: {e}")
         return jsonify({'sucesso': False, 'erro': 'Erro interno'}), 500
+    
+    
 
 # =====================================================
 # HANDLERS DE ERRO PERSONALIZADOS

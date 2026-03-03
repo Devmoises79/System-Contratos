@@ -60,7 +60,7 @@ def empresa_ativa_required(f):
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         if 'usuario' in session:
-            # Aqui você verificaria no banco se a empresa está ativa
+            # Aqui verifica no banco se a empresa está ativa
             # Por enquanto, apenas passa
             pass
         return f(*args, **kwargs)

@@ -1,0 +1,254 @@
+<!-- templates/contratos/novo.html -->
+{% extends "base.html" %}
+
+{% block title %}Novo Contrato - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+        <!-- Cabeçalho -->
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('listar_contratos') }}" class="text-decoration-none me-3" style="color: #6b7280;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
+            <div>
+                <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Novo Contrato</h1>
+                <p style="color: #6b7280;">Preencha os dados para gerar um novo contrato</p>
+            </div>
+        </div>
+
+        <!-- Card Principal -->
+        <div class="stat-card p-0 overflow-hidden">
+            <!-- Progresso -->
+            <div class="p-4" style="background: #f3f4f6; border-bottom: 1px solid #e5e7eb;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon primary d-flex align-items-center justify-content-center" 
+                                 style="width: 32px; height: 32px; font-size: 0.875rem;" id="step1-icon">1</div>
+                            <span class="ms-2 small fw-medium" style="color: #1f2937;" id="step1-text">Contratante</span>
+                        </div>
+                        <i class="bi bi-chevron-right" style="color: #e5e7eb;"></i>
+                        
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon d-flex align-items-center justify-content-center" 
+                                 style="width: 32px; height: 32px; font-size: 0.875rem; background: #f3f4f6; color: #6b7280;" id="step2-icon">2</div>
+                            <span class="ms-2 small" style="color: #6b7280;" id="step2-text">Contratada</span>
+                        </div>
+                        <i class="bi bi-chevron-right" style="color: #e5e7eb;"></i>
+                        
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon d-flex align-items-center justify-content-center" 
+                                 style="width: 32px; height: 32px; font-size: 0.875rem; background: #f3f4f6; color: #6b7280;" id="step3-icon">3</div>
+                            <span class="ms-2 small" style="color: #6b7280;" id="step3-text">Detalhes</span>
+                        </div>
+                    </div>
+                    <span class="small" style="color: #ef4444;">* Campos obrigatórios</span>
+                </div>
+            </div>
+
+            <div class="p-4 p-lg-5">
+                <form method="POST" id="contratoForm">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Seção 1: Contratante -->
+                    <div class="section" id="section1">
+                        <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                            <div class="stat-icon primary me-2" style="width: 32px; height: 32px; font-size: 1rem;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            Dados do Contratante
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">
+                                    Nome / Razão Social <span style="color: #ef4444;">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="contratante_nome" id="contratante_nome" required
+                                       style="border-color: #e5e7eb;" placeholder="Digite o nome completo ou razão social">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">CNPJ/CPF</label>
+                                <input type="text" class="form-control" name="contratante_cnpj"
+                                       style="border-color: #e5e7eb;" placeholder="00.000.000/0001-00">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">Email</label>
+                                <input type="email" class="form-control" name="contratante_email"
+                                       style="border-color: #e5e7eb;" placeholder="contato@empresa.com">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">Telefone</label>
+                                <input type="text" class="form-control" name="contratante_telefone"
+                                       style="border-color: #e5e7eb;" placeholder="(11) 99999-9999">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="button" onclick="nextSection()" class="btn"
+                                    style="background: #3b82f6; color: white; border: none;">
+                                Próximo <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Contratada -->
+                    <div class="section d-none" id="section2">
+                        <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                            <div class="stat-icon success me-2" style="width: 32px; height: 32px; font-size: 1rem;">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            Dados da Contratada
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">
+                                    Nome / Razão Social <span style="color: #ef4444;">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="contratada_nome" id="contratada_nome" required
+                                       style="border-color: #e5e7eb;" placeholder="Digite o nome completo ou razão social">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">CNPJ/CPF</label>
+                                <input type="text" class="form-control" name="contratada_cnpj"
+                                       style="border-color: #e5e7eb;" placeholder="00.000.000/0001-00">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">Email</label>
+                                <input type="email" class="form-control" name="contratada_email"
+                                       style="border-color: #e5e7eb;" placeholder="contato@empresa.com">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" onclick="prevSection()" class="btn"
+                                    style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb;">
+                                <i class="bi bi-arrow-left me-2"></i> Anterior
+                            </button>
+                            <button type="button" onclick="nextSection()" class="btn"
+                                    style="background: #3b82f6; color: white; border: none;">
+                                Próximo <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seção 3: Detalhes do Contrato -->
+                    <div class="section d-none" id="section3">
+                        <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                            <div class="stat-icon warning me-2" style="width: 32px; height: 32px; font-size: 1rem;">
+                                <i class="bi bi-file-text"></i>
+                            </div>
+                            Detalhes do Contrato
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">
+                                    Valor (R$) <span style="color: #ef4444;">*</span>
+                                </label>
+                                <input type="number" step="0.01" class="form-control" name="valor" id="valor" required
+                                       style="border-color: #e5e7eb;" placeholder="0,00">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">
+                                    Prazo (dias) <span style="color: #ef4444;">*</span>
+                                </label>
+                                <input type="number" class="form-control" name="prazo_dias" required
+                                       style="border-color: #e5e7eb;" placeholder="30">
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label small fw-medium" style="color: #1f2937;">
+                                    Descrição dos Serviços <span style="color: #ef4444;">*</span>
+                                </label>
+                                <textarea class="form-control" name="descricao" rows="6" required
+                                          style="border-color: #e5e7eb;" 
+                                          placeholder="Descreva detalhadamente os serviços a serem prestados..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" onclick="prevSection()" class="btn"
+                                    style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb;">
+                                <i class="bi bi-arrow-left me-2"></i> Anterior
+                            </button>
+                            <button type="submit" class="btn"
+                                    style="background: #10b981; color: white; border: none;">
+                                <i class="bi bi-file-pdf me-2"></i>
+                                Gerar Contrato
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSection = 1;
+
+    function nextSection() {
+        if (currentSection === 1) {
+            const nome = document.getElementById('contratante_nome').value;
+            if (!nome) {
+                alert('Por favor, preencha o nome do contratante');
+                return;
+            }
+        } else if (currentSection === 2) {
+            const nome = document.getElementById('contratada_nome').value;
+            if (!nome) {
+                alert('Por favor, preencha o nome da contratada');
+                return;
+            }
+        }
+
+        document.getElementById(`section${currentSection}`).classList.add('d-none');
+        currentSection++;
+        document.getElementById(`section${currentSection}`).classList.remove('d-none');
+        updateProgress();
+    }
+
+    function prevSection() {
+        document.getElementById(`section${currentSection}`).classList.add('d-none');
+        currentSection--;
+        document.getElementById(`section${currentSection}`).classList.remove('d-none');
+        updateProgress();
+    }
+
+    function updateProgress() {
+        for (let i = 1; i <= 3; i++) {
+            const icon = document.getElementById(`step${i}-icon`);
+            const text = document.getElementById(`step${i}-text`);
+            
+            if (i < currentSection) {
+                icon.className = 'stat-icon success d-flex align-items-center justify-content-center';
+                icon.style.background = '#d1fae5';
+                icon.style.color = '#10b981';
+                icon.innerHTML = '<i class="bi bi-check"></i>';
+                text.style.color = '#10b981';
+            } else if (i === currentSection) {
+                icon.className = 'stat-icon primary d-flex align-items-center justify-content-center';
+                icon.style.background = '#dbeafe';
+                icon.style.color = '#3b82f6';
+                icon.innerHTML = i;
+                text.style.color = '#1f2937';
+            } else {
+                icon.className = 'stat-icon d-flex align-items-center justify-content-center';
+                icon.style.background = '#f3f4f6';
+                icon.style.color = '#6b7280';
+                icon.innerHTML = i;
+                text.style.color = '#6b7280';
+            }
+        }
+    }
+</script>
+{% endblock %}

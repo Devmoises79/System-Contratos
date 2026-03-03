@@ -1,0 +1,130 @@
+<!-- templates/dashboard/gestor.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard Gestor - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Dashboard do Gestor</h1>
+            <p style="color: #6b7280;">Visão geral dos contratos e aprovações</p>
+        </div>
+        <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white;">
+            Gestor
+        </span>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="stat-icon primary">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    <span class="small text-uppercase" style="color: #6b7280;">TOTAL DE CONTRATOS</span>
+                </div>
+                <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ stats.total }}</span>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="stat-icon success">
+                        <i class="bi bi-coin"></i>
+                    </div>
+                    <span class="small text-uppercase" style="color: #6b7280;">VALOR TOTAL</span>
+                </div>
+                <span class="fw-bold" style="color: #1f2937; font-size: 2rem;">R$ {{ "%.2f"|format(stats.total_valor) }}</span>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="stat-icon warning">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <span class="small text-uppercase" style="color: #6b7280;">PENDENTES</span>
+                </div>
+                <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ contratos_pendentes|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contratos Pendentes -->
+    <div class="stat-card p-0 overflow-hidden">
+        <div class="p-4 d-flex align-items-center justify-content-between" style="border-bottom: 1px solid #e5e7eb;">
+            <h5 class="fw-semibold mb-0" style="color: #1f2937;">Contratos Pendentes de Aprovação</h5>
+            <a href="{{ url_for('listar_contratos') }}" class="small text-decoration-none" style="color: #3b82f6;">
+                Ver todos <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead style="background: #f3f4f6;">
+                    <tr>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Nº Contrato</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Contratante</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Valor</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Criado por</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Data</th>
+                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contrato in contratos_pendentes %}
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td class="px-4 py-3">
+                            <span style="color: #3b82f6; font-weight: 500;">{{ contrato.numero_contrato }}</span>
+                        </td>
+                        <td class="px-4 py-3" style="color: #1f2937;">{{ contrato.contratante_nome }}</td>
+                        <td class="px-4 py-3 fw-medium" style="color: #1f2937;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        <td class="px-4 py-3" style="color: #6b7280;">{{ contrato.criado_por_nome or 'N/A' }}</td>
+                        <td class="px-4 py-3" style="color: #6b7280;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
+                        <td class="px-4 py-3">
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none me-2" style="color: #3b82f6;">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <button class="btn btn-sm p-0 border-0" style="color: #10b981;">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="stat-icon success d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <p style="color: #6b7280;">Nenhum contrato pendente de aprovação.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gráfico de Contratos por Mês -->
+    <div class="stat-card">
+        <h5 class="fw-semibold mb-4" style="color: #1f2937;">Contratos por Mês</h5>
+        
+        <div class="position-relative" style="height: 250px;">
+            <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-around align-items-end px-4" style="height: 200px;">
+                {% for mes in stats.por_mes[:6] %}
+                <div class="d-flex flex-column align-items-center">
+                    <div class="chart-bar" style="height: {{ mes.quantidade * 20 }}px; width: 40px;"></div>
+                    <span class="small mt-2" style="color: #6b7280;">{{ mes.mes }}</span>
+                    <span class="small fw-bold" style="color: #1f2937;">{{ mes.quantidade }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

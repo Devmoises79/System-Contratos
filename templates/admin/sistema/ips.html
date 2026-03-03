@@ -1,0 +1,127 @@
+<!-- templates/admin/sistema/ips.html -->
+{% extends "base.html" %}
+
+{% block title %}IPs Bloqueados - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">IPs Bloqueados</h1>
+            <p class="text-gray-500 mt-1">Gerencie os endereços IP bloqueados do sistema</p>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-ban text-red-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">BLOQUEIOS ATIVOS</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ ip_stats.ativos }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">TENTATIVAS (24H)</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ ip_stats.tentativas_24h.total }}</p>
+            <p class="text-sm text-gray-500 mt-2">{{ ip_stats.tentativas_24h.falhas }} falhas</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-blue-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">POR MOTIVO</h3>
+            </div>
+            <p class="text-sm text-gray-600">Máx. tentativas: {{ ip_stats.por_motivo[0].total if ip_stats.por_motivo else 0 }}</p>
+        </div>
+    </div>
+
+    <!-- Tabela de IPs -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800">Lista de IPs Bloqueados</h3>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tentativas</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Bloqueio</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expira em</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tempo Restante</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for ip in ips %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-mono text-sm font-medium text-gray-800">{{ ip.ip_address }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ ip.tentativas_falhas }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ ip.data_bloqueio.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ ip.expira_em.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                {{ ip.minutos_restantes }} min
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button onclick="desbloquearIP('{{ ip.ip_address }}')" 
+                                    class="text-green-600 hover:text-green-800 flex items-center space-x-1">
+                                <i class="fas fa-unlock-alt"></i>
+                                <span class="text-sm">Desbloquear</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                            <i class="fas fa-shield-alt text-4xl text-gray-300 mb-3"></i>
+                            <p>Nenhum IP bloqueado no momento.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function desbloquearIP(ip) {
+    if (confirm(`Deseja realmente desbloquear o IP ${ip}?`)) {
+        fetch('/admin/sistema/ips/desbloquear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ ip: ip })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                alert(data.mensagem);
+                location.reload();
+            } else {
+                alert('Erro: ' + data.mensagem);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

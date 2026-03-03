@@ -1,0 +1,199 @@
+<!-- templates/admin/empresa/usuarios.html -->
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Usuários da Empresa</h1>
+            <p class="text-gray-500 mt-1">Gerencie os usuários e permissões</p>
+        </div>
+        <a href="{{ url_for('admin_empresa.usuario_novo') }}" 
+           class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition shadow-sm flex items-center space-x-2">
+            <i class="fas fa-user-plus"></i>
+            <span>Novo Usuário</span>
+        </a>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">TOTAL</h3>
+            <p class="text-3xl font-bold text-gray-800">{{ usuarios|length }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">ATIVOS</h3>
+            <p class="text-3xl font-bold text-green-600">{{ usuarios|selectattr('ativo', 'equalto', true)|list|length }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">INATIVOS</h3>
+            <p class="text-3xl font-bold text-red-600">{{ usuarios|selectattr('ativo', 'equalto', false)|list|length }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">ADMINS</h3>
+            <p class="text-3xl font-bold text-purple-600">{{ usuarios|selectattr('perfil', 'equalto', 'admin_empresa')|list|length }}</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="relative flex-1">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Buscar usuários..." id="searchInput"
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="flex items-center space-x-2">
+                <select id="perfilFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Todos os perfis</option>
+                    <option value="admin_empresa">Admin Empresa</option>
+                    <option value="gestor">Gestor</option>
+                    <option value="assistente">Assistente</option>
+                    <option value="analista">Analista</option>
+                </select>
+                <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Todos os status</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Usuários -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perfil</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último Acesso</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="usuariosTable">
+                    {% for usuario in usuarios %}
+                    <tr class="hover:bg-gray-50 transition usuario-row" 
+                        data-nome="{{ usuario.nome|lower }}" 
+                        data-email="{{ usuario.email|lower }}"
+                        data-perfil="{{ usuario.perfil }}"
+                        data-status="{{ 'ativo' if usuario.ativo else 'inativo' }}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                    {{ usuario.nome[:1] }}{{ usuario.nome.split()[-1][:1] if usuario.nome.split()|length > 1 else '' }}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-800">{{ usuario.nome }}</p>
+                                    <p class="text-xs text-gray-500">{{ usuario.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if usuario.perfil == 'admin_empresa' %}bg-purple-100 text-purple-800
+                                {% elif usuario.perfil == 'gestor' %}bg-blue-100 text-blue-800
+                                {% elif usuario.perfil == 'assistente' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ usuario.perfil|replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ usuario.cargo or '-' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">
+                                {% if usuario.telefone %}
+                                <div><i class="fas fa-phone-alt text-xs mr-1"></i>{{ usuario.telefone }}</div>
+                                {% endif %}
+                                {% if usuario.celular %}
+                                <div><i class="fas fa-mobile-alt text-xs mr-1"></i>{{ usuario.celular }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {% if usuario.ativo %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ 'Ativo' if usuario.ativo else 'Inativo' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ usuario.ultimo_login.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_login else 'Nunca' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <div class="flex items-center space-x-3">
+                                <a href="{{ url_for('admin_empresa.usuario_editar', id=usuario.id) }}" 
+                                   class="text-blue-600 hover:text-blue-800" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('admin_empresa.usuario_toggle_status', id=usuario.id) }}" 
+                                   class="{% if usuario.ativo %}text-amber-600 hover:text-amber-800{% else %}text-green-600 hover:text-green-800{% endif %}" 
+                                   title="{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}">
+                                    <i class="fas {% if usuario.ativo %}fa-ban{% else %}fa-check-circle{% endif %}"></i>
+                                </a>
+                                <button class="text-red-600 hover:text-red-800" title="Mais ações">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if not usuarios %}
+        <div class="text-center py-12">
+            <i class="fas fa-users text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500">Nenhum usuário cadastrado</p>
+            <a href="{{ url_for('admin_empresa.usuario_novo') }}" class="text-blue-600 hover:underline mt-2 inline-block">
+                Criar primeiro usuário
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Filtros
+    const searchInput = document.getElementById('searchInput');
+    const perfilFilter = document.getElementById('perfilFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const rows = document.querySelectorAll('.usuario-row');
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const perfilValue = perfilFilter.value;
+        const statusValue = statusFilter.value;
+
+        rows.forEach(row => {
+            const nome = row.dataset.nome;
+            const email = row.dataset.email;
+            const perfil = row.dataset.perfil;
+            const status = row.dataset.status;
+
+            const matchesSearch = nome.includes(searchTerm) || email.includes(searchTerm);
+            const matchesPerfil = !perfilValue || perfil === perfilValue;
+            const matchesStatus = !statusValue || status === statusValue;
+
+            if (matchesSearch && matchesPerfil && matchesStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    perfilFilter.addEventListener('change', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+</script>
+{% endblock %}

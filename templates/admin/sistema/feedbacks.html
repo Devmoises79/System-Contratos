@@ -1,0 +1,140 @@
+<!-- templates/admin/sistema/feedbacks.html -->
+{% extends "base.html" %}
+
+{% block title %}Feedbacks - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Feedbacks dos Usuários</h1>
+            <p class="text-gray-500 mt-1">Avaliações e sugestões dos usuários</p>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-comment text-blue-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">TOTAL DE FEEDBACKS</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ stats.total }}</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-star text-yellow-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">MÉDIA DE NOTAS</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ "%.1f"|format(stats.media_nota) }} / 5.0</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-thumbs-up text-green-600"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase">RECOMENDARIAM</h3>
+            </div>
+            <p class="text-3xl font-bold text-gray-800">{{ stats.recomendariam }}</p>
+        </div>
+    </div>
+
+    <!-- Gráfico de Distribuição -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribuição das Notas</h3>
+        <div class="space-y-3">
+            {% for nota in range(5,0,-1) %}
+            <div class="flex items-center">
+                <div class="w-24 flex items-center">
+                    <span class="text-sm font-medium text-gray-700">{{ nota }}</span>
+                    <i class="fas fa-star text-yellow-400 ml-1 text-sm"></i>
+                </div>
+                <div class="flex-1 mx-4">
+                    <div class="bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2.5 rounded-full" 
+                             style="width: {{ (distribuicao_notas[nota|string] / stats.total * 100) if stats.total > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+                <span class="text-sm font-medium text-gray-700 w-12">{{ distribuicao_notas[nota|string] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Gráfico de Evolução -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Evolução de Feedbacks</h3>
+        <div class="relative h-64">
+            <div class="absolute inset-0 flex items-end justify-around px-4">
+                {% for i in range(evolucao_labels|length) %}
+                <div class="flex flex-col items-center w-full max-w-[80px] group">
+                    <div class="relative">
+                        <div class="w-12 bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg chart-bar" 
+                             style="height: {{ (evolucao_dados[i] / 20) * 100 }}px;">
+                        </div>
+                        <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                            {{ evolucao_dados[i] }} feedbacks
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600 mt-2 font-medium">{{ evolucao_labels[i] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Feedbacks -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800">Últimos Feedbacks</h3>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+            {% for feedback in feedbacks %}
+            <div class="px-6 py-4 hover:bg-gray-50 transition">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {{ feedback.usuario_nome[:1] }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">{{ feedback.usuario_nome }}</p>
+                            <p class="text-xs text-gray-500">{{ feedback.empresa_nome }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="flex items-center">
+                            {% for i in range(1,6) %}
+                            <i class="fas fa-star text-xs {% if i <= feedback.nota %}text-yellow-400{% else %}text-gray-300{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="text-xs text-gray-400">{{ feedback.data_criacao.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                </div>
+                
+                <div class="ml-13 pl-13">
+                    <div class="flex items-center mb-2">
+                        <span class="text-xs text-gray-600 mr-3">
+                            <i class="{% if feedback.recomendaria %}fas fa-check-circle text-green-500{% else %}fas fa-times-circle text-red-500{% endif %} mr-1"></i>
+                            {{ 'Recomendaria' if feedback.recomendaria else 'Não recomendaria' }}
+                        </span>
+                    </div>
+                    
+                    {% if feedback.sugestao %}
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-700">"{{ feedback.sugestao }}"</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
