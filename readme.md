@@ -86,7 +86,7 @@ System-Contratos/
 
 # 🔐 Controle de Acesso e Perfis
 
-O sistema implementa controle de acesso baseado em papéis (RBAC), com dois níveis administrativos distintos:
+O sistema implementa controle de acesso baseado em papéis (RBAC), com quatro níveis administrativos distintos:
 
 # 🔹 Administrador do Sistema
 
