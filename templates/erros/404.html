@@ -6,20 +6,38 @@
 {% block content %}
 <div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="stat-card p-5 text-center">
-            <div class="stat-icon warning d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
-                <i class="bi bi-question-circle"></i>
+        <div class="card-custom p-5 text-center fade-in">
+            <!-- Ícone de busca -->
+            <div class="position-relative d-inline-block mb-4">
+                <div class="card-icon amarelo" style="width: 120px; height: 120px; font-size: 4rem;">
+                    <i class="bi bi-search"></i>
+                </div>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" style="background: var(--amarelo-escuro) !important; font-size: 1rem;">
+                    404
+                </span>
             </div>
             
-            <h1 class="display-1 fw-bold" style="color: #f59e0b;">404</h1>
-            <h3 class="fw-semibold mb-3" style="color: #1f2937;">Página Não Encontrada</h3>
-            <p class="mb-4" style="color: #6b7280;">A página que você está procurando não existe ou foi removida.</p>
+            <h1 class="fw-bold mb-3" style="color: var(--cinza-texto); font-size: 3rem;">Página Não Encontrada</h1>
             
-            <a href="{{ url_for('dashboard') }}" class="btn py-2 px-4"
-               style="background: #3b82f6; color: white; border: none;">
-                <i class="bi bi-house me-2"></i>
-                Voltar para o Dashboard
-            </a>
+            <div class="alert alert-warning d-flex align-items-center mb-4" style="background: var(--amarelo-claro); border: none; border-radius: 12px;">
+                <i class="bi bi-question-circle-fill fs-4 me-3" style="color: var(--amarelo-escuro);"></i>
+                <div class="text-start">
+                    <strong class="d-block">Página não encontrada</strong>
+                    <small>O endereço que você procurou não existe ou foi removido</small>
+                </div>
+            </div>
+            
+            <p class="text-muted mb-4">
+                <i class="bi bi-arrow-return-left me-1"></i>
+                Verifique o endereço ou volte para o dashboard
+            </p>
+            
+            <div class="d-grid">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary py-3 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-house-door"></i>
+                    Voltar para o Dashboard
+                </a>
+            </div>
         </div>
     </div>
 </div>

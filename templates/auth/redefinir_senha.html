@@ -6,57 +6,216 @@
 {% block content %}
 <div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="stat-card p-0 overflow-hidden">
-            <div style="height: 6px; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);"></div>
+        <!-- Card de Redefinição -->
+        <div class="card-custom p-0 overflow-hidden fade-in">
+            <!-- Barra superior colorida -->
+            <div style="height: 6px; background: linear-gradient(90deg, var(--azul-principal), var(--vermelho-principal));"></div>
             
-            <div class="p-5">
+            <div class="p-4 p-lg-5">
+                <!-- Cabeçalho -->
                 <div class="text-center mb-4">
-                    <div class="stat-icon success d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
-                        <i class="bi bi-key"></i>
+                    <!-- Ícone de segurança -->
+                    <div class="position-relative d-inline-block mb-4">
+                        <div class="card-icon vermelho" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style="background: var(--verde-principal) !important;">
+                            <i class="bi bi-check-lg"></i>
+                        </span>
                     </div>
-                    <h2 class="fw-bold" style="color: #1f2937;">Redefinir Senha</h2>
-                    <p class="small" style="color: #6b7280;">Digite sua nova senha abaixo</p>
+                    
+                    <h2 class="fw-bold mb-2" style="color: var(--cinza-texto);">
+                        <i class="bi bi-arrow-repeat me-2" style="color: var(--vermelho-principal);"></i>
+                        Redefinir Senha
+                    </h2>
+                    <p class="text-muted">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Escolha uma nova senha segura
+                    </p>
                 </div>
 
+                <!-- Token Info -->
+                <div class="alert alert-success d-flex align-items-center mb-4" style="background: var(--verde-claro); border: none; border-radius: 12px;">
+                    <i class="bi bi-check-circle-fill fs-4 me-3" style="color: var(--verde-principal);"></i>
+                    <div>
+                        <strong class="d-block mb-1">Token válido!</strong>
+                        <small>Agora você pode criar uma nova senha</small>
+                    </div>
+                </div>
+
+                <!-- Formulário -->
                 <form method="POST">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     
                     <div class="mb-3">
-                        <label class="form-label small fw-medium" style="color: #1f2937;">Nova Senha</label>
+                        <label class="form-label fw-medium mb-2">
+                            <i class="bi bi-lock-fill me-1" style="color: var(--vermelho-principal);"></i>
+                            Nova Senha
+                        </label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                <i class="bi bi-lock" style="color: #6b7280;"></i>
+                            <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                <i class="bi bi-lock" style="color: var(--vermelho-principal);"></i>
                             </span>
-                            <input type="password" class="form-control border-start-0 ps-0" name="senha" 
-                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
-                                   placeholder="••••••••" required>
-                        </div>
-                        <div class="form-text small" style="color: #6b7280;">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial
+                            <input type="password" class="form-control border-start-0" name="senha" id="senha"
+                                   placeholder="••••••••" required
+                                   style="border-color: var(--cinza-claro);">
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label small fw-medium" style="color: #1f2937;">Confirmar Nova Senha</label>
+                        <label class="form-label fw-medium mb-2">
+                            <i class="bi bi-lock-fill me-1" style="color: var(--verde-principal);"></i>
+                            Confirmar Nova Senha
+                        </label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                <i class="bi bi-lock-fill" style="color: #6b7280;"></i>
+                            <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                <i class="bi bi-lock" style="color: var(--verde-principal);"></i>
                             </span>
-                            <input type="password" class="form-control border-start-0 ps-0" name="confirmar_senha" 
-                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
-                                   placeholder="••••••••" required>
+                            <input type="password" class="form-control border-start-0" name="confirmar_senha" id="confirmar_senha"
+                                   placeholder="••••••••" required
+                                   style="border-color: var(--cinza-claro);">
                         </div>
                     </div>
 
-                    <button type="submit" class="btn w-100 py-2"
-                            style="background: #3b82f6; color: white; border: none;">
-                        <i class="bi bi-check-circle me-2"></i>
-                        Redefinir Senha
+                    <!-- Requisitos de senha -->
+                    <div class="password-requirements mb-4 p-3" style="background: var(--branco-fundo); border-radius: 12px;">
+                        <h6 class="fw-semibold mb-3 d-flex align-items-center">
+                            <i class="bi bi-shield-check me-2" style="color: var(--azul-principal);"></i>
+                            Requisitos de segurança:
+                        </h6>
+                        <div class="row g-2 small">
+                            <div class="col-md-6" id="req-length">
+                                <i class="bi bi-circle me-1"></i> Mínimo 8 caracteres
+                            </div>
+                            <div class="col-md-6" id="req-upper">
+                                <i class="bi bi-circle me-1"></i> 1 letra maiúscula
+                            </div>
+                            <div class="col-md-6" id="req-lower">
+                                <i class="bi bi-circle me-1"></i> 1 letra minúscula
+                            </div>
+                            <div class="col-md-6" id="req-number">
+                                <i class="bi bi-circle me-1"></i> 1 número
+                            </div>
+                            <div class="col-md-6" id="req-special">
+                                <i class="bi bi-circle me-1"></i> 1 caractere especial
+                            </div>
+                            <div class="col-md-6" id="req-match">
+                                <i class="bi bi-circle me-1"></i> Senhas coincidem
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barra de força da senha -->
+                    <div class="password-strength mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-medium">Força da senha:</span>
+                            <span id="strengthText" class="small text-muted">Digite uma senha</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%; background: var(--cinza-claro);"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2"
+                            style="background: var(--azul-principal); border: none;">
+                        <i class="bi bi-check-circle fs-5"></i>
+                        <span class="fw-medium">Redefinir Senha</span>
+                        <i class="bi bi-arrow-right-short fs-5"></i>
                     </button>
                 </form>
+
+                <!-- Dica de segurança -->
+                <div class="text-center mt-4">
+                    <p class="small text-muted">
+                        <i class="bi bi-exclamation-triangle me-1" style="color: var(--amarelo-escuro);"></i>
+                        Nunca compartilhe sua senha com ninguém
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Validação de força da senha
+    const senhaInput = document.getElementById('senha');
+    const confirmarInput = document.getElementById('confirmar_senha');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    
+    const requirements = {
+        length: document.getElementById('req-length'),
+        upper: document.getElementById('req-upper'),
+        lower: document.getElementById('req-lower'),
+        number: document.getElementById('req-number'),
+        special: document.getElementById('req-special'),
+        match: document.getElementById('req-match')
+    };
+
+    function updateRequirements() {
+        const senha = senhaInput.value;
+        const confirmar = confirmarInput.value;
+        
+        const temLength = senha.length >= 8;
+        const temUpper = /[A-Z]/.test(senha);
+        const temLower = /[a-z]/.test(senha);
+        const temNumber = /[0-9]/.test(senha);
+        const temSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+        const temMatch = senha && confirmar && senha === confirmar;
+        
+        updateRequirement('length', temLength);
+        updateRequirement('upper', temUpper);
+        updateRequirement('lower', temLower);
+        updateRequirement('number', temNumber);
+        updateRequirement('special', temSpecial);
+        updateRequirement('match', temMatch);
+        
+        // Calcular força
+        let forca = 0;
+        if (temLength) forca += 16;
+        if (temUpper) forca += 16;
+        if (temLower) forca += 16;
+        if (temNumber) forca += 16;
+        if (temSpecial) forca += 16;
+        if (temMatch) forca += 20;
+        
+        strengthBar.style.width = forca + '%';
+        
+        if (forca === 0) {
+            strengthBar.style.background = 'var(--cinza-claro)';
+            strengthText.textContent = 'Digite uma senha';
+        } else if (forca < 50) {
+            strengthBar.style.background = 'var(--vermelho-principal)';
+            strengthText.textContent = 'Fraca';
+        } else if (forca < 70) {
+            strengthBar.style.background = 'var(--amarelo-escuro)';
+            strengthText.textContent = 'Média';
+        } else if (forca < 90) {
+            strengthBar.style.background = 'var(--azul-principal)';
+            strengthText.textContent = 'Boa';
+        } else {
+            strengthBar.style.background = 'var(--verde-principal)';
+            strengthText.textContent = 'Excelente';
+        }
+    }
+
+    function updateRequirement(req, met) {
+        const element = requirements[req];
+        if (!element) return;
+        
+        const icon = element.querySelector('i');
+        if (met) {
+            icon.className = 'bi bi-check-circle-fill text-success me-1';
+            element.classList.add('text-success');
+            element.classList.remove('text-muted');
+        } else {
+            icon.className = 'bi bi-circle me-1';
+            element.classList.remove('text-success');
+            element.classList.add('text-muted');
+        }
+    }
+
+    senhaInput.addEventListener('input', updateRequirements);
+    confirmarInput.addEventListener('input', updateRequirements);
+</script>
 {% endblock %}

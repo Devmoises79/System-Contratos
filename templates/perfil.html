@@ -1,0 +1,362 @@
+<!-- templates/perfil.html -->
+{% extends "base.html" %}
+
+{% block title %}Meu Perfil - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('dashboard') }}" class="text-decoration-none me-3" style="color: var(--cinza-texto);">
+            <i class="bi bi-arrow-left-circle fs-4"></i>
+        </a>
+        <div>
+            <h1 class="fw-bold mb-2" style="color: var(--cinza-texto); font-size: 2rem;">
+                <i class="bi bi-person-circle me-2" style="color: var(--azul-principal);"></i>
+                Meu Perfil
+            </h1>
+            <p class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Visualize e gerencie suas informações pessoais
+            </p>
+        </div>
+    </div>
+
+    <!-- Card do Perfil -->
+    <div class="card-custom p-0 overflow-hidden">
+        <!-- Cabeçalho com gradiente -->
+        <div style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); padding: 2rem; color: white;">
+            <div class="d-flex align-items-center gap-4">
+                <!-- Avatar com ícone -->
+                <div class="position-relative">
+                    <div style="width: 100px; height: 100px; background: white; border-radius: 30px; display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.3);">
+                        <span style="font-size: 3rem; font-weight: 700; color: var(--azul-principal);">
+                            {{ usuario.nome[:1] }}{{ usuario.nome.split()[-1][:1] if usuario.nome.split()|length > 1 else '' }}
+                        </span>
+                    </div>
+                    <span class="position-absolute bottom-0 end-0 bg-success rounded-circle p-2 border border-2 border-white" 
+                          style="width: 20px; height: 20px; background: var(--verde-principal) !important;"></span>
+                </div>
+                
+                <!-- Informações básicas -->
+                <div>
+                    <h2 class="fw-bold mb-1" style="color: white;">{{ usuario.nome }}</h2>
+                    <p class="mb-2 d-flex align-items-center gap-2" style="opacity: 0.9;">
+                        <i class="bi bi-envelope"></i>
+                        {{ usuario.email }}
+                    </p>
+                    <span class="badge" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 30px;">
+                        <i class="bi bi-shield-check me-1"></i>
+                        {{ usuario.get_perfil_display() }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações detalhadas -->
+        <div class="p-4 p-lg-5">
+            <div class="row g-4">
+                <!-- Dados Pessoais -->
+                <div class="col-md-6">
+                    <div class="card-custom p-4" style="background: var(--branco-fundo);">
+                        <h6 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon azul me-2" style="width: 32px; height: 32px;">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            Dados Pessoais
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-person-badge me-1"></i>
+                                Nome Completo
+                            </small>
+                            <p class="fw-medium mb-0">{{ usuario.nome }}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-envelope me-1"></i>
+                                Email de Acesso
+                            </small>
+                            <p class="mb-0">{{ usuario.email }}</p>
+                        </div>
+                        
+                        {% if usuario.email_corporativo %}
+                        <div>
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-building me-1"></i>
+                                Email Corporativo
+                            </small>
+                            <p class="mb-0">{{ usuario.email_corporativo }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Dados Profissionais -->
+                <div class="col-md-6">
+                    <div class="card-custom p-4" style="background: var(--branco-fundo);">
+                        <h6 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon amarelo me-2" style="width: 32px; height: 32px;">
+                                <i class="bi bi-briefcase"></i>
+                            </span>
+                            Dados Profissionais
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-shield-check me-1"></i>
+                                Função no Sistema
+                            </small>
+                            <p class="fw-medium mb-0">{{ usuario.get_perfil_display() }}</p>
+                        </div>
+                        
+                        {% if usuario.cargo %}
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-briefcase me-1"></i>
+                                Cargo na Empresa
+                            </small>
+                            <p class="mb-0">{{ usuario.cargo }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if usuario.telefone or usuario.celular %}
+                        <div>
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-telephone me-1"></i>
+                                Contato
+                            </small>
+                            <p class="mb-0">
+                                {% if usuario.telefone %}
+                                <span class="me-3"><i class="bi bi-telephone-fill me-1" style="color: var(--verde-principal);"></i>{{ usuario.telefone }}</span>
+                                {% endif %}
+                                {% if usuario.celular %}
+                                <span><i class="bi bi-phone-fill me-1" style="color: var(--vermelho-principal);"></i>{{ usuario.celular }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Informações da Empresa -->
+                <div class="col-12">
+                    <div class="card-custom p-4" style="background: var(--branco-fundo);">
+                        <h6 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon verde me-2" style="width: 32px; height: 32px;">
+                                <i class="bi bi-building"></i>
+                            </span>
+                            Informações da Empresa
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-building me-1"></i>
+                                    Empresa
+                                </small>
+                                <p class="fw-medium mb-0">{{ session.empresa.nome }}</p>
+                            </div>
+                            {% if empresa and empresa.cnpj %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-upc-scan me-1"></i>
+                                    CNPJ
+                                </small>
+                                <p class="mb-0">{{ empresa.cnpj }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Acesso -->
+                <div class="col-12">
+                    <div class="card-custom p-4" style="background: var(--branco-fundo);">
+                        <h6 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon vermelho me-2" style="width: 32px; height: 32px;">
+                                <i class="bi bi-clock-history"></i>
+                            </span>
+                            Histórico de Acesso
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-calendar-plus me-1"></i>
+                                    Membro desde
+                                </small>
+                                <p class="mb-0">{{ usuario.data_criacao.strftime('%d/%m/%Y') if usuario.data_criacao else '-' }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    Último login
+                                </small>
+                                <p class="mb-0">{{ usuario.ultimo_login.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_login else 'Nunca' }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-pc-display me-1"></i>
+                                    Último IP
+                                </small>
+                                <p class="font-monospace mb-0">{{ usuario.ultimo_ip or '-' }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Status
+                                </small>
+                                <span class="badge {% if usuario.ativo %}badge-azul{% else %}badge-vermelho{% endif %}">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                                    {{ 'Ativo' if usuario.ativo else 'Inativo' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de ação -->
+            <div class="d-flex justify-content-end gap-3 mt-4 pt-4" style="border-top: 2px solid var(--cinza-claro);">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary px-4 py-2">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Voltar
+                </a>
+                <button class="btn btn-primary px-4 py-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square"></i>
+                    Editar Perfil
+                </button>
+                <button class="btn btn-outline-danger px-4 py-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-lock"></i>
+                    Alterar Senha
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de acesso rápido baseados no perfil -->
+    <div class="row g-4 mt-2">
+        {% if usuario.perfil == 'admin_sistema' %}
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon azul mx-auto mb-3">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Empresas</h6>
+                <small class="text-muted">Gerenciar empresas</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon verde mx-auto mb-3">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Usuários</h6>
+                <small class="text-muted">Gerenciar usuários</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon amarelo mx-auto mb-3">
+                    <i class="bi bi-shield"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Logs</h6>
+                <small class="text-muted">Auditoria</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon vermelho mx-auto mb-3">
+                    <i class="bi bi-star"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Feedbacks</h6>
+                <small class="text-muted">Avaliações</small>
+            </div>
+        </div>
+
+        {% elif usuario.perfil == 'admin_empresa' %}
+        <div class="col-md-4">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon azul mx-auto mb-3">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Contratos</h6>
+                <small class="text-muted">Gerenciar contratos</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon verde mx-auto mb-3">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Usuários</h6>
+                <small class="text-muted">Gerenciar equipe</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon amarelo mx-auto mb-3">
+                    <i class="bi bi-gear"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Configurações</h6>
+                <small class="text-muted">Personalizar</small>
+            </div>
+        </div>
+
+        {% elif usuario.perfil == 'gestor' %}
+        <div class="col-md-6">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon azul mx-auto mb-3">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Contratos</h6>
+                <small class="text-muted">Criar e aprovar</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon verde mx-auto mb-3">
+                    <i class="bi bi-bar-chart"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Relatórios</h6>
+                <small class="text-muted">Análises</small>
+            </div>
+        </div>
+
+        {% elif usuario.perfil == 'analista' %}
+        <div class="col-md-6">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon azul mx-auto mb-3">
+                    <i class="bi bi-bar-chart"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Dashboard</h6>
+                <small class="text-muted">Visualizar dados</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon verde mx-auto mb-3">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Contratos</h6>
+                <small class="text-muted">Consultar</small>
+            </div>
+        </div>
+
+        {% elif usuario.perfil == 'assistente' %}
+        <div class="col-12">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon azul mx-auto mb-3">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h6 class="fw-semibold mb-1">Contratos</h6>
+                <small class="text-muted">Criar novos contratos</small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

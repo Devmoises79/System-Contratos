@@ -139,7 +139,7 @@ def xss_protegido(f):
 # =====================================================
 
 def sql_injection_protegido(f):
-    """Decorator que adiciona camada extra de proteção SQL Injection"""
+    """adiciona camada extra de proteção SQL Injection"""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         # Padrões suspeitos de SQL Injection
@@ -246,7 +246,7 @@ def log_acesso(f):
                 'status_code': resposta.status_code if hasattr(resposta, 'status_code') else 200
             }
             
-            # Aqui você pode salvar no banco se desejar
+            # 
             app.logger.info(f"Acesso: {log_data}")
             
         except Exception as e:
@@ -316,7 +316,7 @@ def index():
     """Página inicial - redireciona para login"""
     if 'usuario' in session:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    return redirect(url_for('login.html'))
 
 @app.route('/login', methods=['GET', 'POST'])
 @ip_bloqueado_verificado
@@ -386,7 +386,6 @@ def recuperar_senha():
         usuario = Usuario.get_by_email(email)
         if usuario:
             token = usuario.gerar_token_recuperacao()
-            # Aqui você enviaria email com link
             # link = url_for('redefinir_senha', token=token, _external=True)
             app.logger.info(f"Token de recuperação gerado para: {email}")
             flash('Instruções enviadas para seu email.', 'success')
@@ -441,7 +440,6 @@ def redefinir_senha(token):
     return render_template('auth/redefinir_senha.html', token=token)
 
 
-# app.py - Substitua a rota de cadastro existente por esta:
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 @ip_bloqueado_verificado
@@ -450,45 +448,79 @@ def redefinir_senha(token):
 def cadastro_usuario():
     """Página pública de cadastro de usuário"""
     from models.empresa import Empresa
+    from models.usuario import Usuario
     from core.database import Database
     
     # Busca ramos de atividade do banco
     db = Database()
     ramos = db.fetch_all("SELECT id, nome, descricao FROM ramos_atividade WHERE ativo = TRUE ORDER BY nome")
     
+    # Lista de perfis disponíveis
+    perfis = [
+        {'valor': 'admin_empresa', 'nome': 'Administrador da Empresa', 'descricao': 'Acesso total à gestão da empresa'},
+        {'valor': 'gestor', 'nome': 'Gestor', 'descricao': 'Gerencia contratos e aprovações'},
+        {'valor': 'analista', 'nome': 'Analista', 'descricao': 'Visualiza relatórios e estatísticas'},
+        {'valor': 'assistente', 'nome': 'Assistente', 'descricao': 'Cria e edita contratos'}
+    ]
+    
     if request.method == 'POST':
+        # Dados pessoais
         nome = sanitizar_entrada(request.form.get('nome', ''))
         email = sanitizar_entrada(request.form.get('email', ''))
         senha = request.form.get('senha', '')
         confirmar_senha = request.form.get('confirmar_senha', '')
+        
+        # Dados profissionais
+        perfil = request.form.get('perfil', '')
+        email_corporativo = sanitizar_entrada(request.form.get('email_corporativo', ''))
+        cargo = sanitizar_entrada(request.form.get('cargo', ''))
+        telefone = apenas_digitos(request.form.get('telefone', ''))
+        celular = apenas_digitos(request.form.get('celular', ''))
+        
+        # Dados da empresa
         empresa_nome = sanitizar_entrada(request.form.get('empresa_nome', ''))
         empresa_cnpj = apenas_digitos(request.form.get('empresa_cnpj', ''))
         ramo_id = request.form.get('ramo_id', '')
         novo_ramo = sanitizar_entrada(request.form.get('novo_ramo', ''))
         
-        # Validações
-        if not nome or not email or not senha or not empresa_nome:
+        # Validações básicas
+        if not nome or not email or not senha or not perfil or not empresa_nome:
             flash('Todos os campos obrigatórios devem ser preenchidos.', 'danger')
-            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+            return render_template('admin/empresa/usuario_form.html', 
+                                 cadastro_publico=True, 
+                                 ramos=ramos, 
+                                 perfis=perfis,
+                                 form_data=request.form)
         
         if senha != confirmar_senha:
             flash('As senhas não conferem.', 'danger')
-            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+            return render_template('admin/empresa/usuario_form.html', 
+                                 cadastro_publico=True, 
+                                 ramos=ramos, 
+                                 perfis=perfis,
+                                 form_data=request.form)
         
         # Valida força da senha
         if len(senha) < 8:
             flash('A senha deve ter no mínimo 8 caracteres.', 'danger')
-            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+            return render_template('admin/empresa/usuario_form.html', 
+                                 cadastro_publico=True, 
+                                 ramos=ramos, 
+                                 perfis=perfis,
+                                 form_data=request.form)
         
         # Verifica se email já existe
         if Usuario.get_by_email(email):
             flash('Este email já está cadastrado.', 'danger')
-            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+            return render_template('admin/empresa/usuario_form.html', 
+                                 cadastro_publico=True, 
+                                 ramos=ramos, 
+                                 perfis=perfis,
+                                 form_data=request.form)
         
         try:
             # Se usuário escolheu "Outro" e preencheu novo ramo
             if ramo_id == 'outro' and novo_ramo:
-                # Insere novo ramo no banco
                 query = "INSERT INTO ramos_atividade (nome, descricao, ativo) VALUES (%s, %s, TRUE)"
                 ramo_id = db.execute_return_id(query, (novo_ramo, f"Ramo cadastrado por {empresa_nome}"))
                 app.logger.info(f"Novo ramo cadastrado: {novo_ramo}")
@@ -502,35 +534,64 @@ def cadastro_usuario():
             )
             empresa.save()
             
-            # Registra o ramo da empresa (se selecionado)
-            if ramo_id and ramo_id != 'outro':
-                # Aqui você pode criar uma relação empresa-ramo se tiver essa tabela
-                # Por enquanto, vamos apenas logar
-                app.logger.info(f"Empresa {empresa.id} associada ao ramo {ramo_id}")
-            
-            # Cria o usuário como admin da empresa
+            # Cria o usuário com o perfil selecionado
             usuario = Usuario(
                 empresa_id=empresa.id,
                 nome=nome,
                 email=email,
-                perfil='admin_empresa',
+                perfil=perfil,  # Perfil selecionado pelo usuário
+                cargo=cargo,
+                telefone=telefone,
+                celular=celular,
+                email_corporativo=email_corporativo,
                 ativo=True,
-                primeiro_acesso=False  # Já vai definir a senha agora
+                primeiro_acesso=False,  # Já define a senha agora
+                criado_por=None  # Cadastro público
             )
             usuario.definir_senha(senha)
             usuario.save()
             
-            app.logger.info(f"Novo cadastro: {email} - Empresa: {empresa_nome}")
+            app.logger.info(f"Novo cadastro: {email} - Perfil: {perfil} - Empresa: {empresa_nome}")
+            
+            # Flash message de sucesso
             flash('Cadastro realizado com sucesso! Faça o login.', 'success')
+            
+            # Redireciona para a página de login
             return redirect(url_for('login'))
             
         except Exception as e:
             app.logger.error(f"Erro no cadastro: {str(e)}")
             flash('Erro ao realizar cadastro. Tente novamente.', 'danger')
-            return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+            return render_template('admin/empresa/usuario_form.html', 
+                                 cadastro_publico=True, 
+                                 ramos=ramos, 
+                                 perfis=perfis,
+                                 form_data=request.form)
     
-    # GET - exibe formulário de cadastro com os ramos
-    return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos)
+    # GET - exibe formulário de cadastro
+    return render_template('admin/empresa/usuario_form.html', 
+                         cadastro_publico=True, 
+                         ramos=ramos, 
+                         perfis=perfis,
+                         form_data={})
+    
+# Rota do perfil
+@app.route('/perfil')
+@rota_protegida()
+def perfil():
+    """Página de perfil do usuário"""
+    usuario_id = session['usuario']['id']
+    usuario = Usuario.get_by_id(usuario_id)
+    
+    if not usuario:
+        flash('Usuário não encontrado.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Busca dados da empresa
+    from models.empresa import Empresa
+    empresa = Empresa.get_by_id(usuario.empresa_id)
+    
+    return render_template('perfil.html', usuario=usuario, empresa=empresa)
 # =====================================================
 # ROTAS DE DASHBOARD (PROTEGIDAS)
 # =====================================================
@@ -594,6 +655,7 @@ def analista_dashboard():
     stats = Contrato.estatisticas(empresa_id)
     
     return render_template('dashboard/analista.html', stats=stats)
+
 
 # =====================================================
 # ROTAS DE CONTRATOS (PROTEGIDAS)

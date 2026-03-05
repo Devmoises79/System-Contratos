@@ -1,0 +1,184 @@
+<!-- templates/admin/empresa/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - {{ empresa.nome }}{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Admin: {{ empresa.nome }}</h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie sua empresa e contratos</p>
+        </div>
+        <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.9rem; font-weight: 500;">
+            <i class="bi bi-building me-1"></i>
+            Admin Empresa
+        </span>
+    </div>
+
+    <!-- Primeira Linha: Cards de Estatísticas -->
+    <div class="row g-4 mb-4">
+        <!-- CONTRATOS -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px; margin: 0;">CONTRATOS</h6>
+                    <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500;">{{ stats.ativos or 0 }} ativos</span>
+                </div>
+                <div style="font-size: 3rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ stats.total }}</div>
+            </div>
+        </div>
+
+        <!-- USUÁRIOS -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px; margin: 0;">USUÁRIOS</h6>
+                    <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500;">{{ usuarios|selectattr('ativo', 'equalto', true)|list|length }} ativos</span>
+                </div>
+                <div style="font-size: 3rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ usuarios|length }}</div>
+            </div>
+        </div>
+
+        <!-- VALOR TOTAL -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px; margin: 0;">VALOR TOTAL</h6>
+                    <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500;">em contratos</span>
+                </div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.total_valor) }}</div>
+            </div>
+        </div>
+
+        <!-- VALOR MÉDIO -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px; margin: 0;">VALOR MÉDIO</h6>
+                </div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.media) }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda Linha: Gráfico e Últimos Usuários -->
+    <div class="row g-4 mb-4">
+        <!-- Gráfico de Contratos por Mês -->
+        <div class="col-md-8">
+            <div class="card-custom p-4">
+                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Contratos por Mês</h5>
+                
+                <div class="position-relative" style="height: 250px; margin-top: 20px;">
+                    <!-- Linhas horizontais -->
+                    <div class="position-absolute start-0 top-0 bottom-0 d-flex flex-column justify-content-between" style="width: 30px;">
+                        {% set max_valor = stats.por_mes|map(attribute='quantidade')|max|default(10) %}
+                        {% for i in range(max_valor, 0, -1) %}
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">{{ i }}</span>
+                        {% endfor %}
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">0</span>
+                    </div>
+
+                    <!-- Linhas de grade -->
+                    <div class="position-absolute start-0 end-0" style="top: 0; height: 100%; margin-left: 40px;">
+                        {% for i in range(0, max_valor + 1) %}
+                        <div style="position: absolute; left: 0; right: 0; top: {{ (max_valor - i) * (200 / max_valor) }}px; border-bottom: 1px dashed var(--cinza-claro);"></div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Barras do gráfico -->
+                    <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-around align-items-end" style="margin-left: 40px; height: 100%;">
+                        {% for mes in stats.por_mes[:6] %}
+                        <div class="d-flex flex-column align-items-center" style="width: 60px;">
+                            <div style="height: {{ (mes.quantidade / max_valor) * 200 }}px; width: 30px; background: var(--azul-principal); border-radius: 4px 4px 0 0;"></div>
+                            <span style="margin-top: 8px; color: var(--cinza-texto); font-weight: 500; font-size: 0.9rem;">{{ mes.mes }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimos Usuários -->
+        <div class="col-md-4">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin: 0;">Últimos Usuários</h5>
+                    <a href="{{ url_for('admin_empresa.usuarios') }}" style="color: var(--azul-principal); text-decoration: none; font-size: 0.9rem;">
+                        Ver todos <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                
+                {% for usuario in usuarios[:5] %}
+                <div class="d-flex align-items-center justify-content-between py-2 {% if not loop.last %}mb-2{% endif %}" style="border-bottom: {% if not loop.last %}1px solid var(--cinza-claro){% else %}none{% endif %};">
+                    <div class="d-flex align-items-center">
+                        <div style="width: 36px; height: 36px; background: var(--azul-claro); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                            <span style="color: var(--azul-principal); font-weight: 600;">{{ usuario.nome[:1] }}</span>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{{ usuario.nome }}</div>
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">{{ usuario.perfil|replace('_', ' ')|title }}</div>
+                        </div>
+                    </div>
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: {% if usuario.ativo %}var(--azul-principal){% else %}var(--cinza-claro){% endif %};"></span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Terceira Linha: Últimos Contratos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin: 0;">Últimos Contratos</h5>
+                    <a href="{{ url_for('listar_contratos') }}" style="color: var(--azul-principal); text-decoration: none; font-size: 0.9rem;">
+                        Ver todos <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table" style="border-collapse: separate; border-spacing: 0 8px;">
+                        <thead>
+                            <tr>
+                                <th style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; padding: 0.5rem;">Nº Contrato</th>
+                                <th style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; padding: 0.5rem;">Contratante</th>
+                                <th style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; padding: 0.5rem;">Valor</th>
+                                <th style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; padding: 0.5rem;">Status</th>
+                                <th style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; padding: 0.5rem;">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contrato in contratos %}
+                            <tr style="background: var(--branco-fundo); border-radius: 12px;">
+                                <td style="padding: 1rem 0.5rem;">
+                                    <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
+                                        {{ contrato.numero_contrato }}
+                                    </a>
+                                </td>
+                                <td style="padding: 1rem 0.5rem;">{{ contrato.contratante_nome }}</td>
+                                <td style="padding: 1rem 0.5rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                                <td style="padding: 1rem 0.5rem;">
+                                    <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% else %}var(--cinza-claro){% endif %}; 
+                                                 color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% else %}var(--cinza-texto){% endif %}; 
+                                                 padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                        {{ contrato.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td style="padding: 1rem 0.5rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4" style="color: var(--cinza-texto); opacity: 0.7;">Nenhum contrato encontrado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

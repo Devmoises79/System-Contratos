@@ -4,267 +4,455 @@
 {% block title %}{{ 'Cadastro' if cadastro_publico else ('Editar' if usuario else 'Novo') }} Usuário - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-10 col-xl-8">
-        <!-- Cabeçalho com breadcrumb (apenas para admin) -->
-        {% if not cadastro_publico %}
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('admin_empresa.dashboard') }}" class="text-decoration-none">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('admin_empresa.usuarios') }}" class="text-decoration-none">Usuários</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ 'Editar' if usuario else 'Novo' }} Usuário</li>
-            </ol>
-        </nav>
-        {% endif %}
-
-        <!-- Card principal -->
-        <div class="stat-card p-0 overflow-hidden">
-            <!-- Cabeçalho com gradiente e avatar -->
-            <div class="bg-gradient-primary px-4 py-5 text-white position-relative">
-                <div class="d-flex align-items-center">
-                    <!-- Avatar grande -->
-                    <div class="bg-white rounded-4 d-flex align-items-center justify-content-center me-4 shadow" style="width: 80px; height: 80px;">
-                        {% if cadastro_publico %}
-                            <i class="bi bi-building fs-1 text-primary"></i>
-                        {% elif usuario %}
-                            <span class="fw-bold fs-1 text-primary">{{ usuario.nome[:1] }}{{ usuario.nome.split()[-1][:1] if usuario.nome.split()|length > 1 else '' }}</span>
-                        {% else %}
-                            <i class="bi bi-person-plus-fill fs-1 text-primary"></i>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Informações do usuário -->
-                    <div>
-                        <h2 class="fw-bold mb-1">
-                            {% if cadastro_publico %}
-                                Cadastre sua Empresa
-                            {% elif usuario %}
-                                {{ usuario.nome }}
-                            {% else %}
-                                Novo Usuário
-                            {% endif %}
-                        </h2>
-                        <p class="text-white-80 mb-0">
-                            {% if cadastro_publico %}
-                                <i class="bi bi-building me-2"></i>Preencha os dados da sua empresa
-                            {% elif usuario %}
-                                <i class="bi bi-envelope me-2"></i>{{ usuario.email }}
-                            {% else %}
-                                <i class="bi bi-person-plus me-2"></i>Preencha os dados para criar um novo usuário
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- Badge de status (apenas para edição) -->
-                {% if usuario and not cadastro_publico %}
-                <div class="position-absolute top-0 end-0 mt-3 me-3">
-                    <span class="badge {% if usuario.ativo %}bg-success{% else %}bg-secondary{% endif %} px-3 py-2">
-                        <i class="bi bi-circle-fill me-1 small"></i>
-                        {{ 'Ativo' if usuario.ativo else 'Inativo' }}
-                    </span>
-                </div>
+<div class="fade-in">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Cabeçalho -->
+            <div class="d-flex align-items-center mb-4">
+                {% if not cadastro_publico %}
+                <a href="{{ url_for('admin_empresa.usuarios') }}" class="text-decoration-none me-3" style="color: var(--cinza-texto);">
+                    <i class="bi bi-arrow-left fs-4"></i>
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="text-decoration-none me-3" style="color: var(--cinza-texto);">
+                    <i class="bi bi-arrow-left fs-4"></i>
+                </a>
                 {% endif %}
+                <div>
+                    <h1 class="fw-bold mb-2" style="color: var(--cinza-texto); font-size: 2rem;">
+                        {% if cadastro_publico %}
+                            <i class="bi bi-person-plus-fill me-2" style="color: var(--azul-principal);"></i>
+                            Criar Nova Conta
+                        {% elif usuario %}
+                            <i class="bi bi-pencil-square me-2" style="color: var(--amarelo-escuro);"></i>
+                            Editar Usuário
+                        {% else %}
+                            <i class="bi bi-person-plus me-2" style="color: var(--azul-principal);"></i>
+                            Novo Usuário
+                        {% endif %}
+                    </h1>
+                    <p style="color: var(--cinza-texto); opacity: 0.7;">
+                        {% if cadastro_publico %}
+                            <i class="bi bi-info-circle me-1"></i>
+                            Preencha seus dados para começar a usar o ValidaPy
+                        {% elif usuario %}
+                            <i class="bi bi-info-circle me-1"></i>
+                            Altere as informações do usuário
+                        {% else %}
+                            <i class="bi bi-info-circle me-1"></i>
+                            Preencha os dados para criar um novo usuário
+                        {% endif %}
+                    </p>
+                </div>
             </div>
 
-            <!-- Formulário -->
-            <div class="card-body p-4 p-lg-5">
-                <form method="POST" id="usuarioForm" class="needs-validation" novalidate>
+            <!-- Card Principal -->
+            <div class="card-custom p-0 overflow-hidden">
+                <!-- Cabeçalho com avatar -->
+                <div style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); padding: 2rem; color: white;">
+                    <div class="d-flex align-items-center gap-4">
+                        <div style="width: 80px; height: 80px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                            {% if cadastro_publico %}
+                                <i class="bi bi-building" style="font-size: 2.5rem; color: var(--azul-principal);"></i>
+                            {% elif usuario %}
+                                <span style="font-size: 2.5rem; font-weight: 700; color: var(--azul-principal);">
+                                    {{ usuario.nome[:1] }}{{ usuario.nome.split()[-1][:1] if usuario.nome.split()|length > 1 else '' }}
+                                </span>
+                            {% else %}
+                                <i class="bi bi-person-plus" style="font-size: 2.5rem; color: var(--azul-principal);"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h2 class="fw-bold mb-1" style="color: white;">
+                                {% if cadastro_publico %}
+                                    Cadastre sua Empresa
+                                {% elif usuario %}
+                                    {{ usuario.nome }}
+                                {% else %}
+                                    Novo Usuário
+                                {% endif %}
+                            </h2>
+                            <p style="opacity: 0.9; margin-bottom: 0;">
+                                {% if cadastro_publico %}
+                                    <i class="bi bi-building me-1"></i> Comece gratuitamente por 30 dias
+                                {% elif usuario %}
+                                    <i class="bi bi-envelope me-1"></i> {{ usuario.email }}
+                                {% else %}
+                                    <i class="bi bi-person-plus me-1"></i> Preencha os dados abaixo
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="POST" class="p-4 p-lg-5" id="usuarioForm" enctype="multipart/form-data">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
 
                     {% if cadastro_publico %}
-                    <!-- Informações da Empresa (para cadastro público) -->
-                    <div class="mb-4">
-                        <h5 class="fw-semibold mb-3 d-flex align-items-center">
-                            <div class="stat-icon primary me-2" style="width: 28px; height: 28px;">
+                    <!-- SEÇÃO: Dados da Empresa (apenas para cadastro público) -->
+                    <div class="mb-5">
+                        <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon azul me-2" style="width: 32px; height: 32px;">
                                 <i class="bi bi-building"></i>
-                            </div>
+                            </span>
                             Dados da Empresa
                         </h5>
                         
-                        <div class="row g-3">
+                        <div class="row g-4">
                             <!-- Nome da Empresa -->
                             <div class="col-md-8">
-                                <label for="empresa_nome" class="form-label fw-medium">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-building me-1" style="color: var(--azul-principal);"></i>
                                     Nome da Empresa <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-building" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-building" style="color: var(--azul-principal);"></i>
                                     </span>
-                                    <input type="text" class="form-control border-start-0 ps-0" id="empresa_nome" name="empresa_nome" 
-                                           placeholder="Digite o nome da empresa" required
-                                           style="border-color: #e5e7eb;">
+                                    <input type="text" class="form-control border-start-0" name="empresa_nome" 
+                                           value="{{ form_data.get('empresa_nome', '') }}" required
+                                           placeholder="Digite o nome da empresa"
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
                             </div>
 
-                            <!-- CNPJ (opcional) -->
+                            <!-- CNPJ -->
                             <div class="col-md-4">
-                                <label for="empresa_cnpj" class="form-label fw-medium">CNPJ</label>
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-upc-scan me-1" style="color: var(--amarelo-escuro);"></i>
+                                    CNPJ
+                                </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-upc-scan" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-upc-scan" style="color: var(--amarelo-escuro);"></i>
                                     </span>
-                                    <input type="text" class="form-control border-start-0 ps-0 cnpj-mask" id="empresa_cnpj" name="empresa_cnpj" 
+                                    <input type="text" class="form-control border-start-0 cnpj-mask" name="empresa_cnpj" 
+                                           value="{{ form_data.get('empresa_cnpj', '') }}"
                                            placeholder="00.000.000/0001-00"
-                                           style="border-color: #e5e7eb;">
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
                             </div>
 
                             <!-- Ramo de Atividade -->
                             <div class="col-12">
-                                <label for="ramo_id" class="form-label fw-medium">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-tags me-1" style="color: var(--verde-principal);"></i>
                                     Ramo de Atividade <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select" id="ramo_id" name="ramo_id" required onchange="toggleNovoRamo()"
-                                        style="border-color: #e5e7eb;">
-                                    <option value="">Selecione o ramo da empresa</option>
-                                    {% for ramo in ramos %}
-                                    <option value="{{ ramo.id }}" {% if ramo.id == request.form.get('ramo_id') %}selected{% endif %}>
-                                        {{ ramo.nome }} {% if ramo.descricao %}- {{ ramo.descricao }}{% endif %}
-                                    </option>
-                                    {% endfor %}
-                                    <option value="outro">Outro (especificar)</option>
-                                </select>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-tags" style="color: var(--verde-principal);"></i>
+                                    </span>
+                                    <select class="form-select border-start-0" name="ramo_id" id="ramo_id" required onchange="toggleNovoRamo()"
+                                            style="border-color: var(--cinza-claro);">
+                                        <option value="">Selecione o ramo da empresa</option>
+                                        {% for ramo in ramos %}
+                                        <option value="{{ ramo.id }}" {% if form_data.get('ramo_id') == ramo.id|string %}selected{% endif %}>
+                                            {{ ramo.nome }}
+                                        </option>
+                                        {% endfor %}
+                                        <option value="outro">Outro (especificar)</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- Novo Ramo (aparece quando seleciona "Outro") -->
                             <div class="col-12" id="novoRamoField" style="display: none;">
-                                <label for="novo_ramo" class="form-label fw-medium">Especifique o Ramo</label>
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-pencil me-1" style="color: var(--amarelo-escuro);"></i>
+                                    Especifique o Ramo
+                                </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-pencil" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-pencil" style="color: var(--amarelo-escuro);"></i>
                                     </span>
-                                    <input type="text" class="form-control border-start-0 ps-0" id="novo_ramo" name="novo_ramo" 
+                                    <input type="text" class="form-control border-start-0" name="novo_ramo" id="novo_ramo" 
+                                           value="{{ form_data.get('novo_ramo', '') }}"
                                            placeholder="Digite o nome do ramo"
-                                           style="border-color: #e5e7eb;">
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
-                                <div class="form-text small text-muted">
+                                <small class="text-muted mt-1 d-block">
                                     <i class="bi bi-info-circle me-1"></i>
                                     Este novo ramo será adicionado ao sistema
-                                </div>
+                                </small>
                             </div>
                         </div>
                     </div>
                     {% endif %}
 
-                    <!-- Informações do Responsável -->
-                    <div class="mb-4">
-                        <h5 class="fw-semibold mb-3 d-flex align-items-center">
-                            <div class="stat-icon success me-2" style="width: 28px; height: 28px;">
+                    <!-- SEÇÃO: Dados do Responsável -->
+                    <div class="mb-5">
+                        <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon verde me-2" style="width: 32px; height: 32px;">
                                 <i class="bi bi-person-circle"></i>
-                            </div>
+                            </span>
                             Dados do Responsável
                         </h5>
                         
-                        <div class="row g-3">
+                        <div class="row g-4">
                             <!-- Nome Completo -->
                             <div class="col-12">
-                                <label for="nome" class="form-label fw-medium">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-person me-1" style="color: var(--azul-principal);"></i>
                                     Nome Completo <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-person" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-person" style="color: var(--azul-principal);"></i>
                                     </span>
-                                    <input type="text" class="form-control border-start-0 ps-0" id="nome" name="nome" 
-                                           value="{{ request.form.get('nome', '') }}" 
-                                           placeholder="Digite o nome completo" required
-                                           style="border-color: #e5e7eb;">
+                                    <input type="text" class="form-control border-start-0" name="nome" 
+                                           value="{{ form_data.get('nome', '') if cadastro_publico else usuario.nome if usuario else '' }}" 
+                                           required
+                                           placeholder="Digite o nome completo"
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
                             </div>
 
-                            <!-- Email de Acesso -->
-                            <div class="col-12">
-                                <label for="email" class="form-label fw-medium">
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-envelope me-1" style="color: var(--vermelho-principal);"></i>
                                     Email de Acesso <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-envelope" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-envelope" style="color: var(--vermelho-principal);"></i>
                                     </span>
-                                    <input type="email" class="form-control border-start-0 ps-0" id="email" name="email" 
-                                           value="{{ request.form.get('email', '') }}" 
-                                           placeholder="responsavel@empresa.com" required
-                                           style="border-color: #e5e7eb;">
+                                    <input type="email" class="form-control border-start-0" name="email" 
+                                           value="{{ form_data.get('email', '') if cadastro_publico else usuario.email if usuario else '' }}" 
+                                           {% if usuario and not cadastro_publico %}readonly{% endif %}
+                                           {% if not usuario %}required{% endif %}
+                                           placeholder="responsavel@empresa.com"
+                                           style="border-color: var(--cinza-claro); {% if usuario and not cadastro_publico %}background: var(--branco-fundo);{% endif %}">
+                                </div>
+                                {% if usuario and not cadastro_publico %}
+                                <small class="text-muted">
+                                    <i class="bi bi-lock me-1"></i>
+                                    O email não pode ser alterado
+                                </small>
+                                {% endif %}
+                            </div>
+
+                            <!-- Perfil (apenas para admin) -->
+                            {% if not cadastro_publico %}
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-shield-check me-1" style="color: var(--amarelo-escuro);"></i>
+                                    Perfil <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-person-badge" style="color: var(--amarelo-escuro);"></i>
+                                    </span>
+                                    <select class="form-select border-start-0" name="perfil" required
+                                            style="border-color: var(--cinza-claro);">
+                                        <option value="">Selecione um perfil</option>
+                                        <option value="admin_empresa" {% if usuario and usuario.perfil == 'admin_empresa' %}selected{% endif %}>Admin Empresa</option>
+                                        <option value="gestor" {% if usuario and usuario.perfil == 'gestor' %}selected{% endif %}>Gestor</option>
+                                        <option value="assistente" {% if usuario and usuario.perfil == 'assistente' %}selected{% endif %}>Assistente</option>
+                                        <option value="analista" {% if usuario and usuario.perfil == 'analista' %}selected{% endif %}>Analista</option>
+                                    </select>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Cargo -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-briefcase me-1" style="color: var(--azul-principal);"></i>
+                                    Cargo
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-briefcase" style="color: var(--azul-principal);"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" name="cargo" 
+                                           value="{{ form_data.get('cargo', '') if cadastro_publico else usuario.cargo if usuario else '' }}"
+                                           placeholder="Ex: Gerente Comercial"
+                                           style="border-color: var(--cinza-claro);">
+                                </div>
+                            </div>
+
+                            <!-- Email Corporativo -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-building me-1" style="color: var(--verde-principal);"></i>
+                                    Email Corporativo
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-building" style="color: var(--verde-principal);"></i>
+                                    </span>
+                                    <input type="email" class="form-control border-start-0" name="email_corporativo" 
+                                           value="{{ form_data.get('email_corporativo', '') if cadastro_publico else usuario.email_corporativo if usuario else '' }}"
+                                           placeholder="usuario@empresa.com"
+                                           style="border-color: var(--cinza-claro);">
+                                </div>
+                            </div>
+
+                            <!-- Telefone -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-telephone me-1" style="color: var(--verde-principal);"></i>
+                                    Telefone
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-telephone" style="color: var(--verde-principal);"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 telefone-mask" name="telefone" 
+                                           value="{{ form_data.get('telefone', '') if cadastro_publico else usuario.telefone if usuario else '' }}"
+                                           placeholder="(11) 1234-5678"
+                                           style="border-color: var(--cinza-claro);">
+                                </div>
+                            </div>
+
+                            <!-- Celular -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-phone me-1" style="color: var(--vermelho-principal);"></i>
+                                    Celular
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-phone" style="color: var(--vermelho-principal);"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 celular-mask" name="celular" 
+                                           value="{{ form_data.get('celular', '') if cadastro_publico else usuario.celular if usuario else '' }}"
+                                           placeholder="(11) 99999-9999"
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Senha -->
-                    <div class="mb-4">
-                        <h5 class="fw-semibold mb-3 d-flex align-items-center">
-                            <div class="stat-icon warning me-2" style="width: 28px; height: 28px;">
+                    <!-- SEÇÃO: Senha -->
+                    <div class="mb-5">
+                        <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                            <span class="card-icon vermelho me-2" style="width: 32px; height: 32px;">
                                 <i class="bi bi-key"></i>
-                            </div>
+                            </span>
                             Senha de Acesso
                         </h5>
                         
-                        <div class="row g-3">
+                        <div class="row g-4">
                             <!-- Senha -->
                             <div class="col-md-6">
-                                <label for="senha" class="form-label fw-medium">
-                                    Senha <span class="text-danger">*</span>
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-lock me-1" style="color: var(--amarelo-escuro);"></i>
+                                    Senha {% if not usuario %}<span class="text-danger">*</span>{% endif %}
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-lock" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-lock" style="color: var(--amarelo-escuro);"></i>
                                     </span>
-                                    <input type="password" class="form-control border-start-0 ps-0" id="senha" name="senha" 
-                                           required
+                                    <input type="password" class="form-control border-start-0" name="senha" id="senha"
+                                           {% if not usuario %}required{% endif %}
                                            placeholder="••••••••"
-                                           style="border-color: #e5e7eb;">
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
+                                {% if usuario and not cadastro_publico %}
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Deixe em branco para manter a senha atual
+                                </small>
+                                {% endif %}
                             </div>
 
                             <!-- Confirmar Senha -->
                             <div class="col-md-6">
-                                <label for="confirmar_senha" class="form-label fw-medium">
-                                    Confirmar Senha <span class="text-danger">*</span>
+                                <label class="form-label fw-medium mb-2">
+                                    <i class="bi bi-lock-fill me-1" style="color: var(--vermelho-principal);"></i>
+                                    Confirmar Senha {% if not usuario %}<span class="text-danger">*</span>{% endif %}
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                        <i class="bi bi-lock-fill" style="color: #6b7280;"></i>
+                                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                                        <i class="bi bi-lock-fill" style="color: var(--vermelho-principal);"></i>
                                     </span>
-                                    <input type="password" class="form-control border-start-0 ps-0" id="confirmar_senha" name="confirmar_senha" 
-                                           required
+                                    <input type="password" class="form-control border-start-0" name="confirmar_senha" id="confirmar_senha"
+                                           {% if not usuario %}required{% endif %}
                                            placeholder="••••••••"
-                                           style="border-color: #e5e7eb;">
+                                           style="border-color: var(--cinza-claro);">
                                 </div>
                             </div>
 
-                            <!-- Indicador de força da senha -->
+                            <!-- Indicador de força da senha (para novos usuários) -->
+                            {% if not usuario %}
                             <div class="col-12">
-                                <div class="password-strength mt-2">
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="small fw-medium" style="color: #1f2937;">Força da senha:</span>
-                                        <span id="strengthText" class="small text-muted">Digite uma senha</span>
+                                <div class="password-strength mt-2 p-3" style="background: var(--branco-fundo); border-radius: 12px;">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="fw-medium">Força da senha:</span>
+                                        <span id="strengthText" class="text-muted">Digite uma senha</span>
                                     </div>
-                                    <div class="progress" style="height: 6px;">
-                                        <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                                    <div class="progress mb-3" style="height: 6px;">
+                                        <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%; background: var(--cinza-claro);"></div>
                                     </div>
-                                    <ul class="list-unstyled mt-2 small text-muted">
-                                        <li id="req-length"><i class="bi bi-circle me-1"></i> Mínimo 8 caracteres</li>
-                                        <li id="req-upper"><i class="bi bi-circle me-1"></i> Pelo menos 1 letra maiúscula</li>
-                                        <li id="req-lower"><i class="bi bi-circle me-1"></i> Pelo menos 1 letra minúscula</li>
-                                        <li id="req-number"><i class="bi bi-circle me-1"></i> Pelo menos 1 número</li>
-                                        <li id="req-special"><i class="bi bi-circle me-1"></i> Pelo menos 1 caractere especial</li>
-                                    </ul>
+                                    <div class="row g-2 small">
+                                        <div class="col-md-6" id="req-length">
+                                            <i class="bi bi-circle me-1"></i> Mínimo 8 caracteres
+                                        </div>
+                                        <div class="col-md-6" id="req-upper">
+                                            <i class="bi bi-circle me-1"></i> Pelo menos 1 letra maiúscula
+                                        </div>
+                                        <div class="col-md-6" id="req-lower">
+                                            <i class="bi bi-circle me-1"></i> Pelo menos 1 letra minúscula
+                                        </div>
+                                        <div class="col-md-6" id="req-number">
+                                            <i class="bi bi-circle me-1"></i> Pelo menos 1 número
+                                        </div>
+                                        <div class="col-md-6" id="req-special">
+                                            <i class="bi bi-circle me-1"></i> Pelo menos 1 caractere especial
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
 
+                    <!-- Status (apenas para edição) -->
+                    {% if usuario and not cadastro_publico %}
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="ativo" name="ativo" 
+                                   {% if usuario.ativo %}checked{% endif %}
+                                   style="width: 40px; height: 20px; cursor: pointer;">
+                            <label class="form-check-label ms-2" for="ativo">
+                                <i class="bi bi-check-circle me-1" style="color: var(--verde-principal);"></i>
+                                Usuário ativo
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Informações adicionais (apenas para edição) -->
+                    {% if usuario and not cadastro_publico %}
+                    <div class="mb-4 p-3" style="background: var(--branco-fundo); border-radius: 12px;">
+                        <h6 class="fw-semibold mb-3 d-flex align-items-center">
+                            <i class="bi bi-clock-history me-2" style="color: var(--azul-principal);"></i>
+                            Informações Adicionais
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Criado em:</small>
+                                <span>{{ usuario.data_criacao.strftime('%d/%m/%Y %H:%M') if usuario.data_criacao else '-' }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Último acesso:</small>
+                                <span>{{ usuario.ultimo_login.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_login else 'Nunca' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Botões -->
-                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                        <a href="{{ url_for('login' if cadastro_publico else 'admin_empresa.usuarios') }}" class="btn px-4 py-2"
-                           style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb;">
+                    <div class="d-flex justify-content-end gap-3 mt-4 pt-4" style="border-top: 2px solid var(--cinza-claro);">
+                        <a href="{% if cadastro_publico %}{{ url_for('login') }}{% else %}{{ url_for('admin_empresa.usuarios') }}{% endif %}" 
+                           class="btn btn-outline-secondary px-4 py-2">
                             <i class="bi bi-x-lg me-2"></i>
                             Cancelar
                         </a>
-                        <button type="submit" class="btn px-4 py-2 d-flex align-items-center"
-                                style="background: #3b82f6; color: white; border: none;">
+                        <button type="submit" class="btn btn-primary px-4 py-2">
                             <i class="bi bi-check-lg me-2"></i>
                             {% if cadastro_publico %}
                                 Criar minha conta
@@ -277,40 +465,40 @@
                     </div>
                 </form>
             </div>
-        </div>
 
-        <!-- Informações adicionais para cadastro público -->
-        {% if cadastro_publico %}
-        <div class="row g-4 mt-2">
-            <div class="col-md-4">
-                <div class="stat-card p-3 text-center">
-                    <div class="stat-icon primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
-                        <i class="bi bi-shield-check"></i>
+            <!-- Cards informativos para cadastro público -->
+            {% if cadastro_publico %}
+            <div class="row g-4 mt-4">
+                <div class="col-md-4">
+                    <div class="card-custom p-3 text-center">
+                        <div class="card-icon azul mx-auto mb-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-2">Administrador</h6>
+                        <p class="small text-muted mb-0">Você será o administrador da sua empresa</p>
                     </div>
-                    <h6 class="fw-semibold mb-2" style="color: #1f2937;">Administrador</h6>
-                    <p class="small text-muted mb-0">Você será o administrador da sua empresa</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom p-3 text-center">
+                        <div class="card-icon verde mx-auto mb-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-2">Gerencie usuários</h6>
+                        <p class="small text-muted mb-0">Crie e gerencie usuários da sua empresa</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom p-3 text-center">
+                        <div class="card-icon amarelo mx-auto mb-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-2">Período Trial</h6>
+                        <p class="small text-muted mb-0">Comece com 30 dias de teste grátis</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="stat-card p-3 text-center">
-                    <div class="stat-icon success d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <h6 class="fw-semibold mb-2" style="color: #1f2937;">Gerencie usuários</h6>
-                    <p class="small text-muted mb-0">Crie e gerencie usuários da sua empresa</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card p-3 text-center">
-                    <div class="stat-icon warning d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
-                        <i class="bi bi-clock"></i>
-                    </div>
-                    <h6 class="fw-semibold mb-2" style="color: #1f2937;">Período Trial</h6>
-                    <p class="small text-muted mb-0">Comece com 30 dias de teste grátis</p>
-                </div>
-            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
 
@@ -320,50 +508,41 @@
         const select = document.getElementById('ramo_id');
         const novoRamoField = document.getElementById('novoRamoField');
         
-        if (select.value === 'outro') {
+        if (select && select.value === 'outro') {
             novoRamoField.style.display = 'block';
             document.getElementById('novo_ramo').required = true;
-        } else {
+        } else if (select) {
             novoRamoField.style.display = 'none';
             document.getElementById('novo_ramo').required = false;
         }
     }
 
-    // Validação do formulário
-    (function() {
-        'use strict';
-        
-        const form = document.getElementById('usuarioForm');
-        
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            
-            // Validação de senha
-            const senha = document.getElementById('senha');
-            const confirmar = document.getElementById('confirmar_senha');
-            
-            if (senha.value !== confirmar.value) {
-                confirmar.setCustomValidity('As senhas não conferem');
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                confirmar.setCustomValidity('');
-            }
-            
-            form.classList.add('was-validated');
-        }, false);
-    })();
+    // Máscaras para telefone
+    function mascaraTelefone(input) {
+        let valor = input.value.replace(/\D/g, '');
+        if (valor.length <= 10) {
+            valor = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        } else {
+            valor = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        }
+        input.value = valor;
+    }
 
     // Máscara para CNPJ
-    function mascaraCNPJ(cnpj) {
-        const valor = cnpj.value.replace(/\D/g, '');
+    function mascaraCNPJ(input) {
+        let valor = input.value.replace(/\D/g, '');
         if (valor.length <= 14) {
-            cnpj.value = valor.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            valor = valor.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
         }
+        input.value = valor;
     }
+
+    // Aplicar máscaras
+    document.querySelectorAll('.telefone-mask, .celular-mask').forEach(input => {
+        input.addEventListener('input', function() {
+            mascaraTelefone(this);
+        });
+    });
 
     document.querySelectorAll('.cnpj-mask').forEach(input => {
         input.addEventListener('input', function() {
@@ -371,7 +550,8 @@
         });
     });
 
-    // Validação de força da senha
+    // Validação de força da senha (para novos usuários)
+    {% if not usuario %}
     const senhaInput = document.getElementById('senha');
     const strengthBar = document.getElementById('strengthBar');
     const strengthText = document.getElementById('strengthText');
@@ -384,52 +564,55 @@
         special: document.getElementById('req-special')
     };
 
-    senhaInput.addEventListener('input', function() {
-        const senha = this.value;
-        let forca = 0;
-        
-        const temLength = senha.length >= 8;
-        const temUpper = /[A-Z]/.test(senha);
-        const temLower = /[a-z]/.test(senha);
-        const temNumber = /[0-9]/.test(senha);
-        const temSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
-        
-        updateRequirement('length', temLength);
-        updateRequirement('upper', temUpper);
-        updateRequirement('lower', temLower);
-        updateRequirement('number', temNumber);
-        updateRequirement('special', temSpecial);
-        
-        if (temLength) forca += 20;
-        if (temUpper) forca += 20;
-        if (temLower) forca += 20;
-        if (temNumber) forca += 20;
-        if (temSpecial) forca += 20;
-        
-        strengthBar.style.width = forca + '%';
-        
-        if (forca === 0) {
-            strengthBar.className = 'progress-bar';
-            strengthText.textContent = 'Digite uma senha';
-        } else if (forca <= 40) {
-            strengthBar.className = 'progress-bar bg-danger';
-            strengthText.textContent = 'Fraca';
-        } else if (forca <= 60) {
-            strengthBar.className = 'progress-bar bg-warning';
-            strengthText.textContent = 'Média';
-        } else if (forca <= 80) {
-            strengthBar.className = 'progress-bar bg-info';
-            strengthText.textContent = 'Boa';
-        } else {
-            strengthBar.className = 'progress-bar bg-success';
-            strengthText.textContent = 'Forte';
-        }
-    });
+    if (senhaInput) {
+        senhaInput.addEventListener('input', function() {
+            const senha = this.value;
+            let forca = 0;
+            
+            const temLength = senha.length >= 8;
+            const temUpper = /[A-Z]/.test(senha);
+            const temLower = /[a-z]/.test(senha);
+            const temNumber = /[0-9]/.test(senha);
+            const temSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+            
+            updateRequirement('length', temLength);
+            updateRequirement('upper', temUpper);
+            updateRequirement('lower', temLower);
+            updateRequirement('number', temNumber);
+            updateRequirement('special', temSpecial);
+            
+            if (temLength) forca += 20;
+            if (temUpper) forca += 20;
+            if (temLower) forca += 20;
+            if (temNumber) forca += 20;
+            if (temSpecial) forca += 20;
+            
+            strengthBar.style.width = forca + '%';
+            
+            if (forca === 0) {
+                strengthBar.style.background = 'var(--cinza-claro)';
+                strengthText.textContent = 'Digite uma senha';
+            } else if (forca <= 40) {
+                strengthBar.style.background = 'var(--vermelho-principal)';
+                strengthText.textContent = 'Fraca';
+            } else if (forca <= 60) {
+                strengthBar.style.background = 'var(--amarelo-escuro)';
+                strengthText.textContent = 'Média';
+            } else if (forca <= 80) {
+                strengthBar.style.background = 'var(--azul-principal)';
+                strengthText.textContent = 'Boa';
+            } else {
+                strengthBar.style.background = 'var(--verde-principal)';
+                strengthText.textContent = 'Forte';
+            }
+        });
+    }
 
     function updateRequirement(req, met) {
         const element = requirements[req];
-        const icon = element.querySelector('i');
+        if (!element) return;
         
+        const icon = element.querySelector('i');
         if (met) {
             icon.className = 'bi bi-check-circle-fill text-success me-1';
             element.classList.add('text-success');
@@ -440,6 +623,7 @@
             element.classList.add('text-muted');
         }
     }
+    {% endif %}
 
     // Confirmar senha
     document.getElementById('confirmar_senha')?.addEventListener('input', function() {
@@ -456,38 +640,4 @@
         toggleNovoRamo();
     });
 </script>
-
-<style>
-    .text-white-80 {
-        color: rgba(255, 255, 255, 0.8);
-    }
-    
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    }
-    
-    .password-strength .progress {
-        border-radius: 10px;
-    }
-    
-    .was-validated .form-control:invalid,
-    .form-control.is-invalid {
-        border-color: #ef4444;
-        padding-right: calc(1.5em + 0.75rem);
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right calc(0.375em + 0.1875rem) center;
-        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-    }
-    
-    .was-validated .form-control:valid,
-    .form-control.is-valid {
-        border-color: #10b981;
-        padding-right: calc(1.5em + 0.75rem);
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right calc(0.375em + 0.1875rem) center;
-        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-    }
-</style>
 {% endblock %}

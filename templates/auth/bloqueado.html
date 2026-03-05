@@ -6,43 +6,129 @@
 {% block content %}
 <div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="stat-card p-0 overflow-hidden">
-            <div style="height: 6px; background: linear-gradient(90deg, #ef4444 0%, #dc2626 50%, #ef4444 100%);"></div>
+        <!-- Card de Bloqueio -->
+        <div class="card-custom p-0 overflow-hidden fade-in">
+            <!-- Barra superior vermelha -->
+            <div style="height: 6px; background: linear-gradient(90deg, var(--vermelho-principal), var(--vermelho-escuro));"></div>
             
-            <div class="p-5 text-center">
-                <div class="stat-icon danger d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; font-size: 2.5rem;">
-                    <i class="bi bi-shield"></i>
+            <div class="p-4 p-lg-5 text-center">
+                <!-- Ícone de alerta com animação -->
+                <div class="position-relative d-inline-block mb-4">
+                    <div class="card-icon vermelho" style="width: 100px; height: 100px; font-size: 3rem; animation: shake 0.5s infinite;">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="background: var(--vermelho-escuro) !important;">
+                        <i class="bi bi-exclamation-lg"></i>
+                    </span>
                 </div>
                 
-                <h2 class="fw-bold mb-3" style="color: #1f2937;">Acesso Bloqueado</h2>
+                <h2 class="fw-bold mb-3" style="color: var(--cinza-texto);">
+                    <i class="bi bi-ban me-2" style="color: var(--vermelho-principal);"></i>
+                    Acesso Bloqueado
+                </h2>
                 
-                <div class="p-3 mb-4" style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 12px; text-align: left;">
-                    <p class="small mb-2" style="color: #ef4444;">
-                        <span class="fw-medium">IP:</span> 
-                        <span class="font-monospace">{{ ip }}</span>
-                    </p>
-                    <p class="small mb-2" style="color: #ef4444;">
-                        <span class="fw-medium">Motivo:</span> 
-                        {{ motivo|default('Múltiplas tentativas de login inválidas') }}
-                    </p>
-                    <p class="small mb-0" style="color: #ef4444;">
-                        <span class="fw-medium">Tempo restante:</span> 
-                        <span class="fw-bold">{{ minutos }} minutos</span>
-                    </p>
+                <!-- Informações do bloqueio -->
+                <div class="p-4 mb-4 text-start" style="background: var(--vermelho-claro); border-radius: 16px;">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-shield-fill fs-4 me-3" style="color: var(--vermelho-principal);"></i>
+                        <div>
+                            <small class="text-muted d-block">IP Bloqueado</small>
+                            <strong class="font-monospace">{{ ip }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3" style="color: var(--amarelo-escuro);"></i>
+                        <div>
+                            <small class="text-muted d-block">Motivo</small>
+                            <strong>{{ motivo|default('Múltiplas tentativas de login inválidas') }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-hourglass-split fs-4 me-3" style="color: var(--azul-principal);"></i>
+                        <div>
+                            <small class="text-muted d-block">Tempo restante</small>
+                            <strong class="text-danger">{{ minutos }} minutos</strong>
+                        </div>
+                    </div>
                 </div>
                 
-                <p class="small mb-4" style="color: #6b7280;">
-                    Após o tempo de bloqueio, tente novamente. 
-                    Se o problema persistir, contate o administrador do sistema.
+                <!-- Timer visual -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            Desbloqueio em:
+                        </small>
+                        <small class="fw-bold" id="timer">{{ minutos }}:00</small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div id="timerBar" class="progress-bar bg-danger" role="progressbar" style="width: 100%;"></div>
+                    </div>
+                </div>
+                
+                <p class="text-muted mb-4">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Após o tempo de bloqueio, tente novamente. Se o problema persistir, contate o administrador.
                 </p>
                 
-                <a href="{{ url_for('login') }}" class="btn w-100 py-2 d-flex align-items-center justify-content-center gap-2"
-                   style="background: #3b82f6; color: white; border: none;">
-                    <i class="bi bi-arrow-left"></i>
-                    Voltar ao Login
-                </a>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary py-3 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-arrow-left-circle"></i>
+                        Voltar ao Login
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary py-2" onclick="window.location.reload()">
+                        <i class="bi bi-arrow-repeat me-2"></i>
+                        Verificar novamente
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+</style>
+
+<script>
+    // Timer regressivo
+    let minutosRestantes = {{ minutos }};
+    let segundosRestantes = 0;
+    
+    function updateTimer() {
+        const timerElement = document.getElementById('timer');
+        const timerBar = document.getElementById('timerBar');
+        
+        if (segundosRestantes === 0) {
+            if (minutosRestantes === 0) {
+                // Tempo esgotado
+                timerElement.textContent = '00:00';
+                timerBar.style.width = '0%';
+                return;
+            }
+            minutosRestantes--;
+            segundosRestantes = 59;
+        } else {
+            segundosRestantes--;
+        }
+        
+        const minutosStr = minutosRestantes.toString().padStart(2, '0');
+        const segundosStr = segundosRestantes.toString().padStart(2, '0');
+        timerElement.textContent = `${minutosStr}:${segundosStr}`;
+        
+        // Calcula porcentagem restante
+        const totalSegundos = {{ minutos }} * 60;
+        const segundosAtuais = minutosRestantes * 60 + segundosRestantes;
+        const porcentagem = (segundosAtuais / totalSegundos) * 100;
+        timerBar.style.width = porcentagem + '%';
+    }
+    
+    setInterval(updateTimer, 1000);
+</script>
 {% endblock %}

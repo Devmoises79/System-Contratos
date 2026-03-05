@@ -4,21 +4,20 @@
 {% block title %}Contratos - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="fade-in">
     <!-- Cabeçalho -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Contratos</h1>
-            <p style="color: #6b7280;">Gerencie todos os contratos da empresa</p>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Contratos</h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie todos os contratos da empresa</p>
         </div>
-        <a href="{{ url_for('contrato_novo') }}" class="btn d-flex align-items-center gap-2"
-           style="background: #3b82f6; color: white; border: none;">
-            <i class="bi bi-plus"></i>
+        <a href="{{ url_for('contrato_novo') }}" class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 500;">
+            <i class="bi bi-plus-circle me-2"></i>
             Novo Contrato
         </a>
     </div>
 
-    <!-- Cards de Resumo -->
+    <!-- Cards de Resumo por Status -->
     <div class="row g-4 mb-4">
         {% set status_count = {
             'rascunho': contratos|selectattr('status', 'equalto', 'rascunho')|list|length,
@@ -27,60 +26,60 @@
             'cancelado': contratos|selectattr('status', 'equalto', 'cancelado')|list|length
         } %}
         
-        <div class="col-6 col-md-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="small" style="color: #6b7280;">Rascunho</span>
-                    <span class="fw-bold" style="color: #f59e0b; font-size: 1.5rem;">{{ status_count.rascunho }}</span>
+        <div class="col-md-3">
+            <div class="card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: var(--cinza-texto); opacity: 0.7;">Rascunho</span>
+                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--amarelo-escuro);">{{ status_count.rascunho }}</span>
                 </div>
             </div>
         </div>
         
-        <div class="col-6 col-md-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="small" style="color: #6b7280;">Ativo</span>
-                    <span class="fw-bold" style="color: #10b981; font-size: 1.5rem;">{{ status_count.ativo }}</span>
+        <div class="col-md-3">
+            <div class="card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: var(--cinza-texto); opacity: 0.7;">Ativo</span>
+                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--azul-principal);">{{ status_count.ativo }}</span>
                 </div>
             </div>
         </div>
         
-        <div class="col-6 col-md-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="small" style="color: #6b7280;">Encerrado</span>
-                    <span class="fw-bold" style="color: #6b7280; font-size: 1.5rem;">{{ status_count.encerrado }}</span>
+        <div class="col-md-3">
+            <div class="card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: var(--cinza-texto); opacity: 0.7;">Encerrado</span>
+                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">{{ status_count.encerrado }}</span>
                 </div>
             </div>
         </div>
         
-        <div class="col-6 col-md-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="small" style="color: #6b7280;">Cancelado</span>
-                    <span class="fw-bold" style="color: #ef4444; font-size: 1.5rem;">{{ status_count.cancelado }}</span>
+        <div class="col-md-3">
+            <div class="card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: var(--cinza-texto); opacity: 0.7;">Cancelado</span>
+                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--vermelho-principal);">{{ status_count.cancelado }}</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filtros -->
-    <div class="stat-card mb-4">
+    <div class="card-custom p-4 mb-4">
         <form method="GET" class="row g-3">
-            <div class="col-12 col-md-6">
+            <div class="col-md-5">
                 <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                        <i class="bi bi-search" style="color: #6b7280;"></i>
+                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                        <i class="bi bi-search" style="color: var(--azul-principal);"></i>
                     </span>
-                    <input type="text" class="form-control border-start-0 ps-0" name="busca" 
-                           style="border-color: #e5e7eb;"
+                    <input type="text" class="form-control border-start-0" name="busca" 
+                           style="border-color: var(--cinza-claro);"
                            placeholder="Buscar por número, contratante ou contratada..."
                            value="{{ request.args.get('busca', '') }}">
                 </div>
             </div>
             
-            <div class="col-12 col-md-4">
-                <select name="status" class="form-select" style="border-color: #e5e7eb;">
+            <div class="col-md-4">
+                <select name="status" class="form-select" style="border-color: var(--cinza-claro);">
                     <option value="">Todos os status</option>
                     <option value="rascunho" {% if request.args.get('status') == 'rascunho' %}selected{% endif %}>Rascunho</option>
                     <option value="ativo" {% if request.args.get('status') == 'ativo' %}selected{% endif %}>Ativo</option>
@@ -89,8 +88,8 @@
                 </select>
             </div>
             
-            <div class="col-12 col-md-2">
-                <button type="submit" class="btn w-100" style="background: #3b82f6; color: white; border: none;">
+            <div class="col-md-3">
+                <button type="submit" class="btn w-100" style="background: var(--azul-principal); color: white;">
                     Filtrar
                 </button>
             </div>
@@ -98,61 +97,61 @@
     </div>
 
     <!-- Tabela de Contratos -->
-    <div class="stat-card p-0 overflow-hidden">
+    <div class="card-custom p-0 overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: #f3f4f6;">
+            <table class="table" style="border-collapse: separate; border-spacing: 0 8px; margin: 0;">
+                <thead style="background: var(--branco-fundo);">
                     <tr>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Nº Contrato</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Contratante</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Contratada</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Valor</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Status</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Data</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Ações</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Nº Contrato</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratante</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratada</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Data</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for contrato in contratos %}
-                    <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td class="px-4 py-3">
-                            <span style="color: #3b82f6; font-weight: 500;">{{ contrato.numero_contrato }}</span>
+                    <tr style="background: white; border-radius: 12px;">
+                        <td style="padding: 1rem;">
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
+                                {{ contrato.numero_contrato }}
+                            </a>
                         </td>
-                        <td class="px-4 py-3">
+                        <td style="padding: 1rem;">
                             <div class="d-flex align-items-center">
-                                <div class="stat-icon primary me-2" style="width: 32px; height: 32px; font-size: 0.875rem;">
-                                    {{ contrato.contratante_nome[:1] }}
+                                <div style="width: 32px; height: 32px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                    <span style="color: var(--azul-principal); font-weight: 600;">{{ contrato.contratante_nome[:1] }}</span>
                                 </div>
-                                <span style="color: #1f2937;">{{ contrato.contratante_nome }}</span>
+                                {{ contrato.contratante_nome }}
                             </div>
                         </td>
-                        <td class="px-4 py-3">
+                        <td style="padding: 1rem;">
                             <div class="d-flex align-items-center">
-                                <div class="stat-icon secondary me-2" style="width: 32px; height: 32px; font-size: 0.875rem;">
-                                    {{ contrato.contratada_nome[:1] }}
+                                <div style="width: 32px; height: 32px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                    <span style="color: var(--amarelo-escuro); font-weight: 600;">{{ contrato.contratada_nome[:1] }}</span>
                                 </div>
-                                <span style="color: #1f2937;">{{ contrato.contratada_nome }}</span>
+                                {{ contrato.contratada_nome }}
                             </div>
                         </td>
-                        <td class="px-4 py-3 fw-bold" style="color: #1f2937;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
-                        <td class="px-4 py-3">
-                            <span class="badge 
-                                {% if contrato.status == 'ativo' %}badge-active
-                                {% elif contrato.status == 'rascunho' %}badge-trial
-                                {% elif contrato.status == 'encerrado' %}" style="background: #f3f4f6; color: #6b7280;"
-                                {% else %}badge-inactive{% endif %}">
+                        <td style="padding: 1rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        <td style="padding: 1rem;">
+                            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% elif contrato.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
+                                         color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% elif contrato.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
+                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
                                 {{ contrato.status|capitalize }}
                             </span>
                         </td>
-                        <td class="px-4 py-3" style="color: #6b7280;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
-                        <td class="px-4 py-3">
+                        <td style="padding: 1rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
+                        <td style="padding: 1rem;">
                             <div class="d-flex gap-2">
-                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none" style="color: #3b82f6;" title="Ver detalhes">
+                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none;" title="Ver detalhes">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 {% if contrato.pdf_path %}
                                 <a href="{{ url_for('static', filename=contrato.pdf_path.replace('static/', '')) }}" target="_blank" 
-                                   class="text-decoration-none" style="color: #10b981;" title="Download PDF">
+                                   style="color: var(--azul-principal); text-decoration: none;" title="Download PDF">
                                     <i class="bi bi-file-pdf"></i>
                                 </a>
                                 {% endif %}
@@ -161,14 +160,9 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="text-center py-5">
-                            <div class="stat-icon primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                <i class="bi bi-file-text"></i>
-                            </div>
-                            <p style="color: #6b7280;">Nenhum contrato encontrado</p>
-                            <a href="{{ url_for('contrato_novo') }}" class="btn btn-link text-decoration-none" style="color: #3b82f6;">
-                                Criar primeiro contrato
-                            </a>
+                        <td colspan="7" class="text-center py-5" style="color: var(--cinza-texto); opacity: 0.7;">
+                            <i class="bi bi-file-text" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            Nenhum contrato encontrado
                         </td>
                     </tr>
                     {% endfor %}

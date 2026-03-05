@@ -4,143 +4,193 @@
 {% block title %}Login - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
-    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <!-- Card de Login - estilo igual ao dashboard -->
-        <div class="stat-card p-0 overflow-hidden">
-            <!-- Barra superior gradiente igual aos cards do dashboard -->
-            <div style="height: 6px; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);"></div>
-            
-            <div class="p-5">
-                <!-- Logo e título -->
-                <div class="text-center mb-4">
-                    <div class="stat-icon primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
-                        V
+<div class="login-container">
+    <div class="login-card">
+        <!-- Card de Login Compacto -->
+        <div class="card-custom p-4 fade-in">
+            <!-- Logo -->
+            <div class="text-center mb-3">
+                <div class="logo-container mx-auto" style="width: 50px; height: 50px;">
+                    <span class="logo-text" style="font-size: 1.8rem;">V</span>
+                </div>
+                <h4 class="fw-bold mt-2 mb-0" style="color: var(--cinza-texto);">
+                    Valida<span style="color: var(--azul-principal);">Py</span>
+                </h4>
+                <p class="small text-muted mt-1">Sistema de Gerenciamento de Contratos</p>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form method="POST" action="{{ url_for('login') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                
+                <!-- Campo E-mail -->
+                <div class="mb-3">
+                    <label class="form-label small fw-medium mb-1">
+                        <i class="fas fa-envelope fa-sm me-1" style="color: var(--azul-principal);"></i>
+                        E-mail
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-envelope fa-sm" style="color: var(--azul-principal);"></i>
+                        </span>
+                        <input type="email" class="form-control border-start-0 py-2" name="email" 
+                               placeholder="seu@email.com" value="{{ request.form.get('email', '') }}" required>
                     </div>
-                    <h2 class="fw-bold" style="color: #1f2937;">Bem-vindo ao <span style="color: #3b82f6;">ValidaPy</span></h2>
-                    <p class="small" style="color: #6b7280;">Sistema de Gerenciamento de Contratos</p>
                 </div>
 
-                <!-- Formulário de Login -->
-                <form method="POST" action="{{ url_for('login') }}">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                    
-                    <!-- Campo Email -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-medium" style="color: #1f2937;">E-mail</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                <i class="bi bi-envelope" style="color: #6b7280;"></i>
-                            </span>
-                            <input type="email" class="form-control border-start-0 ps-0" name="email" 
-                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
-                                   placeholder="seu@email.com" value="{{ request.form.get('email', '') }}" required>
-                        </div>
+                <!-- Campo Senha -->
+                <div class="mb-3">
+                    <label class="form-label small fw-medium mb-1">
+                        <i class="fas fa-lock fa-sm me-1" style="color: var(--vermelho-principal);"></i>
+                        Senha
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-lock fa-sm" style="color: var(--vermelho-principal);"></i>
+                        </span>
+                        <input type="password" class="form-control border-start-0 py-2" name="senha" 
+                               placeholder="••••••••" required id="senha">
+                        <button class="btn btn-outline-secondary border-start-0 py-2" type="button" onclick="toggleSenha()">
+                            <i class="fas fa-eye fa-sm" id="toggleSenhaIcon"></i>
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Campo Senha -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-medium" style="color: #1f2937;">Senha</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0" style="background: #f3f4f6; border-color: #e5e7eb;">
-                                <i class="bi bi-lock" style="color: #6b7280;"></i>
-                            </span>
-                            <input type="password" class="form-control border-start-0 ps-0" name="senha" 
-                                   style="border-color: #e5e7eb; background: white; color: #1f2937;"
-                                   placeholder="••••••••" required>
-                        </div>
+                <!-- Opções em linha -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="lembrar" name="lembrar" 
+                               style="border-color: var(--azul-principal);">
+                        <label class="form-check-label small" for="lembrar">
+                            Lembrar
+                        </label>
                     </div>
-
-                    <!-- Opções adicionais -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="lembrar" name="lembrar" 
-                                   style="border-color: #e5e7eb;">
-                            <label class="form-check-label small" for="lembrar" style="color: #6b7280;">Lembrar de mim</label>
-                        </div>
-                        <a href="{{ url_for('recuperar_senha') }}" class="small text-decoration-none" style="color: #3b82f6;">
-                            Esqueceu a senha?
-                        </a>
-                    </div>
-
-                    <!-- Mensagens flash -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" 
-                                     style="background: {% if category == 'danger' %}#fee2e2{% else %}#d1fae5{% endif %}; 
-                                            border: 1px solid {% if category == 'danger' %}#fecaca{% else %}#a7f3d0{% endif %}; 
-                                            color: {% if category == 'danger' %}#ef4444{% else %}#10b981{% endif %};">
-                                    <i class="bi bi-{{ 'exclamation-circle' if category == 'danger' else 'check-circle' }} me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-                    <!-- Botão de Login - estilo igual aos botões do dashboard -->
-                    <button type="submit" class="btn w-100 py-2 mb-3 d-flex align-items-center justify-content-center gap-2"
-                            style="background: #3b82f6; color: white; border: none;">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                        Entrar no Sistema
-                    </button>
-                </form>
-
-                <!-- Link para cadastro -->
-                <div class="text-center mt-4 pt-3" style="border-top: 1px solid #e5e7eb;">
-                    <p class="small mb-2" style="color: #6b7280;">
-                        Não tem uma conta?
-                    </p>
-                    <a href="{{ url_for('cadastro_usuario') }}" class="btn w-100 py-2 d-flex align-items-center justify-content-center gap-2"
-                       style="background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb;">
-                        <i class="bi bi-person-plus"></i>
-                        Criar nova conta
+                    <a href="{{ url_for('recuperar_senha') }}" class="small text-decoration-none" style="color: var(--azul-principal);">
+                        Esqueceu a senha?
                     </a>
                 </div>
 
-                <!-- Rodapé -->
-                <div class="text-center mt-4">
-                    <p class="small mb-2" style="color: #9ca3af;">
-                        &copy; 2024 ValidaPy - Todos os direitos reservados
-                    </p>
-                    <div class="d-flex justify-content-center gap-3 small">
-                        <a href="#" class="text-decoration-none" style="color: #6b7280;">Termos de uso</a>
-                        <span style="color: #e5e7eb;">•</span>
-                        <a href="#" class="text-decoration-none" style="color: #6b7280;">Privacidade</a>
-                        <span style="color: #e5e7eb;">•</span>
-                        <a href="#" class="text-decoration-none" style="color: #6b7280;">Suporte</a>
-                    </div>
-                    <p class="small mt-2" style="color: #9ca3af;">
-                        Versão 1.0.0
-                    </p>
+                <!-- Mensagens flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{% if category == 'danger' %}danger{% else %}success{% endif %} py-2 mb-3 small" role="alert">
+                                <i class="fas fa-{% if category == 'danger' %}exclamation-triangle{% else %}check-circle{% endif %} fa-sm me-2"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Botão de Login -->
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                    <i class="fas fa-sign-in-alt fa-sm me-2"></i>
+                    Entrar
+                </button>
+            </form>
+
+            <!-- Link para cadastro -->
+            <div class="text-center mb-3">
+                <p class="small text-muted mb-2">Não tem uma conta?</p>
+                <a href="{{ url_for('cadastro_usuario') }}" class="btn btn-outline-primary w-100 py-2">
+                    <i class="fas fa-user-plus fa-sm me-2"></i>
+                    Criar conta
+                </a>
+            </div>
+
+            <!-- Recursos do sistema em linha compacta -->
+            <div class="d-flex justify-content-center gap-3 pt-2" style="border-top: 1px solid var(--cinza-claro);">
+                <div class="text-center">
+                    <i class="fas fa-shield-alt fa-sm" style="color: var(--azul-principal);"></i>
+                    <small class="d-block text-muted" style="font-size: 0.65rem;">Seguro</small>
                 </div>
+                <div class="text-center">
+                    <i class="fas fa-clock fa-sm" style="color: var(--verde-principal);"></i>
+                    <small class="d-block text-muted" style="font-size: 0.65rem;">24/7</small>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-headset fa-sm" style="color: var(--amarelo-escuro);"></i>
+                    <small class="d-block text-muted" style="font-size: 0.65rem;">Suporte</small>
+                </div>
+            </div>
+
+            <!-- Rodapé compacto -->
+            <div class="text-center mt-3">
+                <small class="text-muted" style="font-size: 0.6rem; opacity: 0.5;">
+                    <i class="far fa-copyright fa-xs me-1"></i>
+                    2024 ValidaPy
+                </small>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Script para efeitos visuais -->
-<script>
-    document.getElementById('email')?.focus();
-
-    // Animação nos placeholders
-    const emailInput = document.getElementById('email');
-    if (emailInput && !emailInput.value) {
-        const placeholders = ['usuario@empresa.com', 'admin@sistema.com', 'gestor@empresa.com'];
-        let index = 0;
-        setInterval(() => {
-            emailInput.placeholder = placeholders[index];
-            index = (index + 1) % placeholders.length;
-        }, 2000);
+<style>
+    /* Ajustes específicos para o login */
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
     }
 
-    // Hover effect no botão
-    document.querySelector('button[type="submit"]').addEventListener('mouseover', function() {
-        this.style.background = '#2563eb';
-    });
-    document.querySelector('button[type="submit"]').addEventListener('mouseout', function() {
-        this.style.background = '#3b82f6';
-    });
+    .login-card {
+        max-width: 360px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .card-custom {
+        padding: 1.5rem !important;
+    }
+
+    /* Inputs mais compactos */
+    .input-group-sm .form-control,
+    .input-group-sm .input-group-text,
+    .input-group-sm .btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .form-check-input {
+        width: 0.9rem;
+        height: 0.9rem;
+        margin-top: 0.15rem;
+    }
+
+    .form-check-label {
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+    }
+
+    .logo-container {
+        width: 45px;
+        height: 45px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+    }
+</style>
+
+<script>
+    function toggleSenha() {
+        const senhaInput = document.getElementById('senha');
+        const icon = document.getElementById('toggleSenhaIcon');
+        
+        if (senhaInput.type === 'password') {
+            senhaInput.type = 'text';
+            icon.className = 'fas fa-eye-slash fa-sm';
+        } else {
+            senhaInput.type = 'password';
+            icon.className = 'fas fa-eye fa-sm';
+        }
+    }
+
+    document.getElementById('email')?.focus();
 </script>
 {% endblock %}

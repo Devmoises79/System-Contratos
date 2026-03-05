@@ -4,14 +4,15 @@
 {% block title %}Dashboard Gestor - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="fade-in">
     <!-- Cabeçalho -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Dashboard do Gestor</h1>
-            <p style="color: #6b7280;">Visão geral dos contratos e aprovações</p>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Dashboard do Gestor</h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Visão geral dos contratos e aprovações</p>
         </div>
-        <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white;">
+        <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.9rem; font-weight: 500;">
+            <i class="bi bi-person-badge me-1"></i>
             Gestor
         </span>
     </div>
@@ -19,89 +20,86 @@
     <!-- Cards de Estatísticas -->
     <div class="row g-4 mb-4">
         <div class="col-md-4">
-            <div class="stat-card">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="stat-icon primary">
-                        <i class="bi bi-file-text"></i>
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-file-text" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
                     </div>
-                    <span class="small text-uppercase" style="color: #6b7280;">TOTAL DE CONTRATOS</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px;">TOTAL DE CONTRATOS</span>
                 </div>
-                <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ stats.total }}</span>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ stats.total }}</div>
             </div>
         </div>
         
         <div class="col-md-4">
-            <div class="stat-card">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="stat-icon success">
-                        <i class="bi bi-coin"></i>
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--amarelo-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-coin" style="font-size: 1.5rem; color: var(--amarelo-escuro);"></i>
                     </div>
-                    <span class="small text-uppercase" style="color: #6b7280;">VALOR TOTAL</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px;">VALOR TOTAL</span>
                 </div>
-                <span class="fw-bold" style="color: #1f2937; font-size: 2rem;">R$ {{ "%.2f"|format(stats.total_valor) }}</span>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.total_valor) }}</div>
             </div>
         </div>
         
         <div class="col-md-4">
-            <div class="stat-card">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="stat-icon warning">
-                        <i class="bi bi-hourglass-split"></i>
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--vermelho-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-hourglass-split" style="font-size: 1.5rem; color: var(--vermelho-principal);"></i>
                     </div>
-                    <span class="small text-uppercase" style="color: #6b7280;">PENDENTES</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px;">PENDENTES</span>
                 </div>
-                <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ contratos_pendentes|length }}</span>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ contratos_pendentes|length }}</div>
             </div>
         </div>
     </div>
 
     <!-- Contratos Pendentes -->
-    <div class="stat-card p-0 overflow-hidden">
-        <div class="p-4 d-flex align-items-center justify-content-between" style="border-bottom: 1px solid #e5e7eb;">
-            <h5 class="fw-semibold mb-0" style="color: #1f2937;">Contratos Pendentes de Aprovação</h5>
-            <a href="{{ url_for('listar_contratos') }}" class="small text-decoration-none" style="color: #3b82f6;">
+    <div class="card-custom p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin: 0;">Contratos Pendentes de Aprovação</h5>
+            <a href="{{ url_for('listar_contratos') }}" style="color: var(--azul-principal); text-decoration: none;">
                 Ver todos <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
         
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: #f3f4f6;">
+            <table class="table" style="border-collapse: separate; border-spacing: 0 8px;">
+                <thead>
                     <tr>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Nº Contrato</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Contratante</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Valor</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Criado por</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Data</th>
-                        <th class="px-4 py-3 small fw-semibold" style="color: #6b7280;">Ações</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Nº Contrato</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratante</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Data</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for contrato in contratos_pendentes %}
-                    <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td class="px-4 py-3">
-                            <span style="color: #3b82f6; font-weight: 500;">{{ contrato.numero_contrato }}</span>
+                    <tr style="background: var(--branco-fundo); border-radius: 12px;">
+                        <td style="padding: 1rem 0.5rem;">
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
+                                {{ contrato.numero_contrato }}
+                            </a>
                         </td>
-                        <td class="px-4 py-3" style="color: #1f2937;">{{ contrato.contratante_nome }}</td>
-                        <td class="px-4 py-3 fw-medium" style="color: #1f2937;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
-                        <td class="px-4 py-3" style="color: #6b7280;">{{ contrato.criado_por_nome or 'N/A' }}</td>
-                        <td class="px-4 py-3" style="color: #6b7280;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
-                        <td class="px-4 py-3">
-                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none me-2" style="color: #3b82f6;">
+                        <td style="padding: 1rem 0.5rem;">{{ contrato.contratante_nome }}</td>
+                        <td style="padding: 1rem 0.5rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
+                        <td style="padding: 1rem 0.5rem;">
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; margin-right: 0.5rem;">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <button class="btn btn-sm p-0 border-0" style="color: #10b981;">
+                            <button style="background: transparent; border: none; color: var(--azul-principal);">
                                 <i class="bi bi-check-circle"></i>
                             </button>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <div class="stat-icon success d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-check-circle"></i>
-                            </div>
-                            <p style="color: #6b7280;">Nenhum contrato pendente de aprovação.</p>
+                        <td colspan="5" class="text-center py-4" style="color: var(--cinza-texto); opacity: 0.7;">
+                            Nenhum contrato pendente de aprovação.
                         </td>
                     </tr>
                     {% endfor %}
@@ -111,16 +109,15 @@
     </div>
 
     <!-- Gráfico de Contratos por Mês -->
-    <div class="stat-card">
-        <h5 class="fw-semibold mb-4" style="color: #1f2937;">Contratos por Mês</h5>
+    <div class="card-custom p-4">
+        <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Contratos por Mês</h5>
         
-        <div class="position-relative" style="height: 250px;">
-            <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-around align-items-end px-4" style="height: 200px;">
+        <div class="position-relative" style="height: 200px;">
+            <div class="d-flex justify-content-around align-items-end h-100">
                 {% for mes in stats.por_mes[:6] %}
-                <div class="d-flex flex-column align-items-center">
-                    <div class="chart-bar" style="height: {{ mes.quantidade * 20 }}px; width: 40px;"></div>
-                    <span class="small mt-2" style="color: #6b7280;">{{ mes.mes }}</span>
-                    <span class="small fw-bold" style="color: #1f2937;">{{ mes.quantidade }}</span>
+                <div class="d-flex flex-column align-items-center" style="width: 60px;">
+                    <div style="height: {{ mes.quantidade * 15 }}px; width: 30px; background: var(--azul-principal); border-radius: 4px 4px 0 0;"></div>
+                    <span style="margin-top: 8px; font-size: 0.9rem;">{{ mes.mes }}</span>
                 </div>
                 {% endfor %}
             </div>

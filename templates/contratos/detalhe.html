@@ -4,33 +4,30 @@
 {% block title %}Contrato {{ contrato.numero_contrato }} - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="fade-in">
     <!-- Cabeçalho -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div class="d-flex align-items-center gap-3">
-            <a href="{{ url_for('listar_contratos') }}" class="text-decoration-none" style="color: #6b7280;">
+            <a href="{{ url_for('listar_contratos') }}" style="color: var(--cinza-texto); text-decoration: none;">
                 <i class="bi bi-arrow-left fs-4"></i>
             </a>
             <div>
-                <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Contrato {{ contrato.numero_contrato }}</h1>
-                <p style="color: #6b7280;">Criado em {{ contrato.data_criacao.strftime('%d/%m/%Y') }}</p>
+                <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Contrato {{ contrato.numero_contrato }}</h1>
+                <p style="color: var(--cinza-texto); opacity: 0.7;">Criado em {{ contrato.data_criacao.strftime('%d/%m/%Y') }}</p>
             </div>
         </div>
         
         <div class="d-flex align-items-center gap-2">
-            <span class="badge 
-                {% if contrato.status == 'ativo' %}badge-active
-                {% elif contrato.status == 'rascunho' %}badge-trial
-                {% elif contrato.status == 'encerrado' %}" style="background: #f3f4f6; color: #6b7280;"
-                {% else %}badge-inactive{% endif %} px-3 py-2">
+            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% elif contrato.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
+                         color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% elif contrato.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
+                         padding: 0.5rem 1rem; border-radius: 30px; font-weight: 500;">
                 {{ contrato.status|capitalize }}
             </span>
             
             {% if contrato.pdf_path %}
             <a href="{{ url_for('static', filename=contrato.pdf_path.replace('static/', '')) }}" target="_blank"
-               class="btn d-flex align-items-center gap-2"
-               style="background: #10b981; color: white; border: none;">
-                <i class="bi bi-file-pdf"></i>
+               class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none;">
+                <i class="bi bi-file-pdf me-2"></i>
                 Download PDF
             </a>
             {% endif %}
@@ -38,17 +35,17 @@
     </div>
 
     <!-- Card Principal -->
-    <div class="stat-card p-0 overflow-hidden">
+    <div class="card-custom p-0 overflow-hidden">
         <!-- Cabeçalho do Contrato -->
-        <div class="p-4" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white;">
+        <div style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); color: white; padding: 2rem;">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <h3 class="fw-bold mb-2">{{ contrato.contratante_nome }}</h3>
-                    <p class="mb-0" style="opacity: 0.9;">contratante</p>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem;">{{ contrato.contratante_nome }}</h3>
+                    <p style="opacity: 0.9;">contratante</p>
                 </div>
                 <i class="bi bi-handshake" style="font-size: 3rem; opacity: 0.3;"></i>
             </div>
-            <div class="d-flex gap-4 mt-3 small">
+            <div class="d-flex gap-4 mt-3">
                 <span><i class="bi bi-calendar me-2"></i>Início: {{ contrato.data_inicio or 'Não definido' }}</span>
                 <span><i class="bi bi-calendar-check me-2"></i>Término: {{ contrato.data_fim or 'Não definido' }}</span>
                 <span><i class="bi bi-clock me-2"></i>Prazo: {{ contrato.prazo_dias }} dias</span>
@@ -57,41 +54,34 @@
 
         <!-- Informações do Contrato -->
         <div class="p-4 p-lg-5">
-                       <!-- Grid de Partes -->
+            <!-- Grid de Partes -->
             <div class="row g-4 mb-4">
                 <!-- Contratante -->
                 <div class="col-md-6">
-                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
-                        <h6 class="small fw-semibold text-uppercase mb-3 d-flex align-items-center" style="color: #6b7280;">
-                            <div class="stat-icon primary me-2" style="width: 24px; height: 24px; font-size: 0.75rem;">
-                                <i class="bi bi-person"></i>
-                            </div>
+                    <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
+                        <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
+                            <span style="width: 28px; height: 28px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                                <i class="bi bi-person" style="color: var(--azul-principal);"></i>
+                            </span>
                             CONTRATANTE
                         </h6>
                         
-                        <div class="mb-2">
-                            <span class="small" style="color: #6b7280;">Nome / Razão Social</span>
-                            <p class="fw-medium mb-0" style="color: #1f2937;">{{ contrato.contratante_nome }}</p>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Nome / Razão Social</div>
+                            <div style="font-weight: 500;">{{ contrato.contratante_nome }}</div>
                         </div>
                         
                         {% if contrato.contratante_cnpj %}
-                        <div class="mb-2">
-                            <span class="small" style="color: #6b7280;">CNPJ/CPF</span>
-                            <p class="small mb-0" style="color: #1f2937;">{{ contrato.contratante_cnpj }}</p>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">CNPJ/CPF</div>
+                            <div>{{ contrato.contratante_cnpj }}</div>
                         </div>
                         {% endif %}
                         
                         {% if contrato.contratante_email %}
-                        <div class="mb-2">
-                            <span class="small" style="color: #6b7280;">Email</span>
-                            <p class="small mb-0" style="color: #1f2937;">{{ contrato.contratante_email }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if contrato.contratante_telefone %}
-                        <div>
-                            <span class="small" style="color: #6b7280;">Telefone</span>
-                            <p class="small mb-0" style="color: #1f2937;">{{ contrato.contratante_telefone }}</p>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Email</div>
+                            <div>{{ contrato.contratante_email }}</div>
                         </div>
                         {% endif %}
                     </div>
@@ -99,30 +89,30 @@
 
                 <!-- Contratada -->
                 <div class="col-md-6">
-                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
-                        <h6 class="small fw-semibold text-uppercase mb-3 d-flex align-items-center" style="color: #6b7280;">
-                            <div class="stat-icon success me-2" style="width: 24px; height: 24px; font-size: 0.75rem;">
-                                <i class="bi bi-building"></i>
-                            </div>
+                    <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
+                        <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
+                            <span style="width: 28px; height: 28px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                                <i class="bi bi-building" style="color: var(--amarelo-escuro);"></i>
+                            </span>
                             CONTRATADA
                         </h6>
                         
-                        <div class="mb-2">
-                            <span class="small" style="color: #6b7280;">Nome / Razão Social</span>
-                            <p class="fw-medium mb-0" style="color: #1f2937;">{{ contrato.contratada_nome }}</p>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Nome / Razão Social</div>
+                            <div style="font-weight: 500;">{{ contrato.contratada_nome }}</div>
                         </div>
                         
                         {% if contrato.contratada_cnpj %}
-                        <div class="mb-2">
-                            <span class="small" style="color: #6b7280;">CNPJ/CPF</span>
-                            <p class="small mb-0" style="color: #1f2937;">{{ contrato.contratada_cnpj }}</p>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">CNPJ/CPF</div>
+                            <div>{{ contrato.contratada_cnpj }}</div>
                         </div>
                         {% endif %}
                         
                         {% if contrato.contratada_email %}
                         <div>
-                            <span class="small" style="color: #6b7280;">Email</span>
-                            <p class="small mb-0" style="color: #1f2937;">{{ contrato.contratada_email }}</p>
+                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Email</div>
+                            <div>{{ contrato.contratada_email }}</div>
                         </div>
                         {% endif %}
                     </div>
@@ -132,135 +122,100 @@
             <!-- Valor e Prazo -->
             <div class="row g-4 mb-4">
                 <div class="col-md-4">
-                    <div class="stat-card p-3 text-center" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
-                        <span class="small text-uppercase" style="color: #059669;">Valor do Contrato</span>
-                        <p class="fw-bold mb-0" style="color: #1f2937; font-size: 1.5rem;">R$ {{ "%.2f"|format(contrato.valor) }}</p>
+                    <div class="p-3 text-center" style="background: var(--azul-claro); border-radius: 16px;">
+                        <span style="font-size: 0.8rem; color: var(--azul-escuro); text-transform: uppercase;">Valor do Contrato</span>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">R$ {{ "%.2f"|format(contrato.valor) }}</div>
                     </div>
                 </div>
                 
                 <div class="col-md-4">
-                    <div class="stat-card p-3 text-center" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-                        <span class="small text-uppercase" style="color: #2563eb;">Prazo</span>
-                        <p class="fw-bold mb-0" style="color: #1f2937; font-size: 1.5rem;">{{ contrato.prazo_dias }} dias</p>
+                    <div class="p-3 text-center" style="background: var(--amarelo-claro); border-radius: 16px;">
+                        <span style="font-size: 0.8rem; color: var(--amarelo-escuro); text-transform: uppercase;">Prazo</span>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">{{ contrato.prazo_dias }} dias</div>
                     </div>
                 </div>
                 
                 <div class="col-md-4">
-                    <div class="stat-card p-3 text-center" style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);">
-                        <span class="small text-uppercase" style="color: #7c3aed;">Status</span>
-                        <p class="fw-bold mb-0" style="color: #1f2937; font-size: 1.5rem;">{{ contrato.status|capitalize }}</p>
+                    <div class="p-3 text-center" style="background: var(--vermelho-claro); border-radius: 16px;">
+                        <span style="font-size: 0.8rem; color: var(--vermelho-escuro); text-transform: uppercase;">Status</span>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">{{ contrato.status|capitalize }}</div>
                     </div>
                 </div>
             </div>
 
             <!-- Descrição dos Serviços -->
             <div class="mb-4">
-                <h6 class="small fw-semibold text-uppercase mb-3 d-flex align-items-center" style="color: #6b7280;">
-                    <div class="stat-icon secondary me-2" style="width: 24px; height: 24px; font-size: 0.75rem;">
-                        <i class="bi bi-file-text"></i>
-                    </div>
+                <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
+                    <span style="width: 28px; height: 28px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                        <i class="bi bi-file-text" style="color: var(--azul-principal);"></i>
+                    </span>
                     DESCRIÇÃO DOS SERVIÇOS
                 </h6>
-                <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
-                    <p class="small mb-0" style="color: #1f2937; white-space: pre-line;">{{ contrato.descricao or 'Nenhuma descrição fornecida.' }}</p>
+                <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
+                    <p style="margin: 0; white-space: pre-line;">{{ contrato.descricao or 'Nenhuma descrição fornecida.' }}</p>
                 </div>
             </div>
 
             <!-- Informações Adicionais -->
             <div class="row g-4">
                 <div class="col-md-6">
-                    <h6 class="small fw-semibold text-uppercase mb-3 d-flex align-items-center" style="color: #6b7280;">
-                        <div class="stat-icon primary me-2" style="width: 24px; height: 24px; font-size: 0.75rem;">
-                            <i class="bi bi-info-circle"></i>
-                        </div>
+                    <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
+                        <span style="width: 28px; height: 28px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                            <i class="bi bi-info-circle" style="color: var(--amarelo-escuro);"></i>
+                        </span>
                         INFORMAÇÕES ADICIONAIS
                     </h6>
-                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
+                    <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="small" style="color: #6b7280;">Criado por:</span>
-                            <span class="small fw-medium" style="color: #1f2937;">{{ contrato.criado_por_nome or 'Sistema' }}</span>
+                            <span style="color: var(--cinza-texto); opacity: 0.7;">Criado por:</span>
+                            <span style="font-weight: 500;">{{ contrato.criado_por_nome or 'Sistema' }}</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="small" style="color: #6b7280;">Data de criação:</span>
-                            <span class="small" style="color: #1f2937;">{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</span>
-                        </div>
-                        {% if contrato.pdf_path %}
                         <div class="d-flex justify-content-between">
-                            <span class="small" style="color: #6b7280;">PDF:</span>
-                            <span class="small" style="color: #10b981;"><i class="bi bi-check-circle-fill me-1"></i> Gerado</span>
+                            <span style="color: var(--cinza-texto); opacity: 0.7;">Data de criação:</span>
+                            <span>{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</span>
                         </div>
-                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Timeline -->
+                <!-- Ações -->
                 <div class="col-md-6">
-                    <h6 class="small fw-semibold text-uppercase mb-3 d-flex align-items-center" style="color: #6b7280;">
-                        <div class="stat-icon warning me-2" style="width: 24px; height: 24px; font-size: 0.75rem;">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        HISTÓRICO
+                    <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
+                        <span style="width: 28px; height: 28px; background: var(--vermelho-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                            <i class="bi bi-gear" style="color: var(--vermelho-principal);"></i>
+                        </span>
+                        AÇÕES
                     </h6>
-                    <div class="p-3" style="background: #f3f4f6; border-radius: 12px;">
-                        <div class="d-flex gap-3 mb-3">
-                            <div class="stat-icon success d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-size: 0.875rem;">
-                                <i class="bi bi-check"></i>
-                            </div>
-                            <div>
-                                <p class="small fw-medium mb-0" style="color: #1f2937;">Contrato criado</p>
-                                <p class="small mb-0" style="color: #6b7280;">{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
-                            </div>
-                        </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if contrato.status == 'rascunho' %}
+                        <button class="btn" style="background: var(--azul-principal); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
+                            <i class="bi bi-check me-2"></i>
+                            Aprovar
+                        </button>
+                        {% endif %}
                         
                         {% if contrato.status == 'ativo' %}
-                        <div class="d-flex gap-3">
-                            <div class="stat-icon primary d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-size: 0.875rem;">
-                                <i class="bi bi-play"></i>
-                            </div>
-                            <div>
-                                <p class="small fw-medium mb-0" style="color: #1f2937;">Contrato ativado</p>
-                                <p class="small mb-0" style="color: #6b7280;">{{ contrato.data_ativacao.strftime('%d/%m/%Y %H:%M') if contrato.data_ativacao else 'Aguardando' }}</p>
-                            </div>
-                        </div>
+                        <button class="btn" style="background: var(--amarelo-principal); color: var(--cinza-texto); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
+                            <i class="bi bi-pause me-2"></i>
+                            Suspender
+                        </button>
+                        <button class="btn" style="background: var(--cinza-claro); color: var(--cinza-texto); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
+                            <i class="bi bi-check-double me-2"></i>
+                            Encerrar
+                        </button>
                         {% endif %}
+                        
+                        <button class="btn" style="background: var(--azul-claro); color: var(--azul-principal); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
+                            <i class="bi bi-pencil me-2"></i>
+                            Editar
+                        </button>
+                        
+                        <button class="btn" style="background: var(--amarelo-claro); color: var(--amarelo-escuro); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
+                            <i class="bi bi-copy me-2"></i>
+                            Duplicar
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Ações do Contrato -->
-    <div class="stat-card p-4">
-        <h5 class="fw-semibold mb-3" style="color: #1f2937;">Ações do Contrato</h5>
-        
-        <div class="d-flex flex-wrap gap-2">
-            {% if contrato.status == 'rascunho' %}
-            <button class="btn d-flex align-items-center gap-2" style="background: #10b981; color: white; border: none;">
-                <i class="bi bi-check"></i>
-                Aprovar Contrato
-            </button>
-            {% endif %}
-            
-            {% if contrato.status == 'ativo' %}
-            <button class="btn d-flex align-items-center gap-2" style="background: #f59e0b; color: white; border: none;">
-                <i class="bi bi-pause"></i>
-                Suspender Contrato
-            </button>
-            <button class="btn d-flex align-items-center gap-2" style="background: #6b7280; color: white; border: none;">
-                <i class="bi bi-check-double"></i>
-                Encerrar Contrato
-            </button>
-            {% endif %}
-            
-            <button class="btn d-flex align-items-center gap-2" style="background: #3b82f6; color: white; border: none;">
-                <i class="bi bi-pencil"></i>
-                Editar Contrato
-            </button>
-            
-            <button class="btn d-flex align-items-center gap-2" style="background: #8b5cf6; color: white; border: none;">
-                <i class="bi bi-copy"></i>
-                Duplicar Contrato
-            </button>
         </div>
     </div>
 </div>

@@ -143,13 +143,15 @@ class Usuario:
                     avatar_path = %s,
                     ativo = %s,
                     primeiro_acesso = %s,
-                    perfil = %s
+                    perfil = %s,
+                    data_atualizacao = NOW(),
+                    atualizado_por = %s
                 WHERE id = %s
             """
             params = (
                 self.nome, self.cargo, self.telefone, self.celular,
                 self.email_corporativo, self.avatar_path, self.ativo,
-                self.primeiro_acesso, self.perfil, self.id
+                self.primeiro_acesso, self.perfil, self.atualizado_por, self.id
             )
             db.execute(query, params)
             return self.id
@@ -158,13 +160,15 @@ class Usuario:
             query = """
                 INSERT INTO usuarios 
                 (empresa_id, nome, email, senha_hash, perfil, cargo, 
-                 telefone, celular, email_corporativo, avatar_path, ativo, primeiro_acesso)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 telefone, celular, email_corporativo, avatar_path, ativo, 
+                 primeiro_acesso, criado_por)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
                 self.empresa_id, self.nome, self.email, self.senha_hash,
                 self.perfil, self.cargo, self.telefone, self.celular,
-                self.email_corporativo, self.avatar_path, self.ativo, self.primeiro_acesso
+                self.email_corporativo, self.avatar_path, self.ativo, 
+                self.primeiro_acesso, self.criado_por
             )
             self.id = db.execute_return_id(query, params)
             return self.id
@@ -223,7 +227,7 @@ class Usuario:
         # Permissões por perfil (simplificado)
         permissoes = {
             'admin_empresa': {
-                'contratos': ['criar', 'ler', 'atualizar', 'aprovar'],
+                'contratos': ['criar', 'ler', 'atualizar', 'apropar'],
                 'usuarios': ['criar', 'ler', 'atualizar'],
                 'config': ['ler', 'atualizar']
             },
@@ -245,6 +249,28 @@ class Usuario:
         
         return acao in modulo_perm
     
+    def get_perfil_display(self):
+        """Retorna o nome do perfil formatado"""
+        perfis = {
+            'admin_sistema': 'Administrador do Sistema',
+            'admin_empresa': 'Administrador da Empresa',
+            'gestor': 'Gestor',
+            'assistente': 'Assistente',
+            'analista': 'Analista'
+        }
+        return perfis.get(self.perfil, self.perfil)
+    
+    def get_redirect_url(self):
+        """Retorna a URL de redirecionamento baseada no perfil"""
+        redirects = {
+            'admin_sistema': 'admin_sistema.dashboard',
+            'admin_empresa': 'admin_empresa.dashboard',
+            'gestor': 'gestor_dashboard',
+            'assistente': 'assistente_dashboard',
+            'analista': 'analista_dashboard'
+        }
+        return redirects.get(self.perfil, 'dashboard')
+    
     def to_dict(self):
         """Converte para dicionário (para API/sessão)"""
         return {
@@ -252,8 +278,10 @@ class Usuario:
             'nome': self.nome,
             'email': self.email,
             'perfil': self.perfil,
+            'perfil_display': self.get_perfil_display(),
             'cargo': self.cargo,
             'empresa_id': self.empresa_id,
+            'email_corporativo': self.email_corporativo,
             'ativo': self.ativo,
             'primeiro_acesso': self.primeiro_acesso,
             'ultimo_login': self.ultimo_login.isoformat() if self.ultimo_login else None

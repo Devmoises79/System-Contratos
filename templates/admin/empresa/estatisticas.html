@@ -4,131 +4,115 @@
 {% block title %}Estatísticas - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
+<div class="fade-in">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('admin_empresa.dashboard') }}" style="color: var(--cinza-texto); text-decoration: none; margin-right: 1rem;">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Estatísticas Detalhadas</h1>
-            <p class="text-gray-500 mt-1">Análise completa dos contratos da empresa</p>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Estatísticas Detalhadas</h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Análise completa dos contratos da empresa</p>
         </div>
     </div>
 
     <!-- Cards Principais -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-file-contract text-blue-600"></i>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-file-text" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">TOTAL</span>
                 </div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase">TOTAL</h3>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ stats.total }}</div>
+                <small style="color: var(--cinza-texto); opacity: 0.6;">contratos registrados</small>
             </div>
-            <p class="text-3xl font-bold text-gray-800">{{ stats.total }}</p>
-            <p class="text-xs text-gray-500 mt-2">contratos registrados</p>
         </div>
         
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-green-600"></i>
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--amarelo-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-coin" style="font-size: 1.5rem; color: var(--amarelo-escuro);"></i>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">VALOR TOTAL</span>
                 </div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase">VALOR TOTAL</h3>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.total_valor) }}</div>
+                <small style="color: var(--cinza-texto); opacity: 0.6;">soma de todos os contratos</small>
             </div>
-            <p class="text-3xl font-bold text-gray-800">R$ {{ "%.2f"|format(stats.total_valor) }}</p>
-            <p class="text-xs text-gray-500 mt-2">soma de todos os contratos</p>
         </div>
         
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-chart-line text-purple-600"></i>
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-bar-chart" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">VALOR MÉDIO</span>
                 </div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase">VALOR MÉDIO</h3>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.media) }}</div>
+                <small style="color: var(--cinza-texto); opacity: 0.6;">por contrato</small>
             </div>
-            <p class="text-3xl font-bold text-gray-800">R$ {{ "%.2f"|format(stats.media) }}</p>
-            <p class="text-xs text-gray-500 mt-2">por contrato</p>
         </div>
         
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-calendar-check text-amber-600"></i>
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width: 48px; height: 48px; background: var(--vermelho-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-check-circle" style="font-size: 1.5rem; color: var(--vermelho-principal);"></i>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">ATIVOS</span>
                 </div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase">ATIVOS</h3>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ por_status|selectattr('status', 'equalto', 'ativo')|map(attribute='quantidade')|first|default(0) }}</div>
+                <small style="color: var(--cinza-texto); opacity: 0.6;">contratos em andamento</small>
             </div>
-            <p class="text-3xl font-bold text-gray-800">{{ por_status|selectattr('status', 'equalto', 'ativo')|map(attribute='quantidade')|first|default(0) }}</p>
-            <p class="text-xs text-gray-500 mt-2">contratos em andamento</p>
         </div>
     </div>
 
     <!-- Gráficos -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="row g-4 mb-4">
         <!-- Contratos por Status -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Contratos por Status</h3>
-            
-            <div class="space-y-4">
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Contratos por Status</h5>
+                
                 {% for item in por_status %}
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700">{{ item.status|capitalize }}</span>
-                        <span class="text-sm text-gray-600">{{ item.quantidade }} contratos (R$ {{ "%.2f"|format(item.valor_total) }})</span>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span style="font-weight: 500;">{{ item.status|capitalize }}</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.7;">{{ item.quantidade }} contratos</span>
                     </div>
-                    <div class="bg-gray-200 rounded-full h-2.5">
-                        <div class="h-2.5 rounded-full 
-                            {% if item.status == 'ativo' %}bg-green-500
-                            {% elif item.status == 'rascunho' %}bg-yellow-500
-                            {% elif item.status == 'encerrado' %}bg-gray-500
-                            {% else %}bg-red-500{% endif %}"
-                            style="width: {{ (item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="flex: 1; background: var(--cinza-claro); height: 8px; border-radius: 4px;">
+                            <div style="width: {{ (item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%; height: 8px; 
+                                      background: {% if item.status == 'ativo' %}var(--azul-principal){% elif item.status == 'rascunho' %}var(--amarelo-escuro){% elif item.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
+                                      border-radius: 4px;"></div>
                         </div>
+                        <span style="font-weight: 600;">R$ {{ "%.2f"|format(item.valor_total) }}</span>
                     </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Legenda -->
-            <div class="mt-6 grid grid-cols-2 gap-2">
-                {% for item in por_status %}
-                <div class="flex items-center text-xs">
-                    <span class="w-3 h-3 rounded-full 
-                        {% if item.status == 'ativo' %}bg-green-500
-                        {% elif item.status == 'rascunho' %}bg-yellow-500
-                        {% elif item.status == 'encerrado' %}bg-gray-500
-                        {% else %}bg-red-500{% endif %} mr-2"></span>
-                    <span class="text-gray-600">{{ item.status|capitalize }}: {{ item.quantidade }}</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <!-- Evolução Mensal -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Evolução Mensal</h3>
-            
-            <div class="relative h-64">
-                <div class="absolute inset-0 flex flex-col justify-between">
-                    {% set max_valor = stats.por_mes|map(attribute='valor_total')|max|default(10000) %}
-                    {% for i in range(10, 0, -1) %}
-                    <div class="flex items-center w-full">
-                        <span class="text-xs text-gray-400 w-16">R$ {{ (max_valor * i/10)|int }}</span>
-                        <div class="flex-1 border-b border-gray-100"></div>
-                    </div>
-                    {% endfor %}
-                </div>
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Evolução Mensal</h5>
                 
-                <div class="absolute inset-0 pt-6 pb-8 pl-20 pr-4">
-                    <div class="flex items-end justify-around h-full">
+                {% set max_valor = stats.por_mes|map(attribute='valor_total')|max|default(10000) %}
+                
+                <div class="position-relative" style="height: 250px;">
+                    <div class="d-flex justify-content-around align-items-end h-100">
                         {% for mes in stats.por_mes[:6] %}
-                        <div class="flex flex-col items-center group">
-                            <div class="relative">
-                                <div class="w-12 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg chart-bar" 
-                                     style="height: {{ (mes.valor_total / max_valor * 150) if max_valor > 0 else 0 }}px;">
-                                </div>
-                                <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                                    R$ {{ "%.2f"|format(mes.valor_total) }}
-                                </div>
-                            </div>
-                            <span class="text-xs text-gray-600 mt-2 font-medium">{{ mes.mes }}</span>
-                            <span class="text-xs text-gray-500">{{ mes.quantidade }} contratos</span>
+                        <div class="d-flex flex-column align-items-center" style="width: 60px;">
+                            <div style="height: {{ (mes.valor_total / max_valor * 180) if max_valor > 0 else 0 }}px; width: 40px; 
+                                      background: linear-gradient(180deg, var(--azul-principal), var(--azul-escuro)); 
+                                      border-radius: 8px 8px 0 0;"></div>
+                            <span style="margin-top: 8px; font-weight: 600;">{{ mes.mes }}</span>
+                            <small style="color: var(--cinza-texto); opacity: 0.6;">{{ mes.quantidade }}</small>
                         </div>
                         {% endfor %}
                     </div>
@@ -138,118 +122,104 @@
     </div>
 
     <!-- Tabela Detalhada por Status -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-800">Detalhamento por Status</h3>
-        </div>
+    <div class="card-custom p-4">
+        <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Detalhamento por Status</h5>
         
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <div class="table-responsive">
+            <table class="table" style="border-collapse: separate; border-spacing: 0 8px;">
+                <thead>
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Quantidade</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Valor Total</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Percentual</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Valor Médio</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Quantidade</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor Total</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Percentual</th>
+                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor Médio</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody>
                     {% for item in por_status %}
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full
-                                {% if item.status == 'ativo' %}bg-green-100 text-green-800
-                                {% elif item.status == 'rascunho' %}bg-yellow-100 text-yellow-800
-                                {% elif item.status == 'encerrado' %}bg-gray-100 text-gray-800
-                                {% else %}bg-red-100 text-red-800{% endif %}">
+                    <tr style="background: var(--branco-fundo); border-radius: 12px;">
+                        <td style="padding: 1rem 0.5rem;">
+                            <span style="background: {% if item.status == 'ativo' %}var(--azul-claro){% elif item.status == 'rascunho' %}var(--amarelo-claro){% elif item.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
+                                         color: {% if item.status == 'ativo' %}var(--azul-principal){% elif item.status == 'rascunho' %}var(--amarelo-escuro){% elif item.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
+                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
                                 {{ item.status|capitalize }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                            {{ item.quantidade }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            R$ {{ "%.2f"|format(item.valor_total) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
-                                    <div class="h-2 rounded-full 
-                                        {% if item.status == 'ativo' %}bg-green-500
-                                        {% elif item.status == 'rascunho' %}bg-yellow-500
-                                        {% elif item.status == 'encerrado' %}bg-gray-500
-                                        {% else %}bg-red-500{% endif %}"
-                                        style="width: {{ (item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%">
-                                    </div>
+                        <td style="padding: 1rem 0.5rem; font-weight: 600;">{{ item.quantidade }}</td>
+                        <td style="padding: 1rem 0.5rem;">R$ {{ "%.2f"|format(item.valor_total) }}</td>
+                        <td style="padding: 1rem 0.5rem;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width: 80px; background: var(--cinza-claro); height: 6px; border-radius: 3px;">
+                                    <div style="width: {{ (item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%; height: 6px; 
+                                              background: {% if item.status == 'ativo' %}var(--azul-principal){% elif item.status == 'rascunho' %}var(--amarelo-escuro){% elif item.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
+                                              border-radius: 3px;"></div>
                                 </div>
-                                <span class="text-xs text-gray-600">{{ "%.1f"|format(item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%</span>
+                                <span>{{ "%.1f"|format(item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            R$ {{ "%.2f"|format(item.valor_total / item.quantidade) if item.quantidade > 0 else 0 }}
-                        </td>
+                        <td style="padding: 1rem 0.5rem;">R$ {{ "%.2f"|format(item.valor_total / item.quantidade) if item.quantidade > 0 else 0 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
-                <tfoot class="bg-gray-50">
+                <tfoot style="border-top: 2px solid var(--cinza-claro);">
                     <tr>
-                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-800">Total</th>
-                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-800">{{ stats.total }}</th>
-                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-800">R$ {{ "%.2f"|format(stats.total_valor) }}</th>
-                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-800">100%</th>
-                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-800">R$ {{ "%.2f"|format(stats.media) }}</th>
+                        <td style="padding: 1rem 0.5rem; font-weight: 700;">Total</td>
+                        <td style="padding: 1rem 0.5rem; font-weight: 700;">{{ stats.total }}</td>
+                        <td style="padding: 1rem 0.5rem; font-weight: 700;">R$ {{ "%.2f"|format(stats.total_valor) }}</td>
+                        <td style="padding: 1rem 0.5rem; font-weight: 700;">100%</td>
+                        <td style="padding: 1rem 0.5rem; font-weight: 700;">R$ {{ "%.2f"|format(stats.media) }}</td>
                     </tr>
                 </tfoot>
             </table>
         </div>
     </div>
 
-    <!-- Resumo Rápido -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
-            <i class="fas fa-chart-pie text-3xl mb-4 opacity-75"></i>
-            <h4 class="text-lg font-semibold mb-2">Distribuição</h4>
-            <p class="text-blue-100 text-sm mb-4">Como seus contratos estão distribuídos</p>
-            <div class="space-y-2">
+    <!-- Cards de Resumo -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-4">
+            <div class="card-custom p-4" style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); color: white;">
+                <i class="bi bi-pie-chart" style="font-size: 2rem; opacity: 0.8; margin-bottom: 1rem;"></i>
+                <h6 style="color: white; opacity: 0.9; margin-bottom: 0.5rem;">Distribuição</h6>
+                <p style="opacity: 0.8; margin-bottom: 1rem;">Como seus contratos estão distribuídos</p>
                 {% for item in por_status %}
-                <div class="flex items-center justify-between">
-                    <span>{{ item.status|capitalize }}</span>
-                    <span class="font-bold">{{ "%.1f"|format(item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%</span>
+                <div class="d-flex justify-content-between mb-1">
+                    <span style="opacity: 0.9;">{{ item.status|capitalize }}</span>
+                    <span style="font-weight: 600;">{{ "%.1f"|format(item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg p-6 text-white">
-            <i class="fas fa-dollar-sign text-3xl mb-4 opacity-75"></i>
-            <h4 class="text-lg font-semibold mb-2">Financeiro</h4>
-            <p class="text-green-100 text-sm mb-4">Resumo financeiro dos contratos</p>
-            <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                    <span>Maior contrato</span>
-                    <span class="font-bold">R$ {{ "%.2f"|format(por_status|map(attribute='valor_total')|max) }}</span>
+        <div class="col-md-4">
+            <div class="card-custom p-4" style="background: linear-gradient(135deg, var(--amarelo-principal), var(--amarelo-escuro)); color: white;">
+                <i class="bi bi-coin" style="font-size: 2rem; opacity: 0.8; margin-bottom: 1rem;"></i>
+                <h6 style="color: white; opacity: 0.9; margin-bottom: 0.5rem;">Financeiro</h6>
+                <p style="opacity: 0.8; margin-bottom: 1rem;">Resumo financeiro dos contratos</p>
+                <div class="d-flex justify-content-between mb-1">
+                    <span style="opacity: 0.9;">Maior contrato</span>
+                    <span style="font-weight: 600;">R$ {{ "%.2f"|format(por_status|map(attribute='valor_total')|max) }}</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span>Menor contrato</span>
-                    <span class="font-bold">R$ {{ "%.2f"|format(por_status|map(attribute='valor_total')|min) }}</span>
+                <div class="d-flex justify-content-between">
+                    <span style="opacity: 0.9;">Menor contrato</span>
+                    <span style="font-weight: 600;">R$ {{ "%.2f"|format(por_status|map(attribute='valor_total')|min) }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl shadow-lg p-6 text-white">
-            <i class="fas fa-calendar-alt text-3xl mb-4 opacity-75"></i>
-            <h4 class="text-lg font-semibold mb-2">Período</h4>
-            <p class="text-purple-100 text-sm mb-4">Contratos no último mês</p>
-            <div class="space-y-2">
+        <div class="col-md-4">
+            <div class="card-custom p-4" style="background: linear-gradient(135deg, var(--vermelho-principal), var(--vermelho-escuro)); color: white;">
+                <i class="bi bi-calendar" style="font-size: 2rem; opacity: 0.8; margin-bottom: 1rem;"></i>
+                <h6 style="color: white; opacity: 0.9; margin-bottom: 0.5rem;">Período</h6>
+                <p style="opacity: 0.8; margin-bottom: 1rem;">Contratos no último mês</p>
                 {% if stats.por_mes %}
-                <div class="flex items-center justify-between">
-                    <span>{{ stats.por_mes[0].mes }}</span>
-                    <span class="font-bold">{{ stats.por_mes[0].quantidade }} contratos</span>
+                <div class="d-flex justify-content-between mb-1">
+                    <span style="opacity: 0.9;">{{ stats.por_mes[0].mes }}</span>
+                    <span style="font-weight: 600;">{{ stats.por_mes[0].quantidade }} contratos</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span>Valor</span>
-                    <span class="font-bold">R$ {{ "%.2f"|format(stats.por_mes[0].valor_total) }}</span>
+                <div class="d-flex justify-content-between">
+                    <span style="opacity: 0.9;">Valor</span>
+                    <span style="font-weight: 600;">R$ {{ "%.2f"|format(stats.por_mes[0].valor_total) }}</span>
                 </div>
                 {% endif %}
             </div>

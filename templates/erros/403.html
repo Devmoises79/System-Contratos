@@ -6,20 +6,42 @@
 {% block content %}
 <div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="stat-card p-5 text-center">
-            <div class="stat-icon danger d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
-                <i class="bi bi-shield-exclamation"></i>
+        <div class="card-custom p-5 text-center fade-in">
+            <!-- Ícone de bloqueio -->
+            <div class="position-relative d-inline-block mb-4">
+                <div class="card-icon vermelho" style="width: 120px; height: 120px; font-size: 4rem;">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="background: var(--vermelho-escuro) !important; font-size: 1rem;">
+                    403
+                </span>
             </div>
             
-            <h1 class="display-1 fw-bold" style="color: #ef4444;">403</h1>
-            <h3 class="fw-semibold mb-3" style="color: #1f2937;">Acesso Negado</h3>
-            <p class="mb-4" style="color: #6b7280;">Você não tem permissão para acessar esta página.</p>
+            <h1 class="fw-bold mb-3" style="color: var(--cinza-texto); font-size: 3rem;">Acesso Negado</h1>
             
-            <a href="{{ url_for('dashboard') }}" class="btn py-2 px-4"
-               style="background: #3b82f6; color: white; border: none;">
-                <i class="bi bi-house me-2"></i>
-                Voltar para o Dashboard
-            </a>
+            <div class="alert alert-danger d-flex align-items-center mb-4" style="background: var(--vermelho-claro); border: none; border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3" style="color: var(--vermelho-principal);"></i>
+                <div class="text-start">
+                    <strong class="d-block">Oops! Sem permissão</strong>
+                    <small>Você não tem autorização para acessar esta página</small>
+                </div>
+            </div>
+            
+            <p class="text-muted mb-4">
+                <i class="bi bi-info-circle me-1"></i>
+                Se você acha que isso é um erro, entre em contato com o administrador.
+            </p>
+            
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary py-3 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-house-door"></i>
+                    Voltar para o Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary py-2">
+                    <i class="bi bi-box-arrow-right me-2"></i>
+                    Fazer login com outra conta
+                </a>
+            </div>
         </div>
     </div>
 </div>

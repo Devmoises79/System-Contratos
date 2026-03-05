@@ -4,220 +4,263 @@
 {% block title %}Configurações da Empresa - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Configurações da Empresa</h1>
-            <p class="text-gray-500 mt-1">Personalize as informações e aparência</p>
-        </div>
+<div class="fade-in">
+    <!-- Cabeçalho da página -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-cog me-2" style="color: var(--azul-principal);"></i>
+            Configurações da Empresa
+        </h1>
+        <p>Personalize as informações e aparência da sua empresa</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- Tabs -->
-        <div class="border-b border-gray-200">
-            <nav class="flex space-x-8 px-6" aria-label="Tabs">
-                <button class="tab-button active py-4 px-1 border-b-2 border-blue-600 font-medium text-sm text-blue-600">
-                    Informações Gerais
-                </button>
-                <button class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    Personalização
-                </button>
-                <button class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    Logo
-                </button>
-            </nav>
+    <!-- Card Principal -->
+    <div class="card-custom p-0 overflow-hidden">
+        <!-- Tabs de navegação -->
+        <div class="bg-light p-3" style="border-bottom: 2px solid var(--cinza-claro);">
+            <ul class="nav nav-tabs border-0" id="configTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" style="color: var(--azul-principal); font-weight: 500;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Informações Gerais
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="cores-tab" data-bs-toggle="tab" data-bs-target="#cores" type="button" role="tab" style="color: var(--cinza-texto); font-weight: 500;">
+                        <i class="fas fa-palette me-2"></i>
+                        Personalização
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="logo-tab" data-bs-toggle="tab" data-bs-target="#logo" type="button" role="tab" style="color: var(--cinza-texto); font-weight: 500;">
+                        <i class="fas fa-image me-2"></i>
+                        Logo
+                    </button>
+                </li>
+            </ul>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="p-6">
+        <!-- Formulário -->
+        <form method="POST" enctype="multipart/form-data" class="p-4">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
 
-            <!-- Tab 1: Informações Gerais -->
-            <div class="tab-panel" id="tab1">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa *</label>
-                        <input type="text" name="nome" value="{{ empresa.nome }}" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
-                        <input type="text" value="{{ empresa.cnpj }}" disabled 
-                               class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500">
-                        <p class="text-xs text-gray-500 mt-1">CNPJ não pode ser alterado</p>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" value="{{ empresa.email }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                        <input type="text" name="telefone" value="{{ empresa.telefone }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                               placeholder="(11) 99999-9999">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                        <input type="text" name="celular" value="{{ empresa.celular }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                               placeholder="(11) 99999-9999">
-                    </div>
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                        <textarea name="endereco" rows="3" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ empresa.endereco }}</textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 2: Personalização (Cores) -->
-            <div class="tab-panel hidden" id="tab2">
-                <div class="space-y-6">
-                    <p class="text-sm text-gray-600">Escolha as cores que representam sua empresa</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor Primária</label>
-                            <div class="flex items-center space-x-3">
-                                <input type="color" name="cor_primaria" value="{{ empresa.paleta_cores.primaria }}" 
-                                       class="w-12 h-12 p-1 border rounded-lg">
-                                <input type="text" value="{{ empresa.paleta_cores.primaria }}" 
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
-                                       readonly>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Botões principais, links, destaques</p>
+            <!-- Conteúdo das Tabs -->
+            <div class="tab-content" id="configTabsContent">
+                <!-- Tab 1: Informações Gerais -->
+                <div class="tab-pane fade show active" id="info" role="tabpanel">
+                    <div class="row g-4">
+                        <!-- Nome da Empresa -->
+                        <div class="col-12">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-building me-1" style="color: var(--azul-principal);"></i>
+                                Nome da Empresa <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="nome" value="{{ empresa.nome }}" required>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor Secundária</label>
-                            <div class="flex items-center space-x-3">
-                                <input type="color" name="cor_secundaria" value="{{ empresa.paleta_cores.secundaria }}" 
-                                       class="w-12 h-12 p-1 border rounded-lg">
-                                <input type="text" value="{{ empresa.paleta_cores.secundaria }}" 
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
-                                       readonly>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Elementos de sucesso, confirmações</p>
+                        <!-- CNPJ (readonly) -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-qrcode me-1" style="color: var(--amarelo-escuro);"></i>
+                                CNPJ
+                            </label>
+                            <input type="text" class="form-control bg-light" value="{{ empresa.cnpj }}" readonly>
+                            <small class="text-muted">O CNPJ não pode ser alterado</small>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor de Destaque</label>
-                            <div class="flex items-center space-x-3">
-                                <input type="color" name="cor_destaque" value="{{ empresa.paleta_cores.destaque }}" 
-                                       class="w-12 h-12 p-1 border rounded-lg">
-                                <input type="text" value="{{ empresa.paleta_cores.destaque }}" 
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
-                                       readonly>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Alertas, avisos, elementos importantes</p>
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-envelope me-1" style="color: var(--vermelho-principal);"></i>
+                                Email
+                            </label>
+                            <input type="email" class="form-control" name="email" value="{{ empresa.email }}">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor do Texto</label>
-                            <div class="flex items-center space-x-3">
-                                <input type="color" name="cor_texto" value="{{ empresa.paleta_cores.texto }}" 
-                                       class="w-12 h-12 p-1 border rounded-lg">
-                                <input type="text" value="{{ empresa.paleta_cores.texto }}" 
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
-                                       readonly>
-                            </div>
+                        <!-- Telefone -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-phone me-1" style="color: var(--verde-principal);"></i>
+                                Telefone
+                            </label>
+                            <input type="text" class="form-control" name="telefone" value="{{ empresa.telefone }}" placeholder="(11) 1234-5678">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor de Fundo</label>
-                            <div class="flex items-center space-x-3">
-                                <input type="color" name="cor_fundo" value="{{ empresa.paleta_cores.fundo }}" 
-                                       class="w-12 h-12 p-1 border rounded-lg">
-                                <input type="text" value="{{ empresa.paleta_cores.fundo }}" 
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono"
-                                       readonly>
-                            </div>
+                        <!-- Celular -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-mobile-alt me-1" style="color: var(--vermelho-principal);"></i>
+                                Celular
+                            </label>
+                            <input type="text" class="form-control" name="celular" value="{{ empresa.celular }}" placeholder="(11) 99999-9999">
                         </div>
-                    </div>
-
-                    <!-- Preview -->
-                    <div class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                        <h4 class="text-sm font-medium text-gray-700 mb-4">Preview</h4>
-                        <div class="flex items-center space-x-4">
-                            <button class="px-4 py-2 rounded-lg text-white" 
-                                    style="background-color: {{ empresa.paleta_cores.primaria }}">
-                                Botão Primário
-                            </button>
-                            <button class="px-4 py-2 rounded-lg text-white" 
-                                    style="background-color: {{ empresa.paleta_cores.secundaria }}">
-                                Botão Secundário
-                            </button>
-                            <span class="px-3 py-1 rounded-full text-white text-sm" 
-                                  style="background-color: {{ empresa.paleta_cores.destaque }}">
-                                Destaque
-                            </span>
+                        
+                        <!-- Endereço -->
+                        <div class="col-12">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-map-marker-alt me-1" style="color: var(--amarelo-escuro);"></i>
+                                Endereço
+                            </label>
+                            <textarea class="form-control" name="endereco" rows="3">{{ empresa.endereco }}</textarea>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tab 3: Logo -->
-            <div class="tab-panel hidden" id="tab3">
-                <div class="space-y-6">
-                    <div class="flex items-center space-x-8">
+                <!-- Tab 2: Personalização (Cores) -->
+                <div class="tab-pane fade" id="cores" role="tabpanel">
+                    <div class="row g-4">
+                        <p class="text-muted">Escolha as cores que representam sua empresa</p>
+                        
+                        <!-- Cor Primária -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-circle me-1" style="color: var(--azul-principal);"></i>
+                                Cor Primária
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" name="cor_primaria" value="{{ empresa.paleta_cores.primaria }}" class="form-control form-control-color" style="width: 60px; height: 45px;">
+                                <input type="text" class="form-control" value="{{ empresa.paleta_cores.primaria }}" readonly>
+                            </div>
+                            <small class="text-muted">Botões principais, links, destaques</small>
+                        </div>
+                        
+                        <!-- Cor Secundária -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-circle me-1" style="color: var(--verde-principal);"></i>
+                                Cor Secundária
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" name="cor_secundaria" value="{{ empresa.paleta_cores.secundaria }}" class="form-control form-control-color" style="width: 60px; height: 45px;">
+                                <input type="text" class="form-control" value="{{ empresa.paleta_cores.secundaria }}" readonly>
+                            </div>
+                            <small class="text-muted">Elementos de sucesso, confirmações</small>
+                        </div>
+                        
+                        <!-- Cor de Destaque -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-circle me-1" style="color: var(--amarelo-escuro);"></i>
+                                Cor de Destaque
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" name="cor_destaque" value="{{ empresa.paleta_cores.destaque }}" class="form-control form-control-color" style="width: 60px; height: 45px;">
+                                <input type="text" class="form-control" value="{{ empresa.paleta_cores.destaque }}" readonly>
+                            </div>
+                            <small class="text-muted">Alertas, avisos, elementos importantes</small>
+                        </div>
+                        
+                        <!-- Cor do Texto -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-circle me-1" style="color: var(--cinza-texto);"></i>
+                                Cor do Texto
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" name="cor_texto" value="{{ empresa.paleta_cores.texto }}" class="form-control form-control-color" style="width: 60px; height: 45px;">
+                                <input type="text" class="form-control" value="{{ empresa.paleta_cores.texto }}" readonly>
+                            </div>
+                        </div>
+                        
+                        <!-- Cor de Fundo -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-2">
+                                <i class="fas fa-circle me-1" style="color: var(--cinza-claro);"></i>
+                                Cor de Fundo
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" name="cor_fundo" value="{{ empresa.paleta_cores.fundo }}" class="form-control form-control-color" style="width: 60px; height: 45px;">
+                                <input type="text" class="form-control" value="{{ empresa.paleta_cores.fundo }}" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Preview das cores -->
+                        <div class="col-12 mt-4">
+                            <h6 class="fw-semibold mb-3">
+                                <i class="fas fa-eye me-2" style="color: var(--azul-principal);"></i>
+                                Preview
+                            </h6>
+                            <div class="bg-light p-4 rounded-3">
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <button class="btn" style="background: {{ empresa.paleta_cores.primaria }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px;">
+                                        <i class="fas fa-check me-2"></i>
+                                        Botão Primário
+                                    </button>
+                                    <button class="btn" style="background: {{ empresa.paleta_cores.secundaria }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px;">
+                                        <i class="fas fa-check me-2"></i>
+                                        Botão Secundário
+                                    </button>
+                                    <span class="badge" style="background: {{ empresa.paleta_cores.destaque }}; color: white; padding: 0.5rem 1rem; border-radius: 30px;">
+                                        <i class="fas fa-star me-1"></i>
+                                        Badge de Destaque
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Logo -->
+                <div class="tab-pane fade" id="logo" role="tabpanel">
+                    <div class="row g-4">
                         <!-- Logo atual -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Logo Atual</label>
-                            <div class="w-32 h-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-3">
+                                <i class="fas fa-image me-1" style="color: var(--azul-principal);"></i>
+                                Logo Atual
+                            </label>
+                            <div class="border rounded-3 p-4 text-center bg-light" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
                                 {% if empresa.logo_path %}
-                                <img src="{{ url_for('static', filename=empresa.logo_path.replace('static/', '')) }}" 
-                                     alt="Logo" class="w-full h-full object-contain">
+                                    <img src="{{ url_for('static', filename=empresa.logo_path.replace('static/', '')) }}" 
+                                         alt="Logo" style="max-width: 100%; max-height: 150px; object-fit: contain;">
                                 {% else %}
-                                <i class="fas fa-building text-4xl text-gray-400"></i>
+                                    <div class="text-center">
+                                        <i class="fas fa-building fa-3x mb-2" style="color: var(--cinza-claro);"></i>
+                                        <p class="text-muted mb-0">Nenhuma logo cadastrada</p>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
                         
                         <!-- Upload nova logo -->
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nova Logo</label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                                <div class="space-y-1 text-center">
-                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="logo" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                            <span>Upload de arquivo</span>
-                                            <input id="logo" name="logo" type="file" class="sr-only" accept="image/png, image/jpeg, image/gif">
-                                        </label>
-                                        <p class="pl-1">ou arraste e solte</p>
-                                    </div>
-                                    <p class="text-xs text-gray-500">PNG, JPG, GIF até 10MB</p>
-                                </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium mb-3">
+                                <i class="fas fa-upload me-1" style="color: var(--verde-principal);"></i>
+                                Nova Logo
+                            </label>
+                            <div class="border border-2 border-dashed rounded-3 p-4 text-center" style="border-style: dashed !important;">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: var(--azul-principal);"></i>
+                                <p class="mb-2">Arraste sua logo aqui ou</p>
+                                <label for="logo" class="btn btn-outline-primary">
+                                    <i class="fas fa-folder-open me-2"></i>
+                                    Selecionar arquivo
+                                </label>
+                                <input type="file" id="logo" name="logo" accept="image/*" style="display: none;">
+                                <p class="text-muted small mt-2">PNG, JPG ou GIF até 10MB</p>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
-                        <div class="flex">
-                            <i class="fas fa-info-circle text-blue-600 mr-3"></i>
-                            <p class="text-sm text-blue-700">
-                                A logo será exibida no cabeçalho do sistema e nos contratos gerados.
-                                Recomendamos imagens quadradas de pelo menos 200x200 pixels.
-                            </p>
+
+                        <!-- Informações -->
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-center" style="background: var(--azul-claro); border: none;">
+                                <i class="fas fa-info-circle fs-4 me-3" style="color: var(--azul-principal);"></i>
+                                <div>
+                                    <strong>Recomendação:</strong> A logo será exibida no cabeçalho do sistema e nos contratos gerados. Recomendamos imagens quadradas de pelo menos 200x200 pixels.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Botões -->
-            <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
-                <a href="{{ url_for('admin_empresa.dashboard') }}" 
-                   class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+            <!-- Botões do formulário -->
+            <div class="d-flex justify-content-end gap-3 mt-4 pt-4" style="border-top: 2px solid var(--cinza-claro);">
+                <a href="{{ url_for('admin_empresa.dashboard') }}" class="btn btn-outline-secondary px-4 py-2">
+                    <i class="fas fa-times me-2"></i>
                     Cancelar
                 </a>
-                <button type="submit" 
-                        class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition shadow-md">
-                    <i class="fas fa-save mr-2"></i>
+                <button type="submit" class="btn btn-primary px-4 py-2">
+                    <i class="fas fa-save me-2"></i>
                     Salvar Configurações
                 </button>
             </div>
@@ -226,27 +269,80 @@
 </div>
 
 <script>
-    // Tabs functionality
-    document.querySelectorAll('.tab-button').forEach((button, index) => {
-        button.addEventListener('click', () => {
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active', 'text-blue-600', 'border-blue-600');
-                btn.classList.add('text-gray-500', 'border-transparent');
+    // Preview do upload de logo
+    document.getElementById('logo')?.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const fileName = this.files[0].name;
+            alert('Arquivo selecionado: ' + fileName);
+        }
+    });
+
+    // Manter a tab ativa após submit (opcional)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Recuperar a última tab ativa do localStorage
+        const activeTab = localStorage.getItem('activeConfigTab');
+        if (activeTab) {
+            const tab = document.querySelector(`[data-bs-target="${activeTab}"]`);
+            if (tab) {
+                const tabInstance = new bootstrap.Tab(tab);
+                tabInstance.show();
+            }
+        }
+
+        // Salvar a tab ativa no localStorage
+        const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function(e) {
+                localStorage.setItem('activeConfigTab', e.target.getAttribute('data-bs-target'));
             });
-            
-            // Add active class to clicked button
-            button.classList.add('active', 'text-blue-600', 'border-blue-600');
-            button.classList.remove('text-gray-500', 'border-transparent');
-            
-            // Hide all panels
-            document.querySelectorAll('.tab-panel').forEach(panel => {
-                panel.classList.add('hidden');
-            });
-            
-            // Show selected panel
-            document.getElementById(`tab${index + 1}`).classList.remove('hidden');
         });
     });
+
+    // Máscara para telefone (opcional)
+    function mascaraTelefone(input) {
+        let valor = input.value.replace(/\D/g, '');
+        if (valor.length <= 10) {
+            valor = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        } else {
+            valor = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        }
+        input.value = valor;
+    }
+
+    document.querySelector('input[name="telefone"]')?.addEventListener('input', function() {
+        mascaraTelefone(this);
+    });
+
+    document.querySelector('input[name="celular"]')?.addEventListener('input', function() {
+        mascaraTelefone(this);
+    });
 </script>
+
+<style>
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        background: var(--azul-claro);
+        color: var(--azul-principal) !important;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background: var(--azul-claro);
+        color: var(--azul-principal) !important;
+        font-weight: 600;
+    }
+    
+    .form-control-color {
+        padding: 0.375rem;
+    }
+</style>
 {% endblock %}

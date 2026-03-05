@@ -4,144 +4,158 @@
 {% block title %}Gerenciar Usuários - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
+<div class="fade-in">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Usuários da Empresa</h1>
-            <p class="text-gray-500 mt-1">Gerencie os usuários e permissões</p>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Usuários da Empresa</h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie os usuários e permissões</p>
         </div>
         <a href="{{ url_for('admin_empresa.usuario_novo') }}" 
-           class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition shadow-sm flex items-center space-x-2">
-            <i class="fas fa-user-plus"></i>
-            <span>Novo Usuário</span>
+           class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bi bi-person-plus"></i>
+            Novo Usuário
         </a>
     </div>
 
     <!-- Cards de Estatísticas -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">TOTAL</h3>
-            <p class="text-3xl font-bold text-gray-800">{{ usuarios|length }}</p>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">TOTAL</span>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ usuarios|length }}</div>
+            </div>
         </div>
         
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">ATIVOS</h3>
-            <p class="text-3xl font-bold text-green-600">{{ usuarios|selectattr('ativo', 'equalto', true)|list|length }}</p>
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">ATIVOS</span>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--azul-principal); line-height: 1;">{{ usuarios|selectattr('ativo', 'equalto', true)|list|length }}</div>
+            </div>
         </div>
         
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">INATIVOS</h3>
-            <p class="text-3xl font-bold text-red-600">{{ usuarios|selectattr('ativo', 'equalto', false)|list|length }}</p>
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">INATIVOS</span>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--vermelho-principal); line-height: 1;">{{ usuarios|selectattr('ativo', 'equalto', false)|list|length }}</div>
+            </div>
         </div>
         
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-sm font-medium text-gray-500 uppercase mb-1">ADMINS</h3>
-            <p class="text-3xl font-bold text-purple-600">{{ usuarios|selectattr('perfil', 'equalto', 'admin_empresa')|list|length }}</p>
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">ADMINS</span>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--amarelo-escuro); line-height: 1;">{{ usuarios|selectattr('perfil', 'equalto', 'admin_empresa')|list|length }}</div>
+            </div>
         </div>
     </div>
 
     <!-- Filtros -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="relative flex-1">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" placeholder="Buscar usuários..." id="searchInput"
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    <div class="card-custom p-4 mb-4">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
+                        <i class="bi bi-search" style="color: var(--azul-principal);"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="searchInput" 
+                           style="border-color: var(--cinza-claro);"
+                           placeholder="Buscar por nome ou email...">
+                </div>
             </div>
-            <div class="flex items-center space-x-2">
-                <select id="perfilFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            
+            <div class="col-md-3">
+                <select id="perfilFilter" class="form-select" style="border-color: var(--cinza-claro);">
                     <option value="">Todos os perfis</option>
                     <option value="admin_empresa">Admin Empresa</option>
                     <option value="gestor">Gestor</option>
                     <option value="assistente">Assistente</option>
                     <option value="analista">Analista</option>
                 </select>
-                <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Todos os status</option>
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
+            </div>
+            
+            <div class="col-md-2">
+                <select id="statusFilter" class="form-select" style="border-color: var(--cinza-claro);">
+                    <option value="">Todos</option>
+                    <option value="ativo">Ativos</option>
+                    <option value="inativo">Inativos</option>
                 </select>
+            </div>
+            
+            <div class="col-md-2">
+                <button class="btn w-100" style="background: var(--azul-claro); color: var(--azul-principal);" onclick="filterTable()">
+                    Filtrar
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Tabela de Usuários -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+    <div class="card-custom p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table" style="border-collapse: separate; border-spacing: 0 8px; margin: 0;">
+                <thead style="background: var(--branco-fundo);">
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perfil</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último Acesso</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Usuário</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Perfil</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Cargo</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contato</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Último Acesso</th>
+                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200" id="usuariosTable">
+                <tbody id="usuariosTable">
                     {% for usuario in usuarios %}
-                    <tr class="hover:bg-gray-50 transition usuario-row" 
-                        data-nome="{{ usuario.nome|lower }}" 
-                        data-email="{{ usuario.email|lower }}"
-                        data-perfil="{{ usuario.perfil }}"
-                        data-status="{{ 'ativo' if usuario.ativo else 'inativo' }}">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <tr class="usuario-row" data-nome="{{ usuario.nome|lower }}" data-email="{{ usuario.email|lower }}"
+                        data-perfil="{{ usuario.perfil }}" data-status="{{ 'ativo' if usuario.ativo else 'inativo' }}"
+                        style="background: white; border-radius: 12px;">
+                        <td style="padding: 1rem;">
+                            <div class="d-flex align-items-center">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; margin-right: 12px;">
                                     {{ usuario.nome[:1] }}{{ usuario.nome.split()[-1][:1] if usuario.nome.split()|length > 1 else '' }}
                                 </div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-800">{{ usuario.nome }}</p>
-                                    <p class="text-xs text-gray-500">{{ usuario.email }}</p>
+                                <div>
+                                    <div style="font-weight: 600;">{{ usuario.nome }}</div>
+                                    <small style="color: var(--cinza-texto); opacity: 0.6;">{{ usuario.email }}</small>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full
-                                {% if usuario.perfil == 'admin_empresa' %}bg-purple-100 text-purple-800
-                                {% elif usuario.perfil == 'gestor' %}bg-blue-100 text-blue-800
-                                {% elif usuario.perfil == 'assistente' %}bg-green-100 text-green-800
-                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        <td style="padding: 1rem;">
+                            <span style="background: {% if usuario.perfil == 'admin_empresa' %}var(--azul-claro){% elif usuario.perfil == 'gestor' %}var(--amarelo-claro){% elif usuario.perfil == 'assistente' %}var(--verde-claro){% else %}var(--cinza-claro){% endif %}; 
+                                         color: {% if usuario.perfil == 'admin_empresa' %}var(--azul-principal){% elif usuario.perfil == 'gestor' %}var(--amarelo-escuro){% elif usuario.perfil == 'assistente' %}var(--verde-principal){% else %}var(--cinza-texto){% endif %}; 
+                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
                                 {{ usuario.perfil|replace('_', ' ')|title }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ usuario.cargo or '-' }}
+                        <td style="padding: 1rem;">{{ usuario.cargo or '-' }}</td>
+                        <td style="padding: 1rem;">
+                            {% if usuario.telefone or usuario.celular %}
+                                <div><i class="bi bi-telephone" style="color: var(--azul-principal);"></i> {{ usuario.telefone or usuario.celular }}</div>
+                            {% else %}
+                                -
+                            {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-600">
-                                {% if usuario.telefone %}
-                                <div><i class="fas fa-phone-alt text-xs mr-1"></i>{{ usuario.telefone }}</div>
-                                {% endif %}
-                                {% if usuario.celular %}
-                                <div><i class="fas fa-mobile-alt text-xs mr-1"></i>{{ usuario.celular }}</div>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full {% if usuario.ativo %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        <td style="padding: 1rem;">
+                            <span style="background: {% if usuario.ativo %}var(--azul-claro){% else %}var(--cinza-claro){% endif %}; 
+                                         color: {% if usuario.ativo %}var(--azul-principal){% else %}var(--cinza-texto){% endif %}; 
+                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
                                 {{ 'Ativo' if usuario.ativo else 'Inativo' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td style="padding: 1rem; color: var(--cinza-texto); opacity: 0.7;">
                             {{ usuario.ultimo_login.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_login else 'Nunca' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <div class="flex items-center space-x-3">
+                        <td style="padding: 1rem;">
+                            <div class="d-flex gap-2">
                                 <a href="{{ url_for('admin_empresa.usuario_editar', id=usuario.id) }}" 
-                                   class="text-blue-600 hover:text-blue-800" title="Editar">
-                                    <i class="fas fa-edit"></i>
+                                   style="color: var(--azul-principal); text-decoration: none;" title="Editar">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <a href="{{ url_for('admin_empresa.usuario_toggle_status', id=usuario.id) }}" 
-                                   class="{% if usuario.ativo %}text-amber-600 hover:text-amber-800{% else %}text-green-600 hover:text-green-800{% endif %}" 
+                                   style="color: {% if usuario.ativo %}var(--amarelo-escuro){% else %}var(--azul-principal){% endif %}; text-decoration: none;" 
                                    title="{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}">
-                                    <i class="fas {% if usuario.ativo %}fa-ban{% else %}fa-check-circle{% endif %}"></i>
+                                    <i class="bi {% if usuario.ativo %}bi-pause-circle{% else %}bi-play-circle{% endif %}"></i>
                                 </a>
-                                <button class="text-red-600 hover:text-red-800" title="Mais ações">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
                             </div>
                         </td>
                     </tr>
@@ -151,28 +165,21 @@
         </div>
         
         {% if not usuarios %}
-        <div class="text-center py-12">
-            <i class="fas fa-users text-5xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500">Nenhum usuário cadastrado</p>
-            <a href="{{ url_for('admin_empresa.usuario_novo') }}" class="text-blue-600 hover:underline mt-2 inline-block">
-                Criar primeiro usuário
-            </a>
+        <div class="text-center py-5" style="color: var(--cinza-texto); opacity: 0.7;">
+            <i class="bi bi-people" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
+            <p>Nenhum usuário cadastrado</p>
+            <a href="{{ url_for('admin_empresa.usuario_novo') }}" style="color: var(--azul-principal);">Criar primeiro usuário</a>
         </div>
         {% endif %}
     </div>
 </div>
 
 <script>
-    // Filtros
-    const searchInput = document.getElementById('searchInput');
-    const perfilFilter = document.getElementById('perfilFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const rows = document.querySelectorAll('.usuario-row');
-
     function filterTable() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const perfilValue = perfilFilter.value;
-        const statusValue = statusFilter.value;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const perfilValue = document.getElementById('perfilFilter').value;
+        const statusValue = document.getElementById('statusFilter').value;
+        const rows = document.querySelectorAll('.usuario-row');
 
         rows.forEach(row => {
             const nome = row.dataset.nome;
@@ -192,8 +199,8 @@
         });
     }
 
-    searchInput.addEventListener('input', filterTable);
-    perfilFilter.addEventListener('change', filterTable);
-    statusFilter.addEventListener('change', filterTable);
+    document.getElementById('searchInput').addEventListener('keyup', filterTable);
+    document.getElementById('perfilFilter').addEventListener('change', filterTable);
+    document.getElementById('statusFilter').addEventListener('change', filterTable);
 </script>
 {% endblock %}

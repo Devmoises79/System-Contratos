@@ -4,136 +4,151 @@
 {% block title %}Dashboard Admin - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="fade-in">
     <!-- Cabeçalho -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="fw-bold mb-1" style="color: #1f2937; font-size: 2rem;">Dashboard do Administrador do Sistema</h1>
-            <p style="color: #6b7280;">Visão geral completa de todas as empresas e atividades</p>
+            <h1 class="fw-bold mb-2" style="color: var(--cinza-texto); font-size: 2rem;">
+                <i class="bi bi-speedometer2 me-2" style="color: var(--azul-principal);"></i>
+                Dashboard do Administrador
+            </h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7;">
+                <i class="bi bi-eye me-1"></i>
+                Visão geral completa de todas as empresas e atividades
+            </p>
         </div>
-        <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; font-size: 0.875rem;">
+        <span class="badge" style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.5rem 1rem; border-radius: 30px;">
+            <i class="bi bi-shield-fill-check me-1"></i>
             Admin Sistema
         </span>
     </div>
 
-    <!-- Cards de Estatísticas Principais (estilo da imagem) -->
+    <!-- Primeira Linha: EMPRESAS e USUÁRIOS -->
     <div class="row g-4 mb-4">
-        <!-- Empresas -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="text-uppercase small fw-semibold mb-0" style="color: #6b7280;">EMPRESAS</h6>
-                    <span class="badge-active">{{ stats.empresas_ativas }} ativas</span>
-                </div>
-                <div class="d-flex align-items-end justify-content-between">
-                    <div>
-                        <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ stats.total_empresas }}</span>
+        <!-- EMPRESAS -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon azul me-3">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h6 class="stat-label mb-0">EMPRESAS</h6>
                     </div>
-                    <div class="stat-icon primary">
-                        <i class="bi bi-building"></i>
-                    </div>
+                    <span class="badge" style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px;">
+                        <i class="bi bi-check-circle-fill me-1" style="font-size: 0.6rem;"></i>
+                        {{ stats.empresas_ativas }} ativas
+                    </span>
                 </div>
-                <div class="mt-3 d-flex align-items-center">
-                    <span class="badge-active" style="background: #d1fae5; color: #10b981;">↑ 12%</span>
-                    <span class="small ms-2" style="color: #6b7280;">este mês</span>
-                </div>
+                <div class="stat-value ms-5">{{ stats.total_empresas }}</div>
             </div>
         </div>
 
-        <!-- Usuários -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="text-uppercase small fw-semibold mb-0" style="color: #6b7280;">USUÁRIOS</h6>
-                    <span class="badge-active">{{ stats.usuarios_ativos }} ativos</span>
-                </div>
-                <div class="d-flex align-items-end justify-content-between">
-                    <div>
-                        <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ stats.total_usuarios }}</span>
+        <!-- USUÁRIOS -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon amarelo me-3">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h6 class="stat-label mb-0">USUÁRIOS</h6>
                     </div>
-                    <div class="stat-icon success">
-                        <i class="bi bi-people"></i>
-                    </div>
+                    <span class="badge" style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px;">
+                        <i class="bi bi-check-circle-fill me-1" style="font-size: 0.6rem;"></i>
+                        {{ stats.usuarios_ativos }} ativos
+                    </span>
                 </div>
-                <div class="mt-3 d-flex align-items-center">
-                    <span class="badge-active" style="background: #d1fae5; color: #10b981;">↑ 8%</span>
-                    <span class="small ms-2" style="color: #6b7280;">este mês</span>
-                </div>
+                <div class="stat-value ms-5">{{ stats.total_usuarios }}</div>
             </div>
         </div>
 
-        <!-- Contratos -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="text-uppercase small fw-semibold mb-0" style="color: #6b7280;">CONTRATOS</h6>
-                    <span class="badge-active">{{ stats.contratos_ativos }} ativos</span>
-                </div>
-                <div class="d-flex align-items-end justify-content-between">
-                    <div>
-                        <span class="fw-bold" style="color: #1f2937; font-size: 2.5rem;">{{ stats.total_contratos }}</span>
+        <!-- CONTRATOS -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon vermelho me-3">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <h6 class="stat-label mb-0">CONTRATOS</h6>
                     </div>
-                    <div class="stat-icon secondary">
-                        <i class="bi bi-file-text"></i>
-                    </div>
+                    <span class="badge" style="background: var(--vermelho-claro); color: var(--vermelho-principal); padding: 0.25rem 0.75rem; border-radius: 30px;">
+                        <i class="bi bi-check-circle-fill me-1" style="font-size: 0.6rem;"></i>
+                        {{ stats.contratos_ativos }} ativos
+                    </span>
                 </div>
-                <div class="mt-3 d-flex align-items-center">
-                    <span class="badge-active" style="background: #d1fae5; color: #10b981;">↑ 5%</span>
-                    <span class="small ms-2" style="color: #6b7280;">este mês</span>
-                </div>
+                <div class="stat-value ms-5">{{ stats.total_contratos }}</div>
             </div>
         </div>
 
-        <!-- Valor Total -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="text-uppercase small fw-semibold mb-0" style="color: #6b7280;">VALOR TOTAL</h6>
-                    <span class="badge-active" style="background: #dbeafe; color: #3b82f6;">em contratos</span>
-                </div>
-                <div class="d-flex align-items-end justify-content-between">
-                    <div>
-                        <span class="fw-bold" style="color: #1f2937; font-size: 2rem;">R$ {{ "%.2f"|format(stats.valor_total) }}</span>
+        <!-- VALOR TOTAL -->
+        <div class="col-md-3">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon verde me-3">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <h6 class="stat-label mb-0">VALOR TOTAL</h6>
                     </div>
-                    <div class="stat-icon warning">
-                        <i class="bi bi-coin"></i>
-                    </div>
+                    <span class="badge" style="background: var(--verde-claro); color: var(--verde-principal); padding: 0.25rem 0.75rem; border-radius: 30px;">
+                        <i class="bi bi-tag-fill me-1" style="font-size: 0.6rem;"></i>
+                        em contratos
+                    </span>
                 </div>
-                <div class="mt-3 d-flex align-items-center">
-                    <span class="badge-active" style="background: #d1fae5; color: #10b981;">↑ 23%</span>
-                    <span class="small ms-2" style="color: #6b7280;">este mês</span>
-                </div>
+                <div class="stat-value ms-5" style="font-size: 1.8rem;">R$ {{ "%.2f"|format(stats.valor_total) }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Gráficos e IPs Bloqueados (estilo da imagem) -->
-    <div class="row g-4">
-        <!-- Gráfico de Crescimento de Empresas -->
-        <div class="col-12 col-lg-8">
-            <div class="chart-container">
-                <h5 class="fw-semibold mb-4" style="color: #1f2937;">Crescimento de Empresas</h5>
+    <!-- Segunda Linha: CRESCIMENTO DE EMPRESAS e IPs BLOQUEADOS -->
+    <div class="row g-4 mb-4">
+        <!-- CRESCIMENTO DE EMPRESAS -->
+        <div class="col-md-8">
+            <div class="card-custom p-4">
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="card-icon azul" style="width: 36px; height: 36px;">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Crescimento de Empresas</h5>
+                </div>
                 
-                <div class="position-relative" style="height: 300px;">
+                <!-- Grid do gráfico -->
+                <div class="position-relative" style="height: 250px; margin-top: 20px;">
+                    <!-- Eixo Y -->
+                    <div class="position-absolute start-0 top-0 bottom-0 d-flex flex-column justify-content-between" style="width: 30px;">
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">22</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">20</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">18</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">16</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">14</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">12</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">10</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">8</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">6</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">4</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">2</span>
+                        <span style="color: var(--cinza-texto); opacity: 0.5; font-size: 0.8rem;">0</span>
+                    </div>
+
                     <!-- Linhas de grade -->
-                    <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
-                        {% for i in range(0, 23, 2) %}
-                        <line x1="50" y1="{{ 20 + i*12 }}" x2="100%" y2="{{ 20 + i*12 }}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="5,5"/>
+                    <div class="position-absolute start-0 end-0" style="top: 0; height: 100%; margin-left: 40px;">
+                        {% for i in range(0, 12) %}
+                        <div style="position: absolute; left: 0; right: 0; top: {{ i * 20.8 }}px; border-bottom: 1px dashed var(--cinza-claro);"></div>
                         {% endfor %}
-                        <!-- Linha vertical -->
-                        <line x1="50" y1="20" x2="50" y2="280" stroke="#e5e7eb" stroke-width="1"/>
-                    </svg>
+                    </div>
 
                     <!-- Barras do gráfico -->
-                    <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-around align-items-end px-4" style="height: 280px;">
+                    <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-around align-items-end" style="margin-left: 40px; height: 100%;">
                         {% set meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'] %}
                         {% set valores = [4, 6, 8, 10, 14, 18] %}
                         
                         {% for i in range(6) %}
-                        <div class="d-flex flex-column align-items-center">
-                            <div class="chart-bar" style="height: {{ valores[i] * 12 }}px; width: 40px;"></div>
-                            <span class="small mt-2" style="color: #6b7280;">{{ meses[i] }}</span>
-                            <span class="small fw-bold" style="color: #1f2937;">{{ valores[i] }}</span>
+                        <div class="d-flex flex-column align-items-center" style="width: 60px;">
+                            <div style="height: {{ valores[i] * 8 }}px; width: 30px; background: linear-gradient(180deg, var(--azul-principal), var(--azul-escuro)); border-radius: 8px 8px 0 0;"></div>
+                            <span class="mt-2 fw-medium">{{ meses[i] }}</span>
+                            <small style="color: var(--cinza-texto); opacity: 0.6;">{{ valores[i] }}</small>
                         </div>
                         {% endfor %}
                     </div>
@@ -141,96 +156,88 @@
             </div>
         </div>
 
-        <!-- Cards de IPs Bloqueados e Valor Total -->
-        <div class="col-12 col-lg-4">
-            <div class="row g-4">
-                <!-- IPs Bloqueados -->
-                <div class="col-12">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h5 class="fw-semibold mb-0" style="color: #1f2937;">IPs Bloqueados</h5>
-                            <div class="stat-icon danger">
-                                <i class="bi bi-shield"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center py-3">
-                            <span class="fw-bold" style="color: #1f2937; font-size: 3rem;">{{ ip_stats.ativos }}</span>
-                            <p class="small" style="color: #6b7280;">IPs bloqueados no momento</p>
-                        </div>
-                        
-                        <div class="mt-3 pt-3" style="border-top: 1px solid #e5e7eb;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span style="color: #6b7280;">Por excesso de tentativas</span>
-                                <span class="fw-bold" style="color: #1f2937;">{{ ip_stats.por_motivo[0].total if ip_stats.por_motivo else 0 }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span style="color: #6b7280;">Tentativas (24h)</span>
-                                <span class="fw-bold" style="color: #1f2937;">{{ ip_stats.tentativas_24h.total }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span style="color: #6b7280;">Falhas</span>
-                                <span class="fw-bold" style="color: #ef4444;">{{ ip_stats.tentativas_24h.falhas }}</span>
-                            </div>
-                        </div>
-
-                        <a href="{{ url_for('admin_sistema.ips_bloqueados') }}" class="btn btn-link w-100 mt-3 text-decoration-none" style="color: #3b82f6;">
-                            Ver todos os IPs bloqueados <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
+        <!-- IPs BLOQUEADOS -->
+        <div class="col-md-4">
+            <div class="card-custom p-4 h-100">
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="card-icon vermelho" style="width: 36px; height: 36px;">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h5 class="card-title mb-0">IPs Bloqueados</h5>
+                </div>
+                
+                <div class="text-center py-3">
+                    <div class="display-1 fw-bold" style="color: var(--vermelho-principal);">{{ ip_stats.ativos }}</div>
+                    <p class="text-muted">
+                        <i class="bi bi-shield me-1"></i>
+                        IPs bloqueados no momento
+                    </p>
+                </div>
+                
+                <div class="mt-3 pt-3" style="border-top: 2px solid var(--cinza-claro);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">
+                            <i class="bi bi-exclamation-triangle me-1" style="color: var(--amarelo-escuro);"></i>
+                            Max_tentativas
+                        </span>
+                        <span class="fw-bold">{{ ip_stats.por_motivo[0].total if ip_stats.por_motivo else 0 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">
+                            <i class="bi bi-clock-history me-1" style="color: var(--azul-principal);"></i>
+                            Tentativas (24h)
+                        </span>
+                        <span class="fw-bold">{{ ip_stats.tentativas_24h.total }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">
+                            <i class="bi bi-x-circle me-1" style="color: var(--vermelho-principal);"></i>
+                            Falhas
+                        </span>
+                        <span class="fw-bold" style="color: var(--vermelho-principal);">{{ ip_stats.tentativas_24h.falhas }}</span>
                     </div>
                 </div>
 
-                <!-- Valor Total Card (estilo da imagem) -->
-                <div class="col-12">
-                    <div class="stat-card bg-gradient-primary text-white">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h5 class="fw-semibold mb-0 text-white">Valor Total</h5>
-                            <div class="stat-icon" style="background: rgba(255,255,255,0.2); color: white;">
-                                <i class="bi bi-cash-stack"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center py-2">
-                            <span class="fw-bold" style="font-size: 2.5rem;">R$ {{ "%.2f"|format(stats.valor_total) }}</span>
-                            <p class="text-white-50 small">em contratos</p>
-                        </div>
-                        
-                        <div class="mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,0.2);">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span style="color: rgba(255,255,255,0.8);">Contratos ativos</span>
-                                <span class="fw-bold">{{ stats.contratos_ativos }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <a href="{{ url_for('admin_sistema.ips_bloqueados') }}" class="btn btn-link text-decoration-none mt-3 p-0" style="color: var(--azul-principal);">
+                    Ver todos os IPs <i class="bi bi-arrow-right ms-1"></i>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Últimas Empresas e Feedbacks -->
-    <div class="row g-4 mt-2">
+    <!-- Terceira Linha: Últimas Empresas e Feedbacks -->
+    <div class="row g-4">
         <!-- Últimas Empresas -->
-        <div class="col-12 col-lg-6">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-semibold mb-0" style="color: #1f2937;">Últimas Empresas</h5>
-                    <a href="{{ url_for('admin_sistema.empresas') }}" class="text-decoration-none small" style="color: #3b82f6;">
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="card-icon azul" style="width: 36px; height: 36px;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Últimas Empresas</h5>
+                    </div>
+                    <a href="{{ url_for('admin_sistema.empresas') }}" class="btn btn-sm btn-outline-primary">
                         Ver todas <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
                 
                 {% for empresa in empresas_rapidas %}
-                <div class="d-flex align-items-center justify-content-between py-2 {% if not loop.last %}mb-2{% endif %}" style="border-bottom: {% if not loop.last %}1px solid #e5e7eb{% else %}none{% endif %};">
+                <div class="d-flex align-items-center justify-content-between py-2 {% if not loop.last %}mb-2{% endif %}" style="border-bottom: {% if not loop.last %}2px solid var(--cinza-claro){% else %}none{% endif %};">
                     <div class="d-flex align-items-center">
-                        <div class="stat-icon primary me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-                            {{ empresa.nome[:1] }}
+                        <div class="card-icon azul me-3" style="width: 40px; height: 40px; background: var(--azul-claro);">
+                            <span style="color: var(--azul-principal); font-weight: 600;">{{ empresa.nome[:1] }}</span>
                         </div>
                         <div>
-                            <span class="fw-medium" style="color: #1f2937;">{{ empresa.nome }}</span>
-                            <span class="small d-block" style="color: #6b7280;">{{ empresa.total_usuarios }} usuários</span>
+                            <div class="fw-medium">{{ empresa.nome }}</div>
+                            <small class="text-muted">
+                                <i class="bi bi-people me-1"></i>
+                                {{ empresa.total_usuarios }} usuários
+                            </small>
                         </div>
                     </div>
-                    <span class="badge {% if empresa.status == 'ativo' %}badge-active{% elif empresa.status == 'trial' %}badge-trial{% else %}badge-inactive{% endif %}">
+                    <span class="badge {% if empresa.status == 'ativo' %}badge-azul{% elif empresa.status == 'trial' %}badge-amarelo{% else %}badge-vermelho{% endif %}">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
                         {{ empresa.status }}
                     </span>
                 </div>
@@ -239,50 +246,50 @@
         </div>
 
         <!-- Feedbacks Recentes -->
-        <div class="col-12 col-lg-6">
-            <div class="stat-card">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-semibold mb-0" style="color: #1f2937;">Feedbacks Recentes</h5>
-                    <a href="{{ url_for('admin_sistema.feedbacks') }}" class="text-decoration-none small" style="color: #3b82f6;">
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="card-icon amarelo" style="width: 36px; height: 36px;">
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Feedbacks Recentes</h5>
+                    </div>
+                    <a href="{{ url_for('admin_sistema.feedbacks') }}" class="btn btn-sm btn-outline-primary">
                         Ver todos <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
                 
                 {% for feedback in feedbacks %}
-                <div class="py-2 {% if not loop.last %}mb-2{% endif %}" style="border-bottom: {% if not loop.last %}1px solid #e5e7eb{% else %}none{% endif %};">
-                    <div class="d-flex align-items-center justify-content-between mb-1">
-                        <div class="d-flex align-items-center">
-                            <span class="fw-medium" style="color: #1f2937;">{{ feedback.usuario_nome }}</span>
-                            <span class="small ms-2" style="color: #6b7280;">({{ feedback.empresa_nome }})</span>
+                <div class="py-2 {% if not loop.last %}mb-2{% endif %}" style="border-bottom: {% if not loop.last %}2px solid var(--cinza-claro){% else %}none{% endif %};">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="card-icon azul" style="width: 32px; height: 32px; background: var(--azul-claro);">
+                                <span style="color: var(--azul-principal); font-weight: 600;">{{ feedback.usuario_nome[:1] }}</span>
+                            </div>
+                            <div>
+                                <span class="fw-medium">{{ feedback.usuario_nome }}</span>
+                                <small class="text-muted ms-2">({{ feedback.empresa_nome }})</small>
+                            </div>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex">
                             {% for i in range(1,6) %}
-                            <i class="bi bi-star-fill small me-1" style="color: {% if i <= feedback.nota %}#f59e0b{% else %}#e5e7eb{% endif %};"></i>
+                            <i class="bi bi-star-fill small me-1" style="color: {% if i <= feedback.nota %}var(--amarelo-principal){% else %}var(--cinza-claro){% endif %};"></i>
                             {% endfor %}
                         </div>
                     </div>
-                    <p class="small text-truncate mb-0" style="color: #6b7280;">{{ feedback.sugestao or 'Sem sugestão' }}</p>
-                    <span class="small" style="color: #9ca3af;">{{ feedback.data_criacao.strftime('%d/%m/%Y') }}</span>
+                    <p class="text-muted small mb-1 ms-5 ps-2">
+                        <i class="bi bi-chat-quote me-1"></i>
+                        {{ feedback.sugestao or 'Sem sugestão' }}
+                    </p>
+                    <small class="text-muted ms-5 ps-2">
+                        <i class="bi bi-clock me-1"></i>
+                        {{ feedback.data_criacao.strftime('%d/%m/%Y') }}
+                    </small>
                 </div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .text-white-50 {
-        color: rgba(255, 255, 255, 0.5);
-    }
-    
-    .chart-bar {
-        background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
-        border-radius: 8px 8px 0 0;
-        transition: height 0.3s ease;
-    }
-    
-    .stat-card.bg-gradient-primary {
-        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    }
-</style>
 {% endblock %}
