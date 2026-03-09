@@ -23,7 +23,7 @@ O sistema permite:
 
 - Tratamento de erros personalizados
 
-*O projeto está em evolução contínua, com foco em escalabilidade e arquitetura limpa.
+*O projeto está em evolução. Com foco em escalabilidade e arquitetura limpa.
 
 # Stack Tecnológica
 
