@@ -23,7 +23,7 @@ O sistema permite:
 
 - Tratamento de erros personalizados
 
-*O projeto está em evolução contínua, com foco em escalabilidade e arquitetura limpa.
+*O projeto está em evolução. Com foco em escalabilidade e arquitetura limpa.
 
 # Stack Tecnológica
 
@@ -86,7 +86,7 @@ System-Contratos/
 
 # 🔐 Controle de Acesso e Perfis
 
-O sistema implementa controle de acesso baseado em papéis (RBAC), com dois níveis administrativos distintos:
+O sistema implementa controle de acesso baseado em papéis (RBAC), com quatro níveis administrativos distintos:
 
 # 🔹 Administrador do Sistema
 
