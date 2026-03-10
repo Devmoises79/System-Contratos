@@ -38,17 +38,24 @@ class LoginManager:
                 'mensagem': 'Usuário inativo. Contate o administrador.'
             }
         
-        # Busca empresa
-        empresa = Empresa.get_by_id(usuario.empresa_id)
-        if not empresa or empresa.status == 'inativo':
-            return False, {
-                'erro': 'empresa_inativa', 
-                'mensagem': 'Empresa inativa. Contate o suporte.'
-            }
+        # Busca empresa (se não for admin_sistema)
+        if usuario.perfil != 'admin_sistema':
+            empresa = Empresa.get_by_id(usuario.empresa_id)
+            if not empresa or empresa.status == 'inativo':
+                return False, {
+                    'erro': 'empresa_inativa', 
+                    'mensagem': 'Empresa inativa. Contate o suporte.'
+                }
         
         # Login bem-sucedido
         IPBlocker.processar_tentativa_sucesso(ip)
-        usuario.registrar_login(ip)
+        
+        # Registrar login (agora o método existe!)
+        try:
+            usuario.registrar_login(ip)
+        except Exception as e:
+            # Log do erro mas não impede o login
+            print(f"Erro ao registrar login: {e}")
         
         # Dados para sessão
         session['usuario'] = {
@@ -57,15 +64,19 @@ class LoginManager:
             'email': usuario.email,
             'perfil': usuario.perfil,
             'empresa_id': usuario.empresa_id,
-            'empresa_nome': empresa.nome,
             'primeiro_acesso': usuario.primeiro_acesso
         }
-        session['empresa'] = {
-            'id': empresa.id,
-            'nome': empresa.nome,
-            'cores': empresa.paleta_cores,
-            'logo': empresa.logo_path
-        }
+        
+        # Se não for admin_sistema, adiciona dados da empresa
+        if usuario.perfil != 'admin_sistema' and usuario.empresa_id:
+            empresa = Empresa.get_by_id(usuario.empresa_id)
+            if empresa:
+                session['empresa'] = {
+                    'id': empresa.id,
+                    'nome': empresa.nome,
+                    'cores': empresa.paleta_cores,
+                    'logo': empresa.logo_path
+                }
         
         if lembrar:
             session.permanent = True
@@ -89,7 +100,7 @@ class LoginManager:
             usuario = session['usuario']
             LoginManager._registrar_log(
                 usuario['id'], 
-                usuario['empresa_id'], 
+                usuario.get('empresa_id'), 
                 'logout', 
                 request.remote_addr
             )
@@ -106,17 +117,20 @@ class LoginManager:
             'assistente': '/dashboard/assistente',
             'analista': '/dashboard/analista'
         }
-        return redirects.get(perfil, '/')
+        return redirects.get(perfil, '/dashboard')
     
     @staticmethod
     def _registrar_log(usuario_id, empresa_id, acao, ip):
         """Registra log de auditoria"""
-        db = Database()
-        query = """
-            INSERT INTO logs (empresa_id, usuario_id, acao, modulo, ip_address)
-            VALUES (%s, %s, %s, 'auth', %s)
-        """
-        db.execute(query, (empresa_id, usuario_id, acao, ip))
+        try:
+            db = Database()
+            query = """
+                INSERT INTO logs (empresa_id, usuario_id, acao, modulo, ip_address)
+                VALUES (%s, %s, %s, 'auth', %s)
+            """
+            db.execute(query, (empresa_id, usuario_id, acao, ip))
+        except Exception as e:
+            print(f"Erro ao registrar log: {e}")
     
     @staticmethod
     def usuario_atual():

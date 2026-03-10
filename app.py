@@ -316,7 +316,7 @@ def index():
     """Página inicial - redireciona para login"""
     if 'usuario' in session:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login.html'))
+    return redirect(url_for('login')) 
 
 @app.route('/login', methods=['GET', 'POST'])
 @ip_bloqueado_verificado
@@ -325,7 +325,7 @@ def index():
 def login():
     """Página de login"""
     if 'usuario' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('dashboard.html'))
     
     if request.method == 'POST':
         email = sanitizar_entrada(request.form.get('email', ''))
@@ -439,8 +439,6 @@ def redefinir_senha(token):
     
     return render_template('auth/redefinir_senha.html', token=token)
 
-
-
 @app.route('/cadastro', methods=['GET', 'POST'])
 @ip_bloqueado_verificado
 @xss_protegido
@@ -455,7 +453,7 @@ def cadastro_usuario():
     db = Database()
     ramos = db.fetch_all("SELECT id, nome, descricao FROM ramos_atividade WHERE ativo = TRUE ORDER BY nome")
     
-    # Lista de perfis disponíveis
+    # Lista de perfis disponíveis para cadastro público
     perfis = [
         {'valor': 'admin_empresa', 'nome': 'Administrador da Empresa', 'descricao': 'Acesso total à gestão da empresa'},
         {'valor': 'gestor', 'nome': 'Gestor', 'descricao': 'Gerencia contratos e aprovações'},
@@ -464,6 +462,9 @@ def cadastro_usuario():
     ]
     
     if request.method == 'POST':
+        # Log para debug
+        app.logger.info(f"Dados recebidos no POST: {dict(request.form)}")
+        
         # Dados pessoais
         nome = sanitizar_entrada(request.form.get('nome', ''))
         email = sanitizar_entrada(request.form.get('email', ''))
@@ -472,6 +473,18 @@ def cadastro_usuario():
         
         # Dados profissionais
         perfil = request.form.get('perfil', '')
+        
+        # VALIDAÇÃO: perfil deve estar na lista permitida
+        perfis_permitidos = ['admin_empresa', 'gestor', 'analista', 'assistente']
+        if perfil not in perfis_permitidos:
+            app.logger.warning(f"Perfil inválido tentado: {perfil}")
+            flash('Selecione um cargo válido na empresa.', 'danger')
+            return render_template('admin/empresa/usuario_form.html', 
+                                 cadastro_publico=True, 
+                                 ramos=ramos, 
+                                 perfis=perfis,
+                                 form_data=request.form)
+        
         email_corporativo = sanitizar_entrada(request.form.get('email_corporativo', ''))
         cargo = sanitizar_entrada(request.form.get('cargo', ''))
         telefone = apenas_digitos(request.form.get('telefone', ''))
@@ -509,14 +522,35 @@ def cadastro_usuario():
                                  perfis=perfis,
                                  form_data=request.form)
         
-        # Verifica se email já existe
+        # ========== VALIDAÇÕES DE UNICIDADE ==========
+        
+        # 1. Email de acesso DEVE ser único (obrigatório)
         if Usuario.get_by_email(email):
-            flash('Este email já está cadastrado.', 'danger')
+            flash('Este email já está cadastrado. Use outro email.', 'danger')
             return render_template('admin/empresa/usuario_form.html', 
                                  cadastro_publico=True, 
                                  ramos=ramos, 
                                  perfis=perfis,
                                  form_data=request.form)
+        
+        # 2. Email corporativo DEVE ser único (se informado)
+        if email_corporativo:
+            # Busca usuário com mesmo email corporativo
+            query = "SELECT id FROM usuarios WHERE email_corporativo = %s"
+            existing = db.fetch_one(query, (email_corporativo,))
+            if existing:
+                flash('Este email corporativo já está em uso por outro funcionário.', 'danger')
+                return render_template('admin/empresa/usuario_form.html', 
+                                     cadastro_publico=True, 
+                                     ramos=ramos, 
+                                     perfis=perfis,
+                                     form_data=request.form)
+        
+        # 3. Telefone NÃO precisa ser único (vários funcionários podem ter mesmo telefone)
+        # 4. Celular NÃO precisa ser único (vários funcionários podem ter mesmo celular)
+        # 5. CNPJ PODE ser repetido (mesma empresa)
+        
+        # =============================================
         
         try:
             # Se usuário escolheu "Outro" e preencheu novo ramo
@@ -525,42 +559,67 @@ def cadastro_usuario():
                 ramo_id = db.execute_return_id(query, (novo_ramo, f"Ramo cadastrado por {empresa_nome}"))
                 app.logger.info(f"Novo ramo cadastrado: {novo_ramo}")
             
-            # Cria a empresa
-            empresa = Empresa(
-                nome=empresa_nome,
-                cnpj=empresa_cnpj if empresa_cnpj else None,
-                email=email,
-                status='trial'
-            )
-            empresa.save()
+            # Verificar se empresa já existe pelo CNPJ (se informado)
+            empresa_id = None
+            if empresa_cnpj:
+                empresa_existente = Empresa.get_by_cnpj(empresa_cnpj)
+                if empresa_existente:
+                    empresa_id = empresa_existente.id
+                    app.logger.info(f"Empresa existente encontrada: {empresa_id} - {empresa_existente.nome}")
             
-            # Cria o usuário com o perfil selecionado
+            # Se não encontrou empresa existente, cria uma nova
+            if not empresa_id:
+                empresa = Empresa(
+                    nome=empresa_nome,
+                    cnpj=empresa_cnpj if empresa_cnpj else None,
+                    email=email,  # Email do responsável como contato da empresa
+                    status='trial'
+                )
+                empresa_id = empresa.save()
+                
+                if not empresa_id:
+                    raise Exception("Erro ao criar empresa - ID não retornado")
+                
+                app.logger.info(f"Nova empresa criada com ID: {empresa_id}")
+            else:
+                # Se usou empresa existente, verifica se o nome da empresa confere (opcional)
+                if empresa_existente and empresa_existente.nome != empresa_nome:
+                    app.logger.warning(f"Nome da empresa diferente do cadastrado: '{empresa_nome}' vs '{empresa_existente.nome}'")
+                    # Não bloqueia, apenas avisa no log
+            
+            # Cria o usuário
             usuario = Usuario(
-                empresa_id=empresa.id,
+                empresa_id=empresa_id,
                 nome=nome,
                 email=email,
-                perfil=perfil,  # Perfil selecionado pelo usuário
+                perfil=perfil,
                 cargo=cargo,
                 telefone=telefone,
                 celular=celular,
-                email_corporativo=email_corporativo,
+                email_corporativo=email_corporativo if email_corporativo else None,  # None se vazio
                 ativo=True,
-                primeiro_acesso=False,  # Já define a senha agora
-                criado_por=None  # Cadastro público
+                primeiro_acesso=False
             )
-            usuario.definir_senha(senha)
-            usuario.save()
             
-            app.logger.info(f"Novo cadastro: {email} - Perfil: {perfil} - Empresa: {empresa_nome}")
+            # Define a senha
+            if not usuario.definir_senha(senha):
+                raise Exception("Erro ao definir hash da senha")
             
-            # Flash message de sucesso
+            # Salva o usuário
+            usuario_id = usuario.save()
+            
+            if not usuario_id:
+                raise Exception("Erro ao criar usuário - ID não retornado")
+            
+            app.logger.info(f"Usuário criado com ID: {usuario_id} - Perfil: {perfil} - Empresa: {empresa_id}")
+            
             flash('Cadastro realizado com sucesso! Faça o login.', 'success')
-            
-            # Redireciona para a página de login
             return redirect(url_for('login'))
             
         except Exception as e:
             app.logger.error(f"Erro no cadastro: {str(e)}")
+            import traceback
+            traceback.print_exc()
             flash('Erro ao realizar cadastro. Tente novamente.', 'danger')
             return render_template('admin/empresa/usuario_form.html', 
                                  cadastro_publico=True, 
@@ -574,7 +633,7 @@ def cadastro_usuario():
                          ramos=ramos, 
                          perfis=perfis,
                          form_data={})
-    
+
 # Rota do perfil
 @app.route('/perfil')
 @rota_protegida()

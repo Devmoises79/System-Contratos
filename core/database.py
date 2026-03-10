@@ -19,7 +19,8 @@ class Database:
                 user=Config.MYSQL_USER,
                 password=Config.MYSQL_PASSWORD,
                 database=Config.MYSQL_DB,
-                port=Config.MYSQL_PORT
+                port=Config.MYSQL_PORT,
+                autocommit=False
             )
             self.cursor = self.connection.cursor(dictionary=True)
             return True
@@ -29,44 +30,62 @@ class Database:
     
     def disconnect(self):
         """Fecha a conexão"""
-        if self.cursor:
-            self.cursor.close()
-        if self.connection:
-            self.connection.close()
+        try:
+            if self.cursor:
+                self.cursor.close()
+            if self.connection:
+                self.connection.close()
+        except Exception as e:
+            print(f"Erro ao desconectar: {e}")
     
     def execute(self, query, params=None):
         """Executa uma query (INSERT, UPDATE, DELETE)"""
         try:
             if not self.connection or not self.connection.is_connected():
-                self.connect()
+                if not self.connect():
+                    return 0
             
             self.cursor.execute(query, params or ())
             self.connection.commit()
             return self.cursor.rowcount
         except Error as e:
             print(f"Erro ao executar query: {e}")
-            self.connection.rollback()
+            if self.connection:
+                self.connection.rollback()
+            return 0
+        except Exception as e:
+            print(f"Erro inesperado: {e}")
+            if self.connection:
+                self.connection.rollback()
             return 0
     
     def execute_return_id(self, query, params=None):
         """Executa INSERT e retorna o ID inserido"""
         try:
             if not self.connection or not self.connection.is_connected():
-                self.connect()
+                if not self.connect():
+                    return None
             
             self.cursor.execute(query, params or ())
             self.connection.commit()
             return self.cursor.lastrowid
         except Error as e:
             print(f"Erro ao executar query: {e}")
-            self.connection.rollback()
+            if self.connection:
+                self.connection.rollback()
+            return None
+        except Exception as e:
+            print(f"Erro inesperado: {e}")
+            if self.connection:
+                self.connection.rollback()
             return None
     
     def fetch_one(self, query, params=None):
         """Busca um único registro"""
         try:
             if not self.connection or not self.connection.is_connected():
-                self.connect()
+                if not self.connect():
+                    return None
             
             self.cursor.execute(query, params or ())
             return self.cursor.fetchone()
@@ -78,7 +97,8 @@ class Database:
         """Busca múltiplos registros"""
         try:
             if not self.connection or not self.connection.is_connected():
-                self.connect()
+                if not self.connect():
+                    return []
             
             self.cursor.execute(query, params or ())
             return self.cursor.fetchall()

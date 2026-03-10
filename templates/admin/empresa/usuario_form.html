@@ -233,34 +233,50 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Perfil (apenas para admin) -->
-                            {% if not cadastro_publico %}
+                            <!-- PERFIL / CARGO NA ARQUITETURA EMPRESARIAL -->
                             <div class="col-md-6">
                                 <label class="form-label fw-medium mb-2">
                                     <i class="bi bi-shield-check me-1" style="color: var(--amarelo-escuro);"></i>
-                                    Perfil <span class="text-danger">*</span>
+                                    Cargo na Empresa <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
                                         <i class="bi bi-person-badge" style="color: var(--amarelo-escuro);"></i>
                                     </span>
-                                    <select class="form-select border-start-0" name="perfil" required
+                                    <select class="form-select border-start-0" name="perfil" id="perfil" required
                                             style="border-color: var(--cinza-claro);">
-                                        <option value="">Selecione um perfil</option>
-                                        <option value="admin_empresa" {% if usuario and usuario.perfil == 'admin_empresa' %}selected{% endif %}>Admin Empresa</option>
-                                        <option value="gestor" {% if usuario and usuario.perfil == 'gestor' %}selected{% endif %}>Gestor</option>
-                                        <option value="assistente" {% if usuario and usuario.perfil == 'assistente' %}selected{% endif %}>Assistente</option>
-                                        <option value="analista" {% if usuario and usuario.perfil == 'analista' %}selected{% endif %}>Analista</option>
+                                        <option value="">Selecione o cargo na empresa</option>
+                                        {% if not cadastro_publico and session.usuario.perfil == 'admin_sistema' %}
+                                        <!-- Apenas admin_sistema pode criar outro admin_sistema -->
+                                        <option value="admin_sistema" {% if usuario and usuario.perfil == 'admin_sistema' %}selected{% endif %}>
+                                            Administrador do Sistema (Acesso total)
+                                        </option>
+                                        {% endif %}
+                                        <option value="admin_empresa" {% if (cadastro_publico and form_data.get('perfil') == 'admin_empresa') or (usuario and usuario.perfil == 'admin_empresa') %}selected{% endif %}>
+                                            Administrador da Empresa (Gerencia usuários e contratos)
+                                        </option>
+                                        <option value="gestor" {% if (cadastro_publico and form_data.get('perfil') == 'gestor') or (usuario and usuario.perfil == 'gestor') %}selected{% endif %}>
+                                            Gestor (Aprova contratos e relatórios)
+                                        </option>
+                                        <option value="analista" {% if (cadastro_publico and form_data.get('perfil') == 'analista') or (usuario and usuario.perfil == 'analista') %}selected{% endif %}>
+                                            Analista (Visualiza dados e relatórios)
+                                        </option>
+                                        <option value="assistente" {% if (cadastro_publico and form_data.get('perfil') == 'assistente') or (usuario and usuario.perfil == 'assistente') %}selected{% endif %}>
+                                            Assistente (Cria e edita contratos)
+                                        </option>
                                     </select>
                                 </div>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Selecione o cargo conforme a hierarquia da empresa
+                                </small>
                             </div>
-                            {% endif %}
 
-                            <!-- Cargo -->
+                            <!-- Cargo (opcional - descrição adicional) -->
                             <div class="col-md-6">
                                 <label class="form-label fw-medium mb-2">
                                     <i class="bi bi-briefcase me-1" style="color: var(--azul-principal);"></i>
-                                    Cargo
+                                    Cargo / Função (opcional)
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
@@ -268,9 +284,13 @@
                                     </span>
                                     <input type="text" class="form-control border-start-0" name="cargo" 
                                            value="{{ form_data.get('cargo', '') if cadastro_publico else usuario.cargo if usuario else '' }}"
-                                           placeholder="Ex: Gerente Comercial"
+                                           placeholder="Ex: Gerente Comercial, Diretor de TI"
                                            style="border-color: var(--cinza-claro);">
                                 </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Descrição adicional do cargo (opcional)
+                                </small>
                             </div>
 
                             <!-- Email Corporativo -->
@@ -466,34 +486,66 @@
                 </form>
             </div>
 
-            <!-- Cards informativos para cadastro público -->
+            <!-- Cards informativos sobre os cargos (para cadastro público) -->
             {% if cadastro_publico %}
             <div class="row g-4 mt-4">
-                <div class="col-md-4">
-                    <div class="card-custom p-3 text-center">
-                        <div class="card-icon azul mx-auto mb-3" style="width: 48px; height: 48px;">
-                            <i class="bi bi-shield-check"></i>
+                <div class="col-12">
+                    <div class="card-custom p-4">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="bi bi-shield-check me-2" style="color: var(--azul-principal);"></i>
+                            Hierarquia de Cargos no Sistema
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="p-3 text-center" style="background: var(--azul-claro); border-radius: 12px;">
+                                    <div class="card-icon azul mx-auto mb-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Admin Sistema</h6>
+                                    <small class="text-muted">Acesso total ao sistema (restrito)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 text-center" style="background: var(--azul-claro); border-radius: 12px;">
+                                    <div class="card-icon azul mx-auto mb-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Admin Empresa</h6>
+                                    <small class="text-muted">Gerencia usuários e contratos</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 text-center" style="background: var(--amarelo-claro); border-radius: 12px;">
+                                    <div class="card-icon amarelo mx-auto mb-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-clipboard-check"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Gestor</h6>
+                                    <small class="text-muted">Aprova contratos e relatórios</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 text-center" style="background: var(--verde-claro); border-radius: 12px;">
+                                    <div class="card-icon verde mx-auto mb-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Analista</h6>
+                                    <small class="text-muted">Visualiza dados e relatórios</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 text-center" style="background: var(--vermelho-claro); border-radius: 12px;">
+                                    <div class="card-icon vermelho mx-auto mb-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-pencil"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">Assistente</h6>
+                                    <small class="text-muted">Cria e edita contratos</small>
+                                </div>
+                            </div>
                         </div>
-                        <h6 class="fw-semibold mb-2">Administrador</h6>
-                        <p class="small text-muted mb-0">Você será o administrador da sua empresa</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card-custom p-3 text-center">
-                        <div class="card-icon verde mx-auto mb-3" style="width: 48px; height: 48px;">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <h6 class="fw-semibold mb-2">Gerencie usuários</h6>
-                        <p class="small text-muted mb-0">Crie e gerencie usuários da sua empresa</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card-custom p-3 text-center">
-                        <div class="card-icon amarelo mx-auto mb-3" style="width: 48px; height: 48px;">
-                            <i class="bi bi-clock"></i>
-                        </div>
-                        <h6 class="fw-semibold mb-2">Período Trial</h6>
-                        <p class="small text-muted mb-0">Comece com 30 dias de teste grátis</p>
+                        <p class="text-muted small mt-3 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Selecione o cargo que melhor representa sua função na empresa. O Administrador do Sistema é um cargo restrito e não está disponível no cadastro público.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -638,6 +690,19 @@
     // Inicializar estado do campo novo ramo
     document.addEventListener('DOMContentLoaded', function() {
         toggleNovoRamo();
+        
+        // Validação adicional no formulário
+        const form = document.getElementById('usuarioForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const perfilSelect = document.getElementById('perfil');
+                if (!perfilSelect.value) {
+                    e.preventDefault();
+                    alert('Por favor, selecione o cargo na empresa.');
+                    perfilSelect.focus();
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
