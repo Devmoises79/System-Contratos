@@ -78,12 +78,11 @@ def gerar_csrf_token():
         session['_csrf_token'] = secrets.token_hex(32)
     return session['_csrf_token']
 
-# CORREÇÃO: Registrar a função, NÃO o resultado da função
 app.jinja_env.globals['csrf_token'] = gerar_csrf_token
 
 def validar_csrf_token(token):
     """Valida token CSRF"""
-    token_sessao = session.pop('_csrf_token', None)
+    token_sessao = session.get('_csrf_token')
     if not token_sessao or token_sessao != token:
         return False
     return True
@@ -104,16 +103,6 @@ def csrf_protegido(f):
 # =====================================================
 # PROTEÇÃO XSS
 # =====================================================
-
-def sanitizar_entrada(dados):
-    """Sanitiza entradas para evitar XSS"""
-    if isinstance(dados, str):
-        return html.escape(dados.strip())
-    elif isinstance(dados, dict):
-        return {k: sanitizar_entrada(v) for k, v in dados.items()}
-    elif isinstance(dados, list):
-        return [sanitizar_entrada(item) for item in dados]
-    return dados
 
 def xss_protegido(f):
     """Decorator para sanitizar entradas"""
@@ -139,7 +128,7 @@ def xss_protegido(f):
 # =====================================================
 
 def sql_injection_protegido(f):
-    """adiciona camada extra de proteção SQL Injection"""
+    """Adiciona camada extra de proteção SQL Injection"""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         # Padrões suspeitos de SQL Injection
@@ -246,7 +235,6 @@ def log_acesso(f):
                 'status_code': resposta.status_code if hasattr(resposta, 'status_code') else 200
             }
             
-            # 
             app.logger.info(f"Acesso: {log_data}")
             
         except Exception as e:
@@ -316,7 +304,7 @@ def index():
     """Página inicial - redireciona para login"""
     if 'usuario' in session:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login')) 
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 @ip_bloqueado_verificado
@@ -325,19 +313,17 @@ def index():
 def login():
     """Página de login"""
     if 'usuario' in session:
-        return redirect(url_for('dashboard.html'))
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         email = sanitizar_entrada(request.form.get('email', ''))
-        senha = request.form.get('senha', '')  # Não sanitizar senha
+        senha = request.form.get('senha', '')
         lembrar = request.form.get('lembrar') == 'on'
         
-        # Validação básica
         if not email or not senha:
             flash('Email e senha são obrigatórios.', 'danger')
             return render_template('login.html')
         
-        # Valida formato do email
         if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
             flash('Formato de email inválido.', 'danger')
             return render_template('login.html')
@@ -345,7 +331,6 @@ def login():
         sucesso, resultado = LoginManager.login(email, senha, lembrar)
         
         if sucesso:
-            # Gera novo CSRF token para a sessão
             session['_csrf_token'] = secrets.token_hex(32)
             session['login_time'] = datetime.now().isoformat()
             
@@ -385,12 +370,9 @@ def recuperar_senha():
         
         usuario = Usuario.get_by_email(email)
         if usuario:
-            token = usuario.gerar_token_recuperacao()
-            # link = url_for('redefinir_senha', token=token, _external=True)
             app.logger.info(f"Token de recuperação gerado para: {email}")
             flash('Instruções enviadas para seu email.', 'success')
         else:
-            # Mensagem genérica por segurança
             flash('Se o email existir, enviaremos instruções.', 'info')
         
         return redirect(url_for('login'))
@@ -414,7 +396,6 @@ def redefinir_senha(token):
         senha = request.form.get('senha', '')
         confirmar = request.form.get('confirmar_senha', '')
         
-        # Validações de senha forte
         if len(senha) < 8:
             flash('A senha deve ter no mínimo 8 caracteres.', 'danger')
         elif not re.search(r'[A-Z]', senha):
@@ -449,32 +430,25 @@ def cadastro_usuario():
     from models.usuario import Usuario
     from core.database import Database
     
-    # Busca ramos de atividade do banco
     db = Database()
     ramos = db.fetch_all("SELECT id, nome, descricao FROM ramos_atividade WHERE ativo = TRUE ORDER BY nome")
     
-    # Lista de perfis disponíveis para cadastro público
     perfis = [
         {'valor': 'admin_empresa', 'nome': 'Administrador da Empresa', 'descricao': 'Acesso total à gestão da empresa'},
         {'valor': 'gestor', 'nome': 'Gestor', 'descricao': 'Gerencia contratos e aprovações'},
-        {'valor': 'analista', 'nome': 'Analista', 'descricao': 'Visualiza relatórios e estatísticas'},
+        {'valor': 'analista', 'nome': 'Analista', 'descricao': 'Visualiza relatórios e estatísticas, cria e edita contratos'},
         {'valor': 'assistente', 'nome': 'Assistente', 'descricao': 'Cria e edita contratos'}
     ]
     
     if request.method == 'POST':
-        # Log para debug
         app.logger.info(f"Dados recebidos no POST: {dict(request.form)}")
         
-        # Dados pessoais
         nome = sanitizar_entrada(request.form.get('nome', ''))
         email = sanitizar_entrada(request.form.get('email', ''))
         senha = request.form.get('senha', '')
         confirmar_senha = request.form.get('confirmar_senha', '')
-        
-        # Dados profissionais
         perfil = request.form.get('perfil', '')
         
-        # VALIDAÇÃO: perfil deve estar na lista permitida
         perfis_permitidos = ['admin_empresa', 'gestor', 'analista', 'assistente']
         if perfil not in perfis_permitidos:
             app.logger.warning(f"Perfil inválido tentado: {perfil}")
@@ -490,13 +464,11 @@ def cadastro_usuario():
         telefone = apenas_digitos(request.form.get('telefone', ''))
         celular = apenas_digitos(request.form.get('celular', ''))
         
-        # Dados da empresa
         empresa_nome = sanitizar_entrada(request.form.get('empresa_nome', ''))
         empresa_cnpj = apenas_digitos(request.form.get('empresa_cnpj', ''))
         ramo_id = request.form.get('ramo_id', '')
         novo_ramo = sanitizar_entrada(request.form.get('novo_ramo', ''))
         
-        # Validações básicas
         if not nome or not email or not senha or not perfil or not empresa_nome:
             flash('Todos os campos obrigatórios devem ser preenchidos.', 'danger')
             return render_template('admin/empresa/usuario_form.html', 
@@ -513,7 +485,6 @@ def cadastro_usuario():
                                  perfis=perfis,
                                  form_data=request.form)
         
-        # Valida força da senha
         if len(senha) < 8:
             flash('A senha deve ter no mínimo 8 caracteres.', 'danger')
             return render_template('admin/empresa/usuario_form.html', 
@@ -522,9 +493,6 @@ def cadastro_usuario():
                                  perfis=perfis,
                                  form_data=request.form)
         
-        # ========== VALIDAÇÕES DE UNICIDADE ==========
-        
-        # 1. Email de acesso DEVE ser único (obrigatório)
         if Usuario.get_by_email(email):
             flash('Este email já está cadastrado. Use outro email.', 'danger')
             return render_template('admin/empresa/usuario_form.html', 
@@ -533,33 +501,12 @@ def cadastro_usuario():
                                  perfis=perfis,
                                  form_data=request.form)
         
-        # 2. Email corporativo DEVE ser único (se informado)
-        if email_corporativo:
-            # Busca usuário com mesmo email corporativo
-            query = "SELECT id FROM usuarios WHERE email_corporativo = %s"
-            existing = db.fetch_one(query, (email_corporativo,))
-            if existing:
-                flash('Este email corporativo já está em uso por outro funcionário.', 'danger')
-                return render_template('admin/empresa/usuario_form.html', 
-                                     cadastro_publico=True, 
-                                     ramos=ramos, 
-                                     perfis=perfis,
-                                     form_data=request.form)
-        
-        # 3. Telefone NÃO precisa ser único (vários funcionários podem ter mesmo telefone)
-        # 4. Celular NÃO precisa ser único (vários funcionários podem ter mesmo celular)
-        # 5. CNPJ PODE ser repetido (mesma empresa)
-        
-        # =============================================
-        
         try:
-            # Se usuário escolheu "Outro" e preencheu novo ramo
             if ramo_id == 'outro' and novo_ramo:
                 query = "INSERT INTO ramos_atividade (nome, descricao, ativo) VALUES (%s, %s, TRUE)"
                 ramo_id = db.execute_return_id(query, (novo_ramo, f"Ramo cadastrado por {empresa_nome}"))
                 app.logger.info(f"Novo ramo cadastrado: {novo_ramo}")
             
-            # Verificar se empresa já existe pelo CNPJ (se informado)
             empresa_id = None
             if empresa_cnpj:
                 empresa_existente = Empresa.get_by_cnpj(empresa_cnpj)
@@ -567,12 +514,11 @@ def cadastro_usuario():
                     empresa_id = empresa_existente.id
                     app.logger.info(f"Empresa existente encontrada: {empresa_id} - {empresa_existente.nome}")
             
-            # Se não encontrou empresa existente, cria uma nova
             if not empresa_id:
                 empresa = Empresa(
                     nome=empresa_nome,
                     cnpj=empresa_cnpj if empresa_cnpj else None,
-                    email=email,  # Email do responsável como contato da empresa
+                    email=email,
                     status='trial'
                 )
                 empresa_id = empresa.save()
@@ -581,13 +527,7 @@ def cadastro_usuario():
                     raise Exception("Erro ao criar empresa - ID não retornado")
                 
                 app.logger.info(f"Nova empresa criada com ID: {empresa_id}")
-            else:
-                # Se usou empresa existente, verifica se o nome da empresa confere (opcional)
-                if empresa_existente and empresa_existente.nome != empresa_nome:
-                    app.logger.warning(f"Nome da empresa diferente do cadastrado: '{empresa_nome}' vs '{empresa_existente.nome}'")
-                    # Não bloqueia, apenas avisa no log
             
-            # Cria o usuário
             usuario = Usuario(
                 empresa_id=empresa_id,
                 nome=nome,
@@ -596,16 +536,14 @@ def cadastro_usuario():
                 cargo=cargo,
                 telefone=telefone,
                 celular=celular,
-                email_corporativo=email_corporativo if email_corporativo else None,  # None se vazio
+                email_corporativo=email_corporativo if email_corporativo else None,
                 ativo=True,
                 primeiro_acesso=False
             )
             
-            # Define a senha
             if not usuario.definir_senha(senha):
                 raise Exception("Erro ao definir hash da senha")
             
-            # Salva o usuário
             usuario_id = usuario.save()
             
             if not usuario_id:
@@ -627,14 +565,16 @@ def cadastro_usuario():
                                  perfis=perfis,
                                  form_data=request.form)
     
-    # GET - exibe formulário de cadastro
     return render_template('admin/empresa/usuario_form.html', 
                          cadastro_publico=True, 
                          ramos=ramos, 
                          perfis=perfis,
                          form_data={})
 
-# Rota do perfil
+# =====================================================
+# ROTA DE PERFIL
+# =====================================================
+
 @app.route('/perfil')
 @rota_protegida()
 def perfil():
@@ -646,11 +586,10 @@ def perfil():
         flash('Usuário não encontrado.', 'danger')
         return redirect(url_for('dashboard'))
     
-    # Busca dados da empresa
-    from models.empresa import Empresa
     empresa = Empresa.get_by_id(usuario.empresa_id)
     
     return render_template('perfil.html', usuario=usuario, empresa=empresa)
+
 # =====================================================
 # ROTAS DE DASHBOARD (PROTEGIDAS)
 # =====================================================
@@ -677,10 +616,7 @@ def gestor_dashboard():
     """Dashboard do gestor"""
     empresa_id = session['usuario']['empresa_id']
     
-    # Estatísticas
     stats = Contrato.estatisticas(empresa_id)
-    
-    # Contratos pendentes de aprovação
     contratos_pendentes = Contrato.listar_por_empresa(empresa_id, 'rascunho')
     
     return render_template('dashboard/gestor.html',
@@ -693,7 +629,6 @@ def assistente_dashboard():
     """Dashboard do assistente"""
     empresa_id = session['usuario']['empresa_id']
     
-    # Meus contratos
     db = get_db()
     meus_contratos = db.fetch_all("""
         SELECT * FROM contratos 
@@ -704,16 +639,206 @@ def assistente_dashboard():
     
     return render_template('dashboard/assistente.html', contratos=meus_contratos)
 
+
+
+# =====================================================
+# ROTA DO ANALISTA (CORRIGIDA)
+# =====================================================
+
 @app.route('/dashboard/analista')
 @rota_protegida('analista', 'gestor', 'admin_empresa', 'admin_sistema')
 def analista_dashboard():
-    """Dashboard do analista"""
-    empresa_id = session['usuario']['empresa_id']
+    """Dashboard do analista - Visualização de dados e estatísticas"""
+    try:
+        empresa_id = session['usuario']['empresa_id']
+        db = get_db()
+        
+        # Buscar estatísticas
+        stats = Contrato.estatisticas(empresa_id)
+        
+        if not stats:
+            stats = {
+                'total': 0,
+                'ativos': 0,
+                'rascunhos': 0,
+                'aguardando': 0,
+                'encerrados': 0,
+                'cancelados': 0,
+                'suspensos': 0,
+                'total_valor': 0,
+                'media': 0,
+                'por_mes': []
+            }
+        
+        # Adicionar por_status para compatibilidade com template
+        stats['por_status'] = {
+            'rascunho': stats.get('rascunhos', 0),
+            'aguardando': stats.get('aguardando', 0),
+            'encerrado': stats.get('encerrados', 0),
+            'cancelado': stats.get('cancelados', 0),
+            'suspenso': stats.get('suspensos', 0)
+        }
+        
+        # Buscar top 5 contratos por valor
+        top_contratos_raw = db.fetch_all("""
+            SELECT id, numero_contrato, contratante_nome, valor
+            FROM contratos 
+            WHERE empresa_id = %s
+            ORDER BY valor DESC
+            LIMIT 5
+        """, (empresa_id,))
+        
+        top_contratos = []
+        for c in top_contratos_raw:
+            top_contratos.append({
+                'id': c['id'],
+                'numero_contrato': c['numero_contrato'],
+                'contratante_nome': c['contratante_nome'],
+                'valor': c['valor']
+            })
+        
+        app.logger.info(f"Dashboard analista carregado - Empresa: {empresa_id}, Contratos: {stats['total']}")
+        
+        return render_template('dashboard/analista.html', 
+                             stats=stats,
+                             top_contratos=top_contratos)
+                             
+    except Exception as e:
+        app.logger.error(f"Erro no dashboard do analista: {e}")
+        import traceback
+        traceback.print_exc()
+        # Retorna template com dados vazios em vez de redirecionar
+        return render_template('dashboard/analista.html', 
+                             stats={
+                                 'total': 0, 'ativos': 0, 'rascunhos': 0, 'aguardando': 0,
+                                 'encerrados': 0, 'cancelados': 0, 'suspensos': 0,
+                                 'total_valor': 0, 'media': 0, 'por_mes': [],
+                                 'por_status': {'rascunho': 0, 'aguardando': 0, 'encerrado': 0, 'cancelado': 0, 'suspenso': 0}
+                             }, 
+                             top_contratos=[])
+
+# =====================================================
+# ROTAS DE CONTRATO COM PERMISSÕES CORRETAS
+# =====================================================
+
+@app.route('/contrato/<int:id>/enviar-aprovacao', methods=['POST'])
+@rota_protegida('analista', 'assistente', 'admin_empresa', 'admin_sistema')
+def enviar_contrato_aprovacao(id):
+    """Envia contrato para aprovação"""
+    contrato = Contrato.get_by_id(id)
     
-    # Estatísticas completas
-    stats = Contrato.estatisticas(empresa_id)
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
     
-    return render_template('dashboard/analista.html', stats=stats)
+    # Verificar se já está aprovado
+    if contrato.status == 'ativo':
+        flash('Contrato já está aprovado!', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    # Verificar se já foi enviado
+    if contrato.solicitado_aprovacao:
+        flash('Este contrato já foi enviado para aprovação.', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    # Verificar se está em rascunho
+    if contrato.status != 'rascunho':
+        flash('Apenas contratos em rascunho podem ser enviados para aprovação.', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    # Solicitar aprovação
+    contrato.solicitar_aprovacao(session['usuario']['id'])
+    
+    app.logger.info(f"Contrato {contrato.numero_contrato} enviado para aprovação por {session['usuario']['id']}")
+    
+    flash(f'Contrato {contrato.numero_contrato} enviado para aprovação!', 'success')
+    return redirect(url_for('listar_contratos'))
+
+@app.route('/contrato/<int:id>/aprovar', methods=['POST'])
+@rota_protegida('gestor', 'admin_empresa', 'admin_sistema')
+def aprovar_contrato(id):
+    """Aprova contrato (apenas gestor e admin)"""
+    contrato = Contrato.get_by_id(id)
+    
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
+    
+    # Verificar se já está aprovado
+    if contrato.status == 'ativo':
+        flash('Contrato já está aprovado!', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    # Verificar se foi solicitado aprovação
+    if not contrato.solicitado_aprovacao:
+        flash('Este contrato não foi solicitado para aprovação ainda.', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    # Aprovar usando o método existente
+    contrato.aprovar(session['usuario']['id'])
+    
+    app.logger.info(f"Contrato {contrato.numero_contrato} aprovado por {session['usuario']['id']}")
+    
+    flash(f'Contrato {contrato.numero_contrato} aprovado com sucesso!', 'success')
+    return redirect(url_for('listar_contratos'))
+
+@app.route('/contrato/<int:id>/rejeitar', methods=['POST'])
+@rota_protegida('gestor', 'admin_empresa', 'admin_sistema')
+def rejeitar_contrato(id):
+    """Rejeita a aprovação do contrato"""
+    contrato = Contrato.get_by_id(id)
+    
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
+    
+    # Verificar se foi solicitado aprovação
+    if not contrato.solicitado_aprovacao:
+        flash('Este contrato não está aguardando aprovação.', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    # Rejeitar aprovação
+    contrato.rejeitar_aprovacao(session['usuario']['id'])
+    
+    app.logger.info(f"Contrato {contrato.numero_contrato} rejeitado por {session['usuario']['id']}")
+    
+    flash(f'Contrato {contrato.numero_contrato} rejeitado. Retornado para rascunho.', 'warning')
+    return redirect(url_for('listar_contratos'))
+
+@app.route('/contrato/<int:id>/editar', methods=['GET', 'POST'])
+@rota_protegida('analista', 'gestor', 'assistente', 'admin_empresa', 'admin_sistema')
+def editar_contrato(id):
+    """Edita contrato existente"""
+    contrato = Contrato.get_by_id(id)
+    
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
+    
+    # Verificar se pode editar (analista não pode editar contratos já enviados para aprovação)
+    if session['usuario']['perfil'] == 'analista' and contrato.solicitado_aprovacao:
+        flash('Contrato já enviado para aprovação. Não pode ser editado.', 'danger')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    if request.method == 'POST':
+        contrato.contratante_nome = sanitizar_entrada(request.form.get('contratante_nome', contrato.contratante_nome))
+        contrato.contratante_cnpj = apenas_digitos(request.form.get('contratante_cnpj', contrato.contratante_cnpj))
+        contrato.contratante_email = sanitizar_entrada(request.form.get('contratante_email', contrato.contratante_email))
+        contrato.contratante_telefone = apenas_digitos(request.form.get('contratante_telefone', contrato.contratante_telefone))
+        contrato.contratada_nome = sanitizar_entrada(request.form.get('contratada_nome', contrato.contratada_nome))
+        contrato.contratada_cnpj = apenas_digitos(request.form.get('contratada_cnpj', contrato.contratada_cnpj))
+        contrato.contratada_email = sanitizar_entrada(request.form.get('contratada_email', contrato.contratada_email))
+        contrato.valor = float(request.form.get('valor', contrato.valor))
+        contrato.prazo_dias = int(request.form.get('prazo_dias', contrato.prazo_dias))
+        contrato.descricao = sanitizar_entrada(request.form.get('descricao', contrato.descricao))
+        contrato.atualizado_por = session['usuario']['id']
+        
+        contrato.save()
+        
+        flash('Contrato atualizado com sucesso!', 'success')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    return render_template('contratos/editar.html', contrato=contrato)
 
 
 # =====================================================
@@ -721,7 +846,7 @@ def analista_dashboard():
 # =====================================================
 
 @app.route('/contratos')
-@rota_protegida('gestor', 'assistente', 'admin_empresa', 'admin_sistema')
+@rota_protegida('analista', 'gestor', 'assistente', 'admin_empresa', 'admin_sistema')
 def listar_contratos():
     """Lista contratos da empresa"""
     empresa_id = session['usuario']['empresa_id']
@@ -732,11 +857,10 @@ def listar_contratos():
     return render_template('contratos/listar.html', contratos=contratos)
 
 @app.route('/contrato/novo', methods=['GET', 'POST'])
-@rota_protegida('gestor', 'assistente', 'admin_empresa', 'admin_sistema')
+@rota_protegida('analista', 'gestor', 'assistente', 'admin_empresa', 'admin_sistema')
 def contrato_novo():
     """Cria novo contrato"""
     if request.method == 'POST':
-        # Sanitiza todas as entradas
         dados = {
             'contratante_nome': sanitizar_entrada(request.form.get('contratante_nome', '')),
             'contratante_cnpj': apenas_digitos(request.form.get('contratante_cnpj', '')),
@@ -750,7 +874,6 @@ def contrato_novo():
             'descricao': sanitizar_entrada(request.form.get('descricao', ''))
         }
         
-        # Validações
         if not dados['contratante_nome'] or not dados['contratada_nome']:
             flash('Nome do contratante e contratada são obrigatórios.', 'danger')
             return redirect(url_for('contrato_novo'))
@@ -763,7 +886,6 @@ def contrato_novo():
             flash('Prazo deve ser maior que zero.', 'danger')
             return redirect(url_for('contrato_novo'))
         
-        # Cria contrato
         contrato = Contrato(
             empresa_id=session['usuario']['empresa_id'],
             contratante_nome=dados['contratante_nome'],
@@ -782,7 +904,6 @@ def contrato_novo():
         contrato.save()
         contrato.gerar_pdf()
         
-        # Registra log
         app.logger.info(f"Novo contrato criado: {contrato.numero_contrato} por usuário {session['usuario']['id']}")
         
         flash('Contrato criado com sucesso!', 'success')
@@ -791,7 +912,7 @@ def contrato_novo():
     return render_template('contratos/novo.html')
 
 @app.route('/contrato/<int:id>')
-@rota_protegida('gestor', 'assistente', 'analista', 'admin_empresa', 'admin_sistema')
+@rota_protegida('analista', 'gestor', 'assistente', 'admin_empresa', 'admin_sistema')
 def ver_contrato(id):
     """Visualiza contrato"""
     contrato = Contrato.get_by_id(id)
@@ -801,6 +922,79 @@ def ver_contrato(id):
         return redirect(url_for('listar_contratos'))
     
     return render_template('contratos/detalhe.html', contrato=contrato)
+
+@app.route('/contrato/<int:id>/editar', methods=['GET', 'POST'])
+@rota_protegida('analista', 'gestor', 'assistente', 'admin_empresa', 'admin_sistema')
+def editar_contrato(id):
+    """Edita contrato existente"""
+    contrato = Contrato.get_by_id(id)
+    
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
+    
+    if request.method == 'POST':
+        contrato.contratante_nome = sanitizar_entrada(request.form.get('contratante_nome', contrato.contratante_nome))
+        contrato.contratante_cnpj = apenas_digitos(request.form.get('contratante_cnpj', contrato.contratante_cnpj))
+        contrato.contratante_email = sanitizar_entrada(request.form.get('contratante_email', contrato.contratante_email))
+        contrato.contratante_telefone = apenas_digitos(request.form.get('contratante_telefone', contrato.contratante_telefone))
+        contrato.contratada_nome = sanitizar_entrada(request.form.get('contratada_nome', contrato.contratada_nome))
+        contrato.contratada_cnpj = apenas_digitos(request.form.get('contratada_cnpj', contrato.contratada_cnpj))
+        contrato.contratada_email = sanitizar_entrada(request.form.get('contratada_email', contrato.contratada_email))
+        contrato.valor = float(request.form.get('valor', contrato.valor))
+        contrato.prazo_dias = int(request.form.get('prazo_dias', contrato.prazo_dias))
+        contrato.descricao = sanitizar_entrada(request.form.get('descricao', contrato.descricao))
+        
+        contrato.save()
+        
+        flash('Contrato atualizado com sucesso!', 'success')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    return render_template('contratos/editar.html', contrato=contrato)
+
+@app.route('/contrato/<int:id>/enviar-aprovacao', methods=['POST'])
+@rota_protegida('analista', 'gestor', 'assistente', 'admin_empresa', 'admin_sistema')
+def enviar_contrato_aprovacao(id):
+    """Envia contrato para aprovação do gestor"""
+    contrato = Contrato.get_by_id(id)
+    
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
+    
+    if contrato.status != 'rascunho':
+        flash('Apenas contratos em rascunho podem ser enviados para aprovação.', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    contrato.status = 'aguardando_aprovacao'
+    contrato.save()
+    
+    app.logger.info(f"Contrato {contrato.numero_contrato} enviado para aprovação por {session['usuario']['id']}")
+    
+    flash(f'Contrato {contrato.numero_contrato} enviado para aprovação!', 'success')
+    return redirect(url_for('listar_contratos'))
+
+@app.route('/contrato/<int:id>/aprovar', methods=['POST'])
+@rota_protegida('gestor', 'admin_empresa', 'admin_sistema')
+def aprovar_contrato(id):
+    """Aprova contrato (apenas gestor e admin)"""
+    contrato = Contrato.get_by_id(id)
+    
+    if not contrato or contrato.empresa_id != session['usuario']['empresa_id']:
+        flash('Contrato não encontrado', 'danger')
+        return redirect(url_for('listar_contratos'))
+    
+    if contrato.status != 'aguardando_aprovacao':
+        flash('Apenas contratos aguardando aprovação podem ser aprovados.', 'warning')
+        return redirect(url_for('ver_contrato', id=contrato.id))
+    
+    contrato.status = 'ativo'
+    contrato.save()
+    
+    app.logger.info(f"Contrato {contrato.numero_contrato} aprovado por {session['usuario']['id']}")
+    
+    flash(f'Contrato {contrato.numero_contrato} aprovado com sucesso!', 'success')
+    return redirect(url_for('listar_contratos'))
 
 # =====================================================
 # ROTAS DE FEEDBACK
@@ -828,7 +1022,7 @@ def enviar_feedback():
             session['usuario']['id'],
             nota,
             recomendaria,
-            sugestao[:500]  # Limita tamanho
+            sugestao[:500]
         ))
         
         session['feedback_enviado'] = True
@@ -839,8 +1033,6 @@ def enviar_feedback():
     except Exception as e:
         app.logger.error(f"Erro ao processar feedback: {e}")
         return jsonify({'sucesso': False, 'erro': 'Erro interno'}), 500
-    
-    
 
 # =====================================================
 # HANDLERS DE ERRO PERSONALIZADOS
@@ -864,11 +1056,6 @@ def erro_interno(e):
     app.logger.error(f"Erro interno: {str(e)} - IP: {request.remote_addr}")
     return render_template('erros/500.html'), 500
 
-@app.errorhandler(429)
-def many_requests(e):
-    """Muitas requisições"""
-    return render_template('erros/429.html'), 429
-
 # =====================================================
 # TEARDOWN DO BANCO DE DADOS
 # =====================================================
@@ -883,6 +1070,5 @@ def teardown_db(exception):
 # =====================================================
 
 if __name__ == '__main__':
-    # Modo debug apenas em desenvolvimento
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     app.run(debug=debug, host='0.0.0.0', port=5000)

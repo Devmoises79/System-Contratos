@@ -10,10 +10,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14'>📄</text></svg>" type="image/svg+xml">
     
     <style>
         * {
@@ -37,7 +46,7 @@
             --verde-principal: #10b981;
             --verde-claro: #d1fae5;
             --cinza-texto: #334155;
-            --cinza-claro: #e2e8f0;
+            --cinza-claro: #e2e8f2;
         }
 
         body {
@@ -280,6 +289,22 @@
             padding: 1rem;
         }
 
+        /* Toasts */
+        .toast {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .toast-header {
+            border-radius: 12px 12px 0 0;
+            font-weight: 600;
+        }
+        
+        .toast-body {
+            padding: 0.75rem 1rem;
+        }
+
         /* Animações */
         .fade-in {
             animation: fadeIn 0.3s ease forwards;
@@ -294,6 +319,15 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
     
@@ -320,13 +354,14 @@
 
             {% if session.usuario %}
             <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link p-0 position-relative" style="color: var(--cinza-texto);" onclick="window.location.reload()" title="Recarregar">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                
                 <button class="btn btn-link p-0 position-relative" style="color: var(--cinza-texto);">
                     <i class="fas fa-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle p-1 rounded-circle" style="background: var(--vermelho-principal); width: 8px; height: 8px;"></span>
                 </button>
-
-                <!-- templates/base.html -->
-
 
                 <div class="dropdown">
                     <button class="btn d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: transparent; border: none; padding: 0;">
@@ -337,34 +372,34 @@
                             <div style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto);">{{ session.usuario.nome }}</div>
                             <div style="font-size: 0.7rem; color: var(--cinza-texto); opacity: 0.7;">
                                 <i class="fas fa-user-tag me-1"></i>
-                                    {{ session.usuario.perfil|replace('_', ' ')|title }}
+                                {{ session.usuario.perfil|replace('_', ' ')|title }}
                             </div>
-                            </div>
-                                <i class="fas fa-chevron-down" style="color: var(--cinza-texto); font-size: 0.8rem;"></i>
-                            </button>
+                        </div>
+                        <i class="fas fa-chevron-down" style="color: var(--cinza-texto); font-size: 0.8rem;"></i>
+                    </button>
                                     
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
                             <a class="dropdown-item" href="{{ url_for('perfil') }}">
                                 <i class="fas fa-user-circle me-2" style="color: var(--azul-principal);"></i>
-                                    Meu Perfil
+                                Meu Perfil
                             </a>
-                                </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#feedback-modal">
-                                            <i class="fas fa-star me-2" style="color: var(--amarelo-principal);"></i>
-                                                Feedback
-                                        </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
-                                        <i class="fas fa-sign-out-alt me-2"></i>
-                                        Sair
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#feedback-modal">
+                                <i class="fas fa-star me-2" style="color: var(--amarelo-principal);"></i>
+                                Feedback
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             {% endif %}
         </div>
@@ -454,24 +489,40 @@
 
     <!-- Main Content -->
     <main class="{% if session.usuario %}main-content{% else %}main-content-full{% endif %}">
-        <!-- Mensagens Flash -->
+        <!-- Container de Toasts para mensagens flash -->
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 80px;">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="toast align-items-center border-0 show mb-2 fade-in" 
+                             role="alert" aria-live="assertive" aria-atomic="true" 
+                             data-bs-autohide="true" data-bs-delay="5000"
+                             style="background: {% if category == 'success' %}var(--verde-principal){% elif category == 'danger' %}var(--vermelho-principal){% elif category == 'warning' %}var(--amarelo-escuro){% else %}var(--azul-principal){% endif %}; color: white;">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <i class="bi 
+                                        {% if category == 'success' %}bi-check-circle-fill
+                                        {% elif category == 'danger' %}bi-exclamation-triangle-fill
+                                        {% elif category == 'warning' %}bi-exclamation-circle-fill
+                                        {% else %}bi-info-circle-fill{% endif %} me-2"></i>
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Mensagens flash tradicionais (fallback) -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show fade-in mb-4" role="alert">
-                        {% if category == 'success' %}
-                            <i class="fas fa-check-circle me-2"></i>
-                        {% elif category == 'danger' %}
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                        {% elif category == 'warning' %}
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                        {% else %}
-                            <i class="fas fa-info-circle me-2"></i>
-                        {% endif %}
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
+                <div style="display: none;">
+                    {% for category, message in messages %}
+                        <!-- Já tratado pelos toasts acima -->
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
@@ -557,6 +608,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Inicializa todos os toasts automaticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            var toastList = toastElList.map(function(toastEl) {
+                return new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+            });
+            toastList.forEach(toast => toast.show());
+            
+            // Remove toasts antigos após o tempo
+            setTimeout(() => {
+                document.querySelectorAll('.toast').forEach(toast => {
+                    if (toast) toast.remove();
+                });
+            }, 6000);
+        });
+
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
@@ -590,7 +657,22 @@
                 if (data.sucesso) {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('feedback-modal'));
                     modal.hide();
-                    alert('Obrigado pelo feedback!');
+                    
+                    // Mostra toast de agradecimento
+                    const toastContainer = document.querySelector('.toast-container');
+                    const toast = document.createElement('div');
+                    toast.className = 'toast align-items-center border-0 show mb-2 bg-success text-white';
+                    toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Obrigado pelo seu feedback!
+                            </div>
+                        </div>
+                    `;
+                    toastContainer.appendChild(toast);
+                    new bootstrap.Toast(toast).show();
+                    setTimeout(() => toast.remove(), 5000);
                 } else {
                     alert('Erro ao enviar feedback.');
                 }
@@ -607,6 +689,12 @@
         }
         {% endif %}
 
+        // Previne reenvio de formulários ao atualizar a página
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+
+        // Fecha sidebar ao clicar fora (mobile)
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.querySelector('[onclick="toggleSidebar()"]');

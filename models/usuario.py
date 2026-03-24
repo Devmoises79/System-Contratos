@@ -1,214 +1,292 @@
-# models/usuario.py (COMPLETO)
-import bcrypt
+# models/contrato.py
 from datetime import datetime
 from core.database import Database
-from flask import current_app
+import uuid
 
-class Usuario:
-    def __init__(self, id=None, empresa_id=None, nome=None, email=None, senha_hash=None,
-                 perfil=None, cargo=None, telefone=None, celular=None, email_corporativo=None,
-                 avatar_path=None, ativo=True, primeiro_acesso=True, ultimo_login=None,
-                 ultimo_ip=None, token_recuperacao=None, token_expiracao=None,
-                 data_criacao=None, criado_por=None, data_atualizacao=None, atualizado_por=None):
+class Contrato:
+    def __init__(self, id=None, empresa_id=None, numero_contrato=None, 
+                 contratante_nome=None, contratante_cnpj=None, contratante_email=None, 
+                 contratante_telefone=None, contratada_nome=None, contratada_cnpj=None, 
+                 contratada_email=None, valor=None, prazo_dias=None, data_inicio=None, 
+                 data_fim=None, descricao=None, status='rascunho', criado_por=None,
+                 atualizado_por=None, aprovado_por=None, data_aprovacao=None,
+                 solicitado_aprovacao=False, data_solicitacao=None,
+                 pdf_path=None, data_criacao=None, data_atualizacao=None):
         """
-        Inicializa um usuário com todos os campos possíveis do banco
+        Inicializa um contrato com todos os campos do banco
         """
         self.id = id
         self.empresa_id = empresa_id
-        self.nome = nome
-        self.email = email
-        self.senha_hash = senha_hash
-        self.perfil = perfil
-        self.cargo = cargo
-        self.telefone = telefone
-        self.celular = celular
-        self.email_corporativo = email_corporativo
-        self.avatar_path = avatar_path
-        self.ativo = ativo
-        self.primeiro_acesso = primeiro_acesso
-        self.ultimo_login = ultimo_login
-        self.ultimo_ip = ultimo_ip
-        self.token_recuperacao = token_recuperacao
-        self.token_expiracao = token_expiracao
-        self.data_criacao = data_criacao
+        self.numero_contrato = numero_contrato
+        self.contratante_nome = contratante_nome
+        self.contratante_cnpj = contratante_cnpj
+        self.contratante_email = contratante_email
+        self.contratante_telefone = contratante_telefone
+        self.contratada_nome = contratada_nome
+        self.contratada_cnpj = contratada_cnpj
+        self.contratada_email = contratada_email
+        self.valor = float(valor) if valor else 0
+        self.prazo_dias = prazo_dias
+        self.data_inicio = data_inicio
+        self.data_fim = data_fim
+        self.descricao = descricao
+        self.status = status
         self.criado_por = criado_por
-        self.data_atualizacao = data_atualizacao
         self.atualizado_por = atualizado_por
+        self.aprovado_por = aprovado_por
+        self.data_aprovacao = data_aprovacao
+        self.solicitado_aprovacao = solicitado_aprovacao
+        self.data_solicitacao = data_solicitacao
+        self.pdf_path = pdf_path
+        self.data_criacao = data_criacao
+        self.data_atualizacao = data_atualizacao
     
-    def save(self, usuario_criador_id=None):
-        """
-        Salva ou atualiza o usuário no banco
-        Args:
-            usuario_criador_id: ID do usuário que está criando (opcional)
-        """
+    @staticmethod
+    def gerar_numero_contrato():
+        """Gera um número único para o contrato"""
+        data = datetime.now().strftime("%Y%m%d")
+        codigo = str(uuid.uuid4())[:6].upper()
+        return f"CT-{data}-{codigo}"
+    
+    def save(self):
+        """Salva ou atualiza o contrato no banco"""
         db = Database()
         
-        # Validação: empresa_id é obrigatório para perfis que não são admin_sistema
-        if self.perfil != 'admin_sistema' and not self.empresa_id:
-            raise ValueError("Usuários não-admin precisam estar vinculados a uma empresa")
-        
         if self.id:
-            # Atualiza usuário existente
+            # Atualiza contrato existente
             query = """
-                UPDATE usuarios SET 
-                    nome = %s,
-                    cargo = %s,
-                    telefone = %s,
-                    celular = %s,
-                    email_corporativo = %s,
-                    avatar_path = %s,
-                    ativo = %s,
-                    primeiro_acesso = %s,
-                    perfil = %s,
+                UPDATE contratos SET
+                    contratante_nome = %s,
+                    contratante_cnpj = %s,
+                    contratante_email = %s,
+                    contratante_telefone = %s,
+                    contratada_nome = %s,
+                    contratada_cnpj = %s,
+                    contratada_email = %s,
+                    valor = %s,
+                    prazo_dias = %s,
+                    data_inicio = %s,
+                    data_fim = %s,
+                    descricao = %s,
+                    status = %s,
+                    pdf_path = %s,
+                    atualizado_por = %s,
+                    solicitado_aprovacao = %s,
+                    data_solicitacao = %s,
                     data_atualizacao = NOW()
                 WHERE id = %s
             """
             params = (
-                self.nome, self.cargo, self.telefone, self.celular,
-                self.email_corporativo, self.avatar_path, self.ativo,
-                self.primeiro_acesso, self.perfil, self.id
+                self.contratante_nome, self.contratante_cnpj, self.contratante_email,
+                self.contratante_telefone, self.contratada_nome, self.contratada_cnpj,
+                self.contratada_email, self.valor, self.prazo_dias, self.data_inicio,
+                self.data_fim, self.descricao, self.status, self.pdf_path,
+                self.atualizado_por, self.solicitado_aprovacao, self.data_solicitacao, self.id
             )
             db.execute(query, params)
             return self.id
         else:
-            # Cria novo usuário - Adaptado para a estrutura atual da tabela (SEM username)
+            # Se não tiver número, gera um
+            if not self.numero_contrato:
+                self.numero_contrato = self.gerar_numero_contrato()
+            
+            # Cria novo contrato
             query = """
-                INSERT INTO usuarios 
-                (empresa_id, nome, email, senha_hash, perfil, cargo, 
-                 telefone, celular, email_corporativo, avatar_path, ativo, 
-                 primeiro_acesso)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO contratos (
+                    empresa_id, numero_contrato, contratante_nome, contratante_cnpj,
+                    contratante_email, contratante_telefone, contratada_nome, contratada_cnpj,
+                    contratada_email, valor, prazo_dias, data_inicio, data_fim, descricao,
+                    status, criado_por, pdf_path, solicitado_aprovacao
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
-                self.empresa_id, self.nome, self.email, self.senha_hash,
-                self.perfil, self.cargo, self.telefone, self.celular,
-                self.email_corporativo, self.avatar_path, 1 if self.ativo else 0, 
-                1 if self.primeiro_acesso else 0
+                self.empresa_id, self.numero_contrato, self.contratante_nome, self.contratante_cnpj,
+                self.contratante_email, self.contratante_telefone, self.contratada_nome, self.contratada_cnpj,
+                self.contratada_email, self.valor, self.prazo_dias, self.data_inicio, self.data_fim,
+                self.descricao, self.status, self.criado_por, self.pdf_path, self.solicitado_aprovacao
             )
-            
-            if current_app:
-                current_app.logger.info(f"Tentando criar usuário: {self.email}")
-            
             self.id = db.execute_return_id(query, params)
-            
-            if not self.id:
-                raise Exception("Falha ao inserir usuário no banco")
-            
             return self.id
     
-    def definir_senha(self, senha):
-        """Define uma nova senha com hash"""
-        try:
-            salt = bcrypt.gensalt()
-            self.senha_hash = bcrypt.hashpw(
-                senha.encode('utf-8'), 
-                salt
-            ).decode('utf-8')
-            return True
-        except Exception as e:
-            print(f"Erro ao definir senha: {e}")
-            return False
-    
-    def verificar_senha(self, senha):
-        """Verifica se a senha está correta"""
-        if not self.senha_hash:
-            return False
-        try:
-            return bcrypt.checkpw(
-                senha.encode('utf-8'), 
-                self.senha_hash.encode('utf-8')
-            )
-        except Exception as e:
-            print(f"Erro ao verificar senha: {e}")
-            return False
-    
-    def registrar_login(self, ip):
-        """
-        Registra o último login do usuário
-        """
+    def solicitar_aprovacao(self, usuario_id):
+        """Solicita aprovação do contrato"""
         db = Database()
-        try:
-            query = """
-                UPDATE usuarios 
-                SET ultimo_login = NOW(), 
-                    ultimo_ip = %s,
-                    primeiro_acesso = FALSE 
-                WHERE id = %s
-            """
-            db.execute(query, (ip, self.id))
-            if current_app:
-                current_app.logger.info(f"Login registrado para usuário {self.id} - IP: {ip}")
-            return True
-        except Exception as e:
-            print(f"Erro ao registrar login: {e}")
-            return False
+        query = """
+            UPDATE contratos 
+            SET solicitado_aprovacao = TRUE,
+                data_solicitacao = NOW(),
+                atualizado_por = %s,
+                data_atualizacao = NOW()
+            WHERE id = %s
+        """
+        db.execute(query, (usuario_id, self.id))
+        self.solicitado_aprovacao = True
+        self.data_solicitacao = datetime.now()
+        self.atualizado_por = usuario_id
+        return True
+    
+    def aprovar(self, usuario_id):
+        """Aprova o contrato"""
+        db = Database()
+        query = """
+            UPDATE contratos 
+            SET status = 'ativo', 
+                aprovado_por = %s,
+                data_aprovacao = NOW(),
+                solicitado_aprovacao = FALSE,
+                data_atualizacao = NOW()
+            WHERE id = %s
+        """
+        db.execute(query, (usuario_id, self.id))
+        self.status = 'ativo'
+        self.aprovado_por = usuario_id
+        self.data_aprovacao = datetime.now()
+        self.solicitado_aprovacao = False
+        return True
+    
+    def rejeitar_aprovacao(self, usuario_id, motivo=None):
+        """Rejeita a aprovação do contrato"""
+        db = Database()
+        query = """
+            UPDATE contratos 
+            SET status = 'rascunho',
+                solicitado_aprovacao = FALSE,
+                data_solicitacao = NULL,
+                atualizado_por = %s,
+                data_atualizacao = NOW()
+            WHERE id = %s
+        """
+        db.execute(query, (usuario_id, self.id))
+        self.status = 'rascunho'
+        self.solicitado_aprovacao = False
+        self.data_solicitacao = None
+        self.atualizado_por = usuario_id
+        return True
     
     @staticmethod
-    def get_by_email(email):
-        """Busca usuário por email - CORRIGIDO: usa a coluna email, não username"""
+    def get_by_id(contrato_id):
+        """Busca contrato por ID"""
         db = Database()
-        
-        # Busca usando a coluna email (que existe na sua tabela)
-        query = "SELECT * FROM usuarios WHERE email = %s"
-        result = db.fetch_one(query, (email,))
-        
+        query = "SELECT * FROM contratos WHERE id = %s"
+        result = db.fetch_one(query, (contrato_id,))
         if result:
-            return Usuario(**result)
+            return Contrato(**result)
         return None
     
     @staticmethod
-    def get_by_id(usuario_id):
-        """Busca usuário por ID"""
+    def listar_por_empresa(empresa_id, status=None):
+        """Lista contratos de uma empresa"""
         db = Database()
-        query = "SELECT * FROM usuarios WHERE id = %s"
-        result = db.fetch_one(query, (usuario_id,))
-        if result:
-            return Usuario(**result)
-        return None
-    
-    @staticmethod
-    def listar_por_empresa(empresa_id, perfil=None, apenas_ativos=True):
-        """Lista usuários de uma empresa"""
-        db = Database()
-        query = "SELECT * FROM usuarios WHERE empresa_id = %s"
+        query = "SELECT * FROM contratos WHERE empresa_id = %s"
         params = [empresa_id]
         
-        if apenas_ativos:
-            query += " AND ativo = 1"
+        if status:
+            query += " AND status = %s"
+            params.append(status)
         
-        if perfil:
-            query += " AND perfil = %s"
-            params.append(perfil)
-        
-        query += " ORDER BY nome"
+        query += " ORDER BY data_criacao DESC"
         
         results = db.fetch_all(query, params)
-        return [Usuario(**row) for row in results] if results else []
+        contratos = []
+        for row in results:
+            try:
+                contratos.append(Contrato(**row))
+            except Exception as e:
+                print(f"Erro ao criar contrato: {e}")
+        return contratos
     
-    def get_perfil_display(self):
-        """Retorna o nome do perfil formatado"""
-        perfis = {
-            'admin_sistema': 'Administrador do Sistema',
-            'admin_empresa': 'Administrador da Empresa',
-            'gestor': 'Gestor',
-            'analista': 'Analista',
-            'assistente': 'Assistente'
-        }
-        return perfis.get(self.perfil, self.perfil)
-    
-    def to_dict(self):
-        """Converte para dicionário (para API/sessão)"""
+    @staticmethod
+    def estatisticas(empresa_id):
+        """Retorna estatísticas dos contratos"""
+        db = Database()
+        
+        # Total de contratos
+        total = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
+        total = total['total'] if total else 0
+        
+        # Contratos ativos
+        ativos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'ativo'", (empresa_id,))
+        ativos = ativos['total'] if ativos else 0
+        
+        # Contratos em rascunho
+        rascunhos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'rascunho'", (empresa_id,))
+        rascunhos = rascunhos['total'] if rascunhos else 0
+        
+        # Contratos aguardando aprovação
+        aguardando = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'rascunho' AND solicitado_aprovacao = TRUE", (empresa_id,))
+        aguardando = aguardando['total'] if aguardando else 0
+        
+        # Contratos encerrados
+        encerrados = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'encerrado'", (empresa_id,))
+        encerrados = encerrados['total'] if encerrados else 0
+        
+        # Contratos cancelados
+        cancelados = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'cancelado'", (empresa_id,))
+        cancelados = cancelados['total'] if cancelados else 0
+        
+        # Contratos suspensos
+        suspensos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'suspenso'", (empresa_id,))
+        suspensos = suspensos['total'] if suspensos else 0
+        
+        # Valor total
+        valor_total = db.fetch_one("SELECT SUM(valor) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
+        valor_total = float(valor_total['total']) if valor_total and valor_total['total'] else 0
+        
+        # Valor médio
+        media = valor_total / total if total > 0 else 0
+        
+        # Contratos por mês (últimos 6 meses)
+        por_mes = db.fetch_all("""
+            SELECT 
+                DATE_FORMAT(data_criacao, '%%m/%%Y') as mes,
+                COUNT(*) as quantidade,
+                SUM(valor) as valor_total
+            FROM contratos
+            WHERE empresa_id = %s
+            GROUP BY DATE_FORMAT(data_criacao, '%%m/%%Y')
+            ORDER BY MIN(data_criacao) DESC
+            LIMIT 6
+        """, (empresa_id,))
+        
         return {
-            'id': self.id,
-            'nome': self.nome,
-            'email': self.email,
-            'perfil': self.perfil,
-            'perfil_display': self.get_perfil_display(),
-            'cargo': self.cargo,
-            'empresa_id': self.empresa_id,
-            'ativo': self.ativo,
-            'primeiro_acesso': self.primeiro_acesso
+            'total': total,
+            'ativos': ativos,
+            'rascunhos': rascunhos,
+            'aguardando': aguardando,
+            'encerrados': encerrados,
+            'cancelados': cancelados,
+            'suspensos': suspensos,
+            'total_valor': valor_total,
+            'media': media,
+            'por_mes': por_mes
         }
+    
+    def get_criador_nome(self):
+        """Retorna o nome do usuário que criou o contrato"""
+        if not self.criado_por:
+            return 'Sistema'
+        
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.criado_por,))
+        return result['nome'] if result else 'Usuário não encontrado'
+    
+    def get_aprovador_nome(self):
+        """Retorna o nome do usuário que aprovou o contrato"""
+        if not self.aprovado_por:
+            return None
+        
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.aprovado_por,))
+        return result['nome'] if result else None
+    
+    def get_atualizador_nome(self):
+        """Retorna o nome do usuário que atualizou o contrato"""
+        if not self.atualizado_por:
+            return None
+        
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.atualizado_por,))
+        return result['nome'] if result else None
     
     def __repr__(self):
-        return f"<Usuario {self.id}: {self.nome} ({self.perfil})>"
+        return f"<Contrato {self.id}: {self.numero_contrato}>"

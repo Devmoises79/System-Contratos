@@ -23,7 +23,6 @@ def perfil_required(*perfis_permitidos):
             
             usuario = session['usuario']
             if usuario['perfil'] not in perfis_permitidos:
-                # Se for requisição AJAX
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'erro': 'Acesso negado'}), 403
                 
@@ -64,6 +63,5 @@ def empresa_ativa_required(f):
             return redirect(url_for('login'))
         
         # Aqui você pode verificar o status da empresa no banco
-        # Por enquanto, apenas passa
         return f(*args, **kwargs)
     return decorated_function

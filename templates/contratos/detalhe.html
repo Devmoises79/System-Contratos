@@ -18,10 +18,23 @@
         </div>
         
         <div class="d-flex align-items-center gap-2">
-            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% elif contrato.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
+            <!-- Status do contrato -->
+            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}var(--amarelo-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% elif contrato.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
                          color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% elif contrato.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
                          padding: 0.5rem 1rem; border-radius: 30px; font-weight: 500;">
-                {{ contrato.status|capitalize }}
+                {% if contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
+                    <i class="bi bi-hourglass-split me-1"></i> Aguardando Aprovação
+                {% elif contrato.status == 'rascunho' %}
+                    <i class="bi bi-pencil me-1"></i> Rascunho
+                {% elif contrato.status == 'ativo' %}
+                    <i class="bi bi-check-circle me-1"></i> Ativo
+                {% elif contrato.status == 'encerrado' %}
+                    <i class="bi bi-archive me-1"></i> Encerrado
+                {% elif contrato.status == 'cancelado' %}
+                    <i class="bi bi-x-circle me-1"></i> Cancelado
+                {% else %}
+                    {{ contrato.status|capitalize }}
+                {% endif %}
             </span>
             
             {% if contrato.pdf_path %}
@@ -32,6 +45,45 @@
             </a>
             {% endif %}
         </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="mb-4 d-flex gap-2">
+        {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
+            {% if session.usuario.perfil in ['analista', 'assistente'] %}
+            <form action="{{ url_for('enviar_contrato_aprovacao', id=contrato.id) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-send-check me-2"></i>Enviar para Aprovação
+                </button>
+            </form>
+            {% endif %}
+        {% endif %}
+        
+        {% if contrato.solicitado_aprovacao and contrato.status == 'rascunho' %}
+            {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] %}
+            <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle me-2"></i>Aprovar
+                </button>
+            </form>
+            <form action="{{ url_for('rejeitar_contrato', id=contrato.id) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-x-circle me-2"></i>Rejeitar
+                </button>
+            </form>
+            {% endif %}
+        {% endif %}
+        
+        {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
+            {% if session.usuario.perfil in ['analista', 'assistente', 'gestor', 'admin_empresa', 'admin_sistema'] %}
+            <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            {% endif %}
+        {% endif %}
     </div>
 
     <!-- Card Principal -->
@@ -79,7 +131,7 @@
                         {% endif %}
                         
                         {% if contrato.contratante_email %}
-                        <div style="margin-bottom: 0.75rem;">
+                        <div>
                             <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Email</div>
                             <div>{{ contrato.contratante_email }}</div>
                         </div>
@@ -138,7 +190,13 @@
                 <div class="col-md-4">
                     <div class="p-3 text-center" style="background: var(--vermelho-claro); border-radius: 16px;">
                         <span style="font-size: 0.8rem; color: var(--vermelho-escuro); text-transform: uppercase;">Status</span>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">{{ contrato.status|capitalize }}</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">
+                            {% if contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
+                                Aguardando
+                            {% else %}
+                                {{ contrato.status|capitalize }}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,51 +226,28 @@
                     <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
                         <div class="d-flex justify-content-between mb-2">
                             <span style="color: var(--cinza-texto); opacity: 0.7;">Criado por:</span>
-                            <span style="font-weight: 500;">{{ contrato.criado_por_nome or 'Sistema' }}</span>
+                            <span style="font-weight: 500;">{{ contrato.get_criador_nome() }}</span>
                         </div>
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between mb-2">
                             <span style="color: var(--cinza-texto); opacity: 0.7;">Data de criação:</span>
                             <span>{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Ações -->
-                <div class="col-md-6">
-                    <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
-                        <span style="width: 28px; height: 28px; background: var(--vermelho-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                            <i class="bi bi-gear" style="color: var(--vermelho-principal);"></i>
-                        </span>
-                        AÇÕES
-                    </h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        {% if contrato.status == 'rascunho' %}
-                        <button class="btn" style="background: var(--azul-principal); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
-                            <i class="bi bi-check me-2"></i>
-                            Aprovar
-                        </button>
+                        {% if contrato.solicitado_aprovacao %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: var(--cinza-texto); opacity: 0.7;">Solicitado em:</span>
+                            <span>{{ contrato.data_solicitacao.strftime('%d/%m/%Y %H:%M') if contrato.data_solicitacao else '-' }}</span>
+                        </div>
                         {% endif %}
-                        
-                        {% if contrato.status == 'ativo' %}
-                        <button class="btn" style="background: var(--amarelo-principal); color: var(--cinza-texto); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
-                            <i class="bi bi-pause me-2"></i>
-                            Suspender
-                        </button>
-                        <button class="btn" style="background: var(--cinza-claro); color: var(--cinza-texto); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
-                            <i class="bi bi-check-double me-2"></i>
-                            Encerrar
-                        </button>
+                        {% if contrato.aprovado_por %}
+                        <div class="d-flex justify-content-between">
+                            <span style="color: var(--cinza-texto); opacity: 0.7;">Aprovado por:</span>
+                            <span style="font-weight: 500;">{{ contrato.get_aprovador_nome() }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color: var(--cinza-texto); opacity: 0.7;">Data de aprovação:</span>
+                            <span>{{ contrato.data_aprovacao.strftime('%d/%m/%Y %H:%M') if contrato.data_aprovacao else '-' }}</span>
+                        </div>
                         {% endif %}
-                        
-                        <button class="btn" style="background: var(--azul-claro); color: var(--azul-principal); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
-                            <i class="bi bi-pencil me-2"></i>
-                            Editar
-                        </button>
-                        
-                        <button class="btn" style="background: var(--amarelo-claro); color: var(--amarelo-escuro); border: none; padding: 0.6rem 1.2rem; border-radius: 12px;">
-                            <i class="bi bi-copy me-2"></i>
-                            Duplicar
-                        </button>
                     </div>
                 </div>
             </div>

@@ -11,22 +11,25 @@
             <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Contratos</h1>
             <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie todos os contratos da empresa</p>
         </div>
+        {% if session.usuario.perfil in ['analista', 'assistente', 'gestor', 'admin_empresa', 'admin_sistema'] %}
         <a href="{{ url_for('contrato_novo') }}" class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 500;">
             <i class="bi bi-plus-circle me-2"></i>
             Novo Contrato
         </a>
+        {% endif %}
     </div>
 
     <!-- Cards de Resumo por Status -->
     <div class="row g-4 mb-4">
         {% set status_count = {
-            'rascunho': contratos|selectattr('status', 'equalto', 'rascunho')|list|length,
+            'rascunho': contratos|selectattr('status', 'equalto', 'rascunho')|selectattr('solicitado_aprovacao', 'equalto', false)|list|length,
+            'aguardando': contratos|selectattr('status', 'equalto', 'rascunho')|selectattr('solicitado_aprovacao', 'equalto', true)|list|length,
             'ativo': contratos|selectattr('status', 'equalto', 'ativo')|list|length,
             'encerrado': contratos|selectattr('status', 'equalto', 'encerrado')|list|length,
             'cancelado': contratos|selectattr('status', 'equalto', 'cancelado')|list|length
         } %}
         
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card-custom p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <span style="color: var(--cinza-texto); opacity: 0.7;">Rascunho</span>
@@ -35,7 +38,16 @@
             </div>
         </div>
         
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <div class="card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: var(--cinza-texto); opacity: 0.7;">Aguardando</span>
+                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--amarelo-principal);">{{ status_count.aguardando }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
             <div class="card-custom p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <span style="color: var(--cinza-texto); opacity: 0.7;">Ativo</span>
@@ -44,7 +56,7 @@
             </div>
         </div>
         
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card-custom p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <span style="color: var(--cinza-texto); opacity: 0.7;">Encerrado</span>
@@ -53,7 +65,7 @@
             </div>
         </div>
         
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card-custom p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <span style="color: var(--cinza-texto); opacity: 0.7;">Cancelado</span>
@@ -82,6 +94,7 @@
                 <select name="status" class="form-select" style="border-color: var(--cinza-claro);">
                     <option value="">Todos os status</option>
                     <option value="rascunho" {% if request.args.get('status') == 'rascunho' %}selected{% endif %}>Rascunho</option>
+                    <option value="aguardando" {% if request.args.get('status') == 'aguardando' %}selected{% endif %}>Aguardando Aprovação</option>
                     <option value="ativo" {% if request.args.get('status') == 'ativo' %}selected{% endif %}>Ativo</option>
                     <option value="encerrado" {% if request.args.get('status') == 'encerrado' %}selected{% endif %}>Encerrado</option>
                     <option value="cancelado" {% if request.args.get('status') == 'cancelado' %}selected{% endif %}>Cancelado</option>
@@ -137,21 +150,100 @@
                         </td>
                         <td style="padding: 1rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
                         <td style="padding: 1rem;">
-                            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% elif contrato.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
-                                         color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% elif contrato.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
-                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                {{ contrato.status|capitalize }}
+                            {% if contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
+                            <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                <i class="bi bi-hourglass-split me-1"></i>Aguardando
                             </span>
+                            {% elif contrato.status == 'rascunho' %}
+                            <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                Rascunho
+                            </span>
+                            {% elif contrato.status == 'ativo' %}
+                            <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                <i class="bi bi-check-circle me-1"></i>Ativo
+                            </span>
+                            {% elif contrato.status == 'encerrado' %}
+                            <span style="background: var(--cinza-claro); color: var(--cinza-texto); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                Encerrado
+                            </span>
+                            {% elif contrato.status == 'cancelado' %}
+                            <span style="background: var(--vermelho-claro); color: var(--vermelho-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                Cancelado
+                            </span>
+                            {% endif %}
                         </td>
                         <td style="padding: 1rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
                         <td style="padding: 1rem;">
                             <div class="d-flex gap-2">
-                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none;" title="Ver detalhes">
+                                <!-- Botão Visualizar (todos) -->
+                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" 
+                                   style="color: var(--azul-principal); text-decoration: none;" 
+                                   title="Ver detalhes">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                
+                                <!-- Botão Editar (analista, assistente, gestor, admin) -->
+                                {% if session.usuario.perfil in ['analista', 'assistente', 'gestor', 'admin_empresa', 'admin_sistema'] %}
+                                    {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
+                                    <a href="{{ url_for('editar_contrato', id=contrato.id) }}" 
+                                       style="color: var(--amarelo-escuro); text-decoration: none;" 
+                                       title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <!-- Botão Enviar para Aprovação (analista e assistente) -->
+                                {% if session.usuario.perfil in ['analista', 'assistente'] %}
+                                    {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
+                                    <form action="{{ url_for('enviar_contrato_aprovacao', id=contrato.id) }}" 
+                                          method="POST" style="display: inline;">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" 
+                                                style="background: none; border: none; color: var(--verde-principal); cursor: pointer;" 
+                                                title="Enviar para aprovação">
+                                            <i class="bi bi-send-check"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <!-- Botão Aprovar (gestor e admin) -->
+                                {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] %}
+                                    {% if contrato.solicitado_aprovacao and contrato.status == 'rascunho' %}
+                                    <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" 
+                                          method="POST" style="display: inline;">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" 
+                                                style="background: none; border: none; color: var(--verde-principal); cursor: pointer;" 
+                                                title="Aprovar contrato">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <!-- Botão Rejeitar (gestor e admin) -->
+                                {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] %}
+                                    {% if contrato.solicitado_aprovacao and contrato.status == 'rascunho' %}
+                                    <form action="{{ url_for('rejeitar_contrato', id=contrato.id) }}" 
+                                          method="POST" style="display: inline;">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" 
+                                                style="background: none; border: none; color: var(--vermelho-principal); cursor: pointer;" 
+                                                title="Rejeitar contrato">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <!-- Download PDF -->
                                 {% if contrato.pdf_path %}
-                                <a href="{{ url_for('static', filename=contrato.pdf_path.replace('static/', '')) }}" target="_blank" 
-                                   style="color: var(--azul-principal); text-decoration: none;" title="Download PDF">
+                                <a href="{{ url_for('static', filename=contrato.pdf_path.replace('static/', '')) }}" 
+                                   target="_blank" 
+                                   style="color: var(--azul-principal); text-decoration: none;" 
+                                   title="Download PDF">
                                     <i class="bi bi-file-pdf"></i>
                                 </a>
                                 {% endif %}

@@ -1,150 +1,244 @@
-# models/empresa.py
-import json
+# models/contrato.py
 from datetime import datetime
 from core.database import Database
+import uuid
 
-class Empresa:
-    def __init__(self, id=None, nome=None, cnpj=None, email=None, telefone=None,
-                 celular=None, endereco=None, logo_path=None, paleta_cores=None,
-                 status='trial', data_expiracao=None, data_criacao=None):
+class Contrato:
+    def __init__(self, id=None, empresa_id=None, numero_contrato=None, 
+                 contratante_nome=None, contratante_cnpj=None, contratante_email=None, 
+                 contratante_telefone=None, contratada_nome=None, contratada_cnpj=None, 
+                 contratada_email=None, valor=None, prazo_dias=None, data_inicio=None, 
+                 data_fim=None, descricao=None, status='rascunho', criado_por=None,
+                 atualizado_por=None, aprovado_por=None, data_aprovacao=None,
+                 pdf_path=None, data_criacao=None, data_atualizacao=None):
         """
-        Inicializa uma empresa com todos os campos possíveis do banco
+        Inicializa um contrato com todos os campos do banco
         """
         self.id = id
-        self.nome = nome
-        self.cnpj = cnpj
-        self.email = email
-        self.telefone = telefone
-        self.celular = celular
-        self.endereco = endereco
-        self.logo_path = logo_path
-        self.paleta_cores = paleta_cores or {
-            'primaria': '#4361ee',
-            'secundaria': '#06d6a0',
-            'destaque': '#ef476f',
-            'texto': '#2b2d42',
-            'fundo': '#f8f9fa'
-        }
+        self.empresa_id = empresa_id
+        self.numero_contrato = numero_contrato
+        self.contratante_nome = contratante_nome
+        self.contratante_cnpj = contratante_cnpj
+        self.contratante_email = contratante_email
+        self.contratante_telefone = contratante_telefone
+        self.contratada_nome = contratada_nome
+        self.contratada_cnpj = contratada_cnpj
+        self.contratada_email = contratada_email
+        self.valor = float(valor) if valor else 0
+        self.prazo_dias = prazo_dias
+        self.data_inicio = data_inicio
+        self.data_fim = data_fim
+        self.descricao = descricao
         self.status = status
-        self.data_expiracao = data_expiracao
+        self.criado_por = criado_por
+        self.atualizado_por = atualizado_por
+        self.aprovado_por = aprovado_por
+        self.data_aprovacao = data_aprovacao
+        self.pdf_path = pdf_path
         self.data_criacao = data_criacao
+        self.data_atualizacao = data_atualizacao
     
     @staticmethod
-    def get_by_id(empresa_id):
-        db = Database()
-        query = "SELECT * FROM empresas WHERE id = %s"
-        result = db.fetch_one(query, (empresa_id,))
-        if result:
-            if result['paleta_cores'] and isinstance(result['paleta_cores'], str):
-                try:
-                    result['paleta_cores'] = json.loads(result['paleta_cores'])
-                except:
-                    result['paleta_cores'] = {}
-            return Empresa(**result)
-        return None
-    
-    @staticmethod
-    def get_by_cnpj(cnpj):
-        db = Database()
-        query = "SELECT * FROM empresas WHERE cnpj = %s"
-        result = db.fetch_one(query, (cnpj,))
-        if result:
-            if result['paleta_cores'] and isinstance(result['paleta_cores'], str):
-                try:
-                    result['paleta_cores'] = json.loads(result['paleta_cores'])
-                except:
-                    result['paleta_cores'] = {}
-            return Empresa(**result)
-        return None
-    
-    @staticmethod
-    def listar_todas(apenas_ativas=False):
-        db = Database()
-        query = "SELECT * FROM empresas"
-        params = []
-        
-        if apenas_ativas:
-            query += " WHERE status = 'ativo' OR status = 'trial'"
-        
-        query += " ORDER BY nome"
-        
-        results = db.fetch_all(query, params)
-        empresas = []
-        for row in results:
-            if row['paleta_cores'] and isinstance(row['paleta_cores'], str):
-                try:
-                    row['paleta_cores'] = json.loads(row['paleta_cores'])
-                except:
-                    row['paleta_cores'] = {}
-            empresas.append(Empresa(**row))
-        return empresas
+    def gerar_numero_contrato():
+        """Gera um número único para o contrato"""
+        data = datetime.now().strftime("%Y%m%d")
+        codigo = str(uuid.uuid4())[:6].upper()
+        return f"CT-{data}-{codigo}"
     
     def save(self):
+        """Salva ou atualiza o contrato no banco"""
         db = Database()
+        
         if self.id:
+            # Atualiza contrato existente
             query = """
-                UPDATE empresas SET 
-                    nome = %s,
-                    email = %s,
-                    telefone = %s,
-                    celular = %s,
-                    endereco = %s,
-                    logo_path = %s,
-                    paleta_cores = %s,
+                UPDATE contratos SET
+                    contratante_nome = %s,
+                    contratante_cnpj = %s,
+                    contratante_email = %s,
+                    contratante_telefone = %s,
+                    contratada_nome = %s,
+                    contratada_cnpj = %s,
+                    contratada_email = %s,
+                    valor = %s,
+                    prazo_dias = %s,
+                    data_inicio = %s,
+                    data_fim = %s,
+                    descricao = %s,
                     status = %s,
-                    data_expiracao = %s
+                    pdf_path = %s,
+                    atualizado_por = %s,
+                    data_atualizacao = NOW()
                 WHERE id = %s
             """
             params = (
-                self.nome, self.email, self.telefone, self.celular,
-                self.endereco, self.logo_path,
-                json.dumps(self.paleta_cores, ensure_ascii=False),
-                self.status, self.data_expiracao, self.id
+                self.contratante_nome, self.contratante_cnpj, self.contratante_email,
+                self.contratante_telefone, self.contratada_nome, self.contratada_cnpj,
+                self.contratada_email, self.valor, self.prazo_dias, self.data_inicio,
+                self.data_fim, self.descricao, self.status, self.pdf_path,
+                self.atualizado_por, self.id
             )
             db.execute(query, params)
             return self.id
         else:
+            # Se não tiver número, gera um
+            if not self.numero_contrato:
+                self.numero_contrato = self.gerar_numero_contrato()
+            
+            # Cria novo contrato
             query = """
-                INSERT INTO empresas 
-                (nome, cnpj, email, telefone, celular, endereco, 
-                 logo_path, paleta_cores, status, data_expiracao)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO contratos (
+                    empresa_id, numero_contrato, contratante_nome, contratante_cnpj,
+                    contratante_email, contratante_telefone, contratada_nome, contratada_cnpj,
+                    contratada_email, valor, prazo_dias, data_inicio, data_fim, descricao,
+                    status, criado_por, pdf_path
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
-                self.nome, self.cnpj, self.email, self.telefone, self.celular,
-                self.endereco, self.logo_path,
-                json.dumps(self.paleta_cores, ensure_ascii=False),
-                self.status, self.data_expiracao
+                self.empresa_id, self.numero_contrato, self.contratante_nome, self.contratante_cnpj,
+                self.contratante_email, self.contratante_telefone, self.contratada_nome, self.contratada_cnpj,
+                self.contratada_email, self.valor, self.prazo_dias, self.data_inicio, self.data_fim,
+                self.descricao, self.status, self.criado_por, self.pdf_path
             )
             self.id = db.execute_return_id(query, params)
             return self.id
     
-    def atualizar_cores(self, cores):
-        """Atualiza a paleta de cores"""
-        self.paleta_cores.update(cores)
-        return self.save()
+    def aprovar(self, usuario_id):
+        """Método específico para aprovar contrato"""
+        db = Database()
+        query = """
+            UPDATE contratos 
+            SET status = 'ativo', 
+                aprovado_por = %s,
+                data_aprovacao = NOW(),
+                data_atualizacao = NOW()
+            WHERE id = %s
+        """
+        db.execute(query, (usuario_id, self.id))
+        self.status = 'ativo'
+        self.aprovado_por = usuario_id
+        self.data_aprovacao = datetime.now()
+        return True
     
-    def get_usuarios(self, apenas_ativos=True):
-        """Retorna todos os usuários da empresa"""
-        from models.usuario import Usuario
-        return Usuario.listar_por_empresa(self.id, apenas_ativos=apenas_ativos)
+    @staticmethod
+    def get_by_id(contrato_id):
+        """Busca contrato por ID"""
+        db = Database()
+        query = "SELECT * FROM contratos WHERE id = %s"
+        result = db.fetch_one(query, (contrato_id,))
+        if result:
+            return Contrato(**result)
+        return None
     
-    def get_contratos(self, status=None):
-        """Retorna contratos da empresa"""
-        from models.contrato import Contrato
-        return Contrato.listar_por_empresa(self.id, status)
+    @staticmethod
+    def listar_por_empresa(empresa_id, status=None):
+        """Lista contratos de uma empresa"""
+        db = Database()
+        query = "SELECT * FROM contratos WHERE empresa_id = %s"
+        params = [empresa_id]
+        
+        if status:
+            query += " AND status = %s"
+            params.append(status)
+        
+        query += " ORDER BY data_criacao DESC"
+        
+        results = db.fetch_all(query, params)
+        contratos = []
+        for row in results:
+            try:
+                contratos.append(Contrato(**row))
+            except Exception as e:
+                print(f"Erro ao criar contrato: {e}")
+        return contratos
     
-    def to_dict(self):
-        """Converte para dicionário (para API/sessão)"""
+    @staticmethod
+    def estatisticas(empresa_id):
+        """Retorna estatísticas dos contratos"""
+        db = Database()
+        
+        # Total de contratos
+        total = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
+        total = total['total'] if total else 0
+        
+        # Contratos ativos
+        ativos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'ativo'", (empresa_id,))
+        ativos = ativos['total'] if ativos else 0
+        
+        # Contratos em rascunho
+        rascunhos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'rascunho'", (empresa_id,))
+        rascunhos = rascunhos['total'] if rascunhos else 0
+        
+        # Contratos encerrados
+        encerrados = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'encerrado'", (empresa_id,))
+        encerrados = encerrados['total'] if encerrados else 0
+        
+        # Contratos cancelados
+        cancelados = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'cancelado'", (empresa_id,))
+        cancelados = cancelados['total'] if cancelados else 0
+        
+        # Contratos suspensos
+        suspensos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'suspenso'", (empresa_id,))
+        suspensos = suspensos['total'] if suspensos else 0
+        
+        # Valor total
+        valor_total = db.fetch_one("SELECT SUM(valor) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
+        valor_total = float(valor_total['total']) if valor_total and valor_total['total'] else 0
+        
+        # Valor médio
+        media = valor_total / total if total > 0 else 0
+        
+        # Contratos por mês (últimos 6 meses)
+        por_mes = db.fetch_all("""
+            SELECT 
+                DATE_FORMAT(data_criacao, '%%m/%%Y') as mes,
+                COUNT(*) as quantidade,
+                SUM(valor) as valor_total
+            FROM contratos
+            WHERE empresa_id = %s
+            GROUP BY DATE_FORMAT(data_criacao, '%%m/%%Y')
+            ORDER BY MIN(data_criacao) DESC
+            LIMIT 6
+        """, (empresa_id,))
+        
         return {
-            'id': self.id,
-            'nome': self.nome,
-            'cnpj': self.cnpj,
-            'email': self.email,
-            'status': self.status,
-            'cores': self.paleta_cores,
-            'logo': self.logo_path
+            'total': total,
+            'ativos': ativos,
+            'rascunhos': rascunhos,
+            'encerrados': encerrados,
+            'cancelados': cancelados,
+            'suspensos': suspensos,
+            'total_valor': valor_total,
+            'media': media,
+            'por_mes': por_mes
         }
     
+    def get_criador_nome(self):
+        """Retorna o nome do usuário que criou o contrato"""
+        if not self.criado_por:
+            return 'Sistema'
+        
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.criado_por,))
+        return result['nome'] if result else 'Usuário não encontrado'
+    
+    def get_aprovador_nome(self):
+        """Retorna o nome do usuário que aprovou o contrato"""
+        if not self.aprovado_por:
+            return None
+        
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.aprovado_por,))
+        return result['nome'] if result else None
+    
+    def get_atualizador_nome(self):
+        """Retorna o nome do usuário que atualizou o contrato"""
+        if not self.atualizado_por:
+            return None
+        
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.atualizado_por,))
+        return result['nome'] if result else None
+    
     def __repr__(self):
-        return f"<Empresa {self.id}: {self.nome}>"
+        return f"<Contrato {self.id}: {self.numero_contrato}>"

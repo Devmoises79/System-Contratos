@@ -1,0 +1,130 @@
+<!-- templates/contratos/editar.html -->
+{% extends "base.html" %}
+
+{% block title %}Editar Contrato {{ contrato.numero_contrato }} - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--cinza-texto); text-decoration: none; margin-right: 1rem;">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Editar Contrato</h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7;">{{ contrato.numero_contrato }}</p>
+        </div>
+    </div>
+
+    <div class="card-custom p-4 p-lg-5">
+        <form method="POST" id="editarForm">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Dados do Contratante -->
+            <div class="mb-4">
+                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">
+                    <span style="width: 32px; height: 32px; background: var(--azul-claro); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">
+                        <i class="bi bi-person" style="color: var(--azul-principal);"></i>
+                    </span>
+                    Dados do Contratante
+                </h5>
+                
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-medium">Nome / Razão Social *</label>
+                        <input type="text" class="form-control" name="contratante_nome" 
+                               value="{{ contrato.contratante_nome }}" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">CNPJ/CPF</label>
+                        <input type="text" class="form-control" name="contratante_cnpj" 
+                               value="{{ contrato.contratante_cnpj or '' }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Email</label>
+                        <input type="email" class="form-control" name="contratante_email" 
+                               value="{{ contrato.contratante_email or '' }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Telefone</label>
+                        <input type="text" class="form-control" name="contratante_telefone" 
+                               value="{{ contrato.contratante_telefone or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dados da Contratada -->
+            <div class="mb-4">
+                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">
+                    <span style="width: 32px; height: 32px; background: var(--amarelo-claro); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">
+                        <i class="bi bi-building" style="color: var(--amarelo-escuro);"></i>
+                    </span>
+                    Dados da Contratada
+                </h5>
+                
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-medium">Nome / Razão Social *</label>
+                        <input type="text" class="form-control" name="contratada_nome" 
+                               value="{{ contrato.contratada_nome }}" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">CNPJ/CPF</label>
+                        <input type="text" class="form-control" name="contratada_cnpj" 
+                               value="{{ contrato.contratada_cnpj or '' }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Email</label>
+                        <input type="email" class="form-control" name="contratada_email" 
+                               value="{{ contrato.contratada_email or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalhes do Contrato -->
+            <div class="mb-4">
+                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">
+                    <span style="width: 32px; height: 32px; background: var(--vermelho-claro); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">
+                        <i class="bi bi-file-text" style="color: var(--vermelho-principal);"></i>
+                    </span>
+                    Detalhes do Contrato
+                </h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Valor (R$) *</label>
+                        <input type="number" step="0.01" class="form-control" name="valor" 
+                               value="{{ contrato.valor }}" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Prazo (dias) *</label>
+                        <input type="number" class="form-control" name="prazo_dias" 
+                               value="{{ contrato.prazo_dias }}" required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label fw-medium">Descrição dos Serviços *</label>
+                        <textarea class="form-control" name="descricao" rows="6" required>{{ contrato.descricao }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: 2px solid var(--cinza-claro);">
+                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-2"></i>
+                    Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

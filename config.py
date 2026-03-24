@@ -23,7 +23,7 @@ class Config:
     
     # Configurações de segurança
     MAX_TENTATIVAS_LOGIN = int(os.environ.get('MAX_TENTATIVAS_LOGIN', 5))
-    TEMPO_BLOQUEIO_MINUTOS = int(os.environ.get('TEMPO_BLOQUEIO_MINUTOS', 30))
+    TEMPO_BLOQUEIO_MINUTOS = int(os.environ.get('TEMPO_BLOQUEIO_MINUTOS', 10))
     
     # Uploads
     UPLOAD_FOLDER = 'static/uploads'
