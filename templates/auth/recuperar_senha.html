@@ -6,107 +6,42 @@
 {% block content %}
 <div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <!-- Card de Recuperação -->
-        <div class="card-custom p-0 overflow-hidden fade-in">
-            <!-- Barra superior colorida -->
-            <div style="height: 6px; background: linear-gradient(90deg, var(--azul-principal), var(--amarelo-principal));"></div>
-            
-            <div class="p-4 p-lg-5">
-                <!-- Cabeçalho -->
-                <div class="text-center mb-4">
-                    <a href="{{ url_for('login') }}" class="text-decoration-none d-inline-flex align-items-center mb-4" style="color: var(--azul-principal);">
-                        <i class="bi bi-arrow-left-circle-fill me-2"></i>
-                        <span>Voltar ao login</span>
-                    </a>
-                    
-                    <!-- Ícone de envelope com animação -->
-                    <div class="position-relative d-inline-block mb-4">
-                        <div class="card-icon amarelo" style="width: 80px; height: 80px; font-size: 2.5rem; animation: pulse 2s infinite;">
-                            <i class="bi bi-envelope-paper"></i>
-                        </div>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="background: var(--azul-principal) !important;">
-                            <i class="bi bi-question-lg"></i>
-                        </span>
-                    </div>
-                    
-                    <h2 class="fw-bold mb-2" style="color: var(--cinza-texto);">
-                        <i class="bi bi-key me-2" style="color: var(--amarelo-escuro);"></i>
-                        Recuperar Senha
-                    </h2>
-                    <p class="text-muted">
-                        <i class="bi bi-envelope-check me-1"></i>
-                        Enviaremos instruções para seu e-mail
-                    </p>
+        <div class="card-custom p-4 p-lg-5 fade-in">
+            <div class="text-center mb-4">
+                <div class="logo-container mx-auto mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--azul-principal), var(--verde-principal));">
+                    <span class="logo-text" style="font-size: 1.8rem;">V</span>
                 </div>
-
-                <!-- Formulário -->
-                <form method="POST">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-medium mb-2">
-                            <i class="bi bi-envelope-fill me-1" style="color: var(--amarelo-escuro);"></i>
-                            E-mail cadastrado
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
-                                <i class="bi bi-envelope" style="color: var(--amarelo-escuro);"></i>
-                            </span>
-                            <input type="email" class="form-control border-start-0" name="email" 
-                                   placeholder="seu@email.com" required
-                                   style="border-color: var(--cinza-claro);">
-                        </div>
-                        <div class="form-text mt-2">
-                            <i class="bi bi-info-circle me-1" style="color: var(--azul-principal);"></i>
-                            Digite o e-mail que você usou no cadastro
-                        </div>
-                    </div>
-
-                    <!-- Dicas de segurança -->
-                    <div class="alert alert-info d-flex align-items-center mb-4" style="background: var(--azul-claro); border: none; border-radius: 12px;">
-                        <i class="bi bi-shield-check fs-4 me-3" style="color: var(--azul-principal);"></i>
-                        <div>
-                            <strong class="d-block mb-1">Protegemos sua conta</strong>
-                            <small>Enviaremos um link seguro para redefinir sua senha</small>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2"
-                            style="background: var(--amarelo-principal); border: none;">
-                        <i class="bi bi-send-check fs-5"></i>
-                        <span class="fw-medium">Enviar Instruções</span>
-                        <i class="bi bi-arrow-right-short fs-5"></i>
-                    </button>
-                </form>
-
-                <!-- Links adicionais -->
-                <div class="text-center mt-4">
-                    <p class="small text-muted mb-2">
-                        <i class="bi bi-clock-history me-1"></i>
-                        O link será válido por 24 horas
-                    </p>
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="{{ url_for('login') }}" class="small text-decoration-none" style="color: var(--azul-principal);">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>
-                            Fazer login
-                        </a>
-                        <span class="text-muted">|</span>
-                        <a href="{{ url_for('cadastro_usuario') }}" class="small text-decoration-none" style="color: var(--azul-principal);">
-                            <i class="bi bi-person-plus me-1"></i>
-                            Criar conta
-                        </a>
-                    </div>
-                </div>
+                <h2 class="fw-bold mb-2" style="color: var(--cinza-texto);">Recuperar Senha</h2>
+                <p class="text-muted small">Digite seu e-mail para receber as instruções</p>
             </div>
+
+            <form method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="mb-4">
+                    <label class="form-label fw-medium mb-2">E-mail cadastrado</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-envelope" style="color: var(--azul-principal);"></i>
+                        </span>
+                        <input type="email" class="form-control border-start-0" name="email" 
+                               placeholder="seu@email.com" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                    <i class="bi bi-send me-2"></i>
+                    Enviar Instruções
+                </button>
+
+                <div class="text-center">
+                    <a href="{{ url_for('login') }}" class="small text-decoration-none" style="color: var(--azul-principal);">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Voltar para o login
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<style>
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-</style>
 {% endblock %}

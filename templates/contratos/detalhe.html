@@ -214,6 +214,107 @@
                 </div>
             </div>
 
+
+            <!-- templates/contratos/detalhe.html - Botões de ação -->
+
+<div class="mb-4 d-flex gap-2 flex-wrap">
+    <!-- Assistentes: botão enviar para analista -->
+    {% if session.usuario.perfil == 'assistente' and contrato.status == 'rascunho' and not contrato.solicitado_aprovacao and contrato.criado_por == session.usuario.id %}
+    <form action="{{ url_for('enviar_para_analista', id=contrato.id) }}" method="POST" style="display: inline;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send-check me-2"></i>Enviar para Análise
+        </button>
+    </form>
+    {% endif %}
+    
+    <!-- Analistas: botão enviar para gestor e devolver para assistente -->
+    {% if session.usuario.perfil == 'analista' and contrato.status == 'em_analise' %}
+    <form action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" method="POST" style="display: inline;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send-check me-2"></i>Enviar para Gestor
+        </button>
+    </form>
+    
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#devolverAssistenteModal">
+        <i class="bi bi-arrow-return-left me-2"></i>Devolver para Assistente
+    </button>
+    {% endif %}
+    
+    <!-- Gestores: botões aprovar e devolver para analista -->
+    {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] and contrato.status == 'aguardando_aprovacao' %}
+    <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" method="POST" style="display: inline;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle me-2"></i>Aprovar
+        </button>
+    </form>
+    
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#devolverAnalistaModal">
+        <i class="bi bi-x-circle me-2"></i>Devolver para Analista
+    </button>
+    {% endif %}
+    
+    <!-- Editar: apenas rascunhos não enviados -->
+    {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
+        {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa', 'admin_sistema'] %}
+            {% if session.usuario.perfil != 'assistente' or contrato.criado_por == session.usuario.id %}
+            <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Modal para devolver para analista -->
+<div class="modal fade" id="devolverAnalistaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('devolver_para_analista', id=contrato.id) }}" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Devolver Contrato para Análise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Motivo da devolução</label>
+                    <textarea name="motivo" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Devolver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para devolver para assistente -->
+<div class="modal fade" id="devolverAssistenteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('devolver_para_assistente', id=contrato.id) }}" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Devolver Contrato para Assistente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Motivo da revisão</label>
+                    <textarea name="motivo" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Devolver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
             <!-- Informações Adicionais -->
             <div class="row g-4">
                 <div class="col-md-6">

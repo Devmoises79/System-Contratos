@@ -11,12 +11,17 @@ from core.utils import gerar_nome_arquivo_seguro
 
 admin_empresa_bp = Blueprint('admin_empresa', __name__, url_prefix='/admin/empresa')
 
+
 @admin_empresa_bp.route('/')
 @admin_empresa_required
 def dashboard():
     """Dashboard do admin da empresa"""
     empresa_id = session['usuario']['empresa_id']
     empresa = Empresa.get_by_id(empresa_id)
+    
+    if not empresa:
+        flash('Empresa não encontrada', 'danger')
+        return redirect(url_for('logout'))
     
     # Estatísticas da empresa
     stats = Contrato.estatisticas(empresa_id)
@@ -33,12 +38,17 @@ def dashboard():
                          contratos=contratos,
                          usuarios=usuarios)
 
+
 @admin_empresa_bp.route('/configuracoes', methods=['GET', 'POST'])
 @admin_empresa_required
 def configuracoes():
     """Configurações da empresa"""
     empresa_id = session['usuario']['empresa_id']
     empresa = Empresa.get_by_id(empresa_id)
+    
+    if not empresa:
+        flash('Empresa não encontrada', 'danger')
+        return redirect(url_for('logout'))
     
     if request.method == 'POST':
         # Dados básicos
@@ -66,20 +76,23 @@ def configuracoes():
                 ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
                 if ext in {'png', 'jpg', 'jpeg', 'gif'}:
                     novo_nome = gerar_nome_arquivo_seguro(filename)
-                    os.makedirs('static/uploads/logos', exist_ok=True)
-                    file.save(os.path.join('static/uploads/logos', novo_nome))
+                    upload_path = os.path.join('static', 'uploads', 'logos')
+                    os.makedirs(upload_path, exist_ok=True)
+                    file.save(os.path.join(upload_path, novo_nome))
                     empresa.logo_path = f'static/uploads/logos/{novo_nome}'
         
         empresa.save()
         
         # Atualiza sessão com novas cores
-        session['empresa']['cores'] = cores
-        session['empresa']['logo'] = empresa.logo_path
+        if 'empresa' in session:
+            session['empresa']['cores'] = cores
+            session['empresa']['logo'] = empresa.logo_path
         
         flash('Configurações atualizadas com sucesso!', 'success')
         return redirect(url_for('admin_empresa.configuracoes'))
     
     return render_template('admin/empresa/configuracoes.html', empresa=empresa)
+
 
 @admin_empresa_bp.route('/usuarios')
 @admin_empresa_required
@@ -88,6 +101,7 @@ def usuarios():
     empresa_id = session['usuario']['empresa_id']
     usuarios = Usuario.listar_por_empresa(empresa_id)
     return render_template('admin/empresa/usuarios.html', usuarios=usuarios)
+
 
 @admin_empresa_bp.route('/usuario/novo', methods=['GET', 'POST'])
 @admin_empresa_required
@@ -131,6 +145,7 @@ def usuario_novo():
     
     return render_template('admin/empresa/usuario_form.html')
 
+
 @admin_empresa_bp.route('/usuario/<int:id>/editar', methods=['GET', 'POST'])
 @admin_empresa_required
 def usuario_editar(id):
@@ -148,6 +163,11 @@ def usuario_editar(id):
         usuario.telefone = request.form.get('telefone', usuario.telefone)
         usuario.celular = request.form.get('celular', usuario.celular)
         usuario.email_corporativo = request.form.get('email_corporativo', usuario.email_corporativo)
+        usuario.perfil = request.form.get('perfil', usuario.perfil)
+        
+        # Atualiza status
+        ativo = request.form.get('ativo') == 'on'
+        usuario.ativo = ativo
         
         # Atualiza senha se fornecida
         nova_senha = request.form.get('senha')
@@ -160,6 +180,7 @@ def usuario_editar(id):
         return redirect(url_for('admin_empresa.usuarios'))
     
     return render_template('admin/empresa/usuario_form.html', usuario=usuario)
+
 
 @admin_empresa_bp.route('/usuario/<int:id>/toggle-status')
 @admin_empresa_required
@@ -177,6 +198,7 @@ def usuario_toggle_status(id):
         flash('Usuário não encontrado', 'danger')
     
     return redirect(url_for('admin_empresa.usuarios'))
+
 
 @admin_empresa_bp.route('/estatisticas')
 @admin_empresa_required

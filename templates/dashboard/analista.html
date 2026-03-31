@@ -106,13 +106,15 @@
             <div class="card-custom p-4">
                 <h5 class="fw-semibold mb-3">Distribuição por Status</h5>
                 
+                {% set total = stats.total if stats else 0 %}
+                
                 <div class="mb-3">
                     <div class="d-flex justify-content-between mb-1">
                         <span>Ativos</span>
                         <span class="fw-bold">{{ stats.ativos if stats else 0 }}</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-primary" style="width: {{ (stats.ativos / stats.total * 100) if stats.total > 0 else 0 }}%"></div>
+                        <div class="progress-bar bg-primary" style="width: {{ (stats.ativos / total * 100) if total > 0 else 0 }}%"></div>
                     </div>
                 </div>
                 
@@ -122,7 +124,7 @@
                         <span class="fw-bold">{{ stats.aguardando if stats else 0 }}</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-warning" style="width: {{ (stats.aguardando / stats.total * 100) if stats.total > 0 else 0 }}%"></div>
+                        <div class="progress-bar bg-warning" style="width: {{ (stats.aguardando / total * 100) if total > 0 else 0 }}%"></div>
                     </div>
                 </div>
                 
@@ -132,7 +134,7 @@
                         <span class="fw-bold">{{ stats.rascunhos if stats else 0 }}</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-secondary" style="width: {{ (stats.rascunhos / stats.total * 100) if stats.total > 0 else 0 }}%"></div>
+                        <div class="progress-bar bg-secondary" style="width: {{ (stats.rascunhos / total * 100) if total > 0 else 0 }}%"></div>
                     </div>
                 </div>
                 
@@ -142,7 +144,7 @@
                         <span class="fw-bold">{{ stats.encerrados if stats else 0 }}</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-info" style="width: {{ (stats.encerrados / stats.total * 100) if stats.total > 0 else 0 }}%"></div>
+                        <div class="progress-bar bg-info" style="width: {{ (stats.encerrados / total * 100) if total > 0 else 0 }}%"></div>
                     </div>
                 </div>
                 
@@ -152,7 +154,7 @@
                         <span class="fw-bold">{{ stats.cancelados if stats else 0 }}</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-danger" style="width: {{ (stats.cancelados / stats.total * 100) if stats.total > 0 else 0 }}%"></div>
+                        <div class="progress-bar bg-danger" style="width: {{ (stats.cancelados / total * 100) if total > 0 else 0 }}%"></div>
                     </div>
                 </div>
             </div>
@@ -170,8 +172,7 @@
                                 <th>Contrato</th>
                                 <th>Contratante</th>
                                 <th>Valor</th>
-                            </tr>
-                        </thead>
+                            </thead>
                         <tbody>
                             {% if top_contratos and top_contratos|length > 0 %}
                                 {% for contrato in top_contratos %}

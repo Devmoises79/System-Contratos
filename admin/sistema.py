@@ -1,5 +1,5 @@
 # admin/sistema.py
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 from auth.permissoes import admin_sistema_required
 from auth.ip_blocker import IPBlocker
 from models.empresa import Empresa
@@ -12,6 +12,7 @@ import secrets
 from werkzeug.utils import secure_filename
 
 admin_sistema_bp = Blueprint('admin_sistema', __name__, url_prefix='/admin/sistema')
+
 
 @admin_sistema_bp.route('/')
 @admin_sistema_required
