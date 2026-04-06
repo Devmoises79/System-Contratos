@@ -71,3 +71,87 @@ dist/
 *.egg-info/
 
 config.py
+
+# Ambiente virtual
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Configurações com senhas
+.env
+.env.local
+.env.production
+config_local.py
+config.json
+*.cnf
+*.my.cnf
+
+# Banco de dados
+*.sql
+*.dump
+*.backup
+*.bak
+*.db
+*.sqlite3
+
+# Logs - NUNCA versionar!
+logs/
+*.log
+*.log.*
+*.out
+
+# Uploads e arquivos de usuários
+static/uploads/
+static/logos/
+static/contratos/
+uploads/
+media/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos de teste e cobertura
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+*.cover
+tests/__pycache__/
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Arquivos duplicados (remover do repositório)
+contrato.py
+testar_botao.html
+teste_conexao.py
+gerar_pdf_now.py
+gerar_pdf_teste.py
+fix_now.py
+fix_db.py
+
+# Relatórios
+*.pdf
+*.docx
