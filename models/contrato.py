@@ -1,6 +1,6 @@
-# models/contrato.py
 from datetime import datetime
 from core.database import Database
+from core.logging_config import logger
 import uuid
 
 class Contrato:
@@ -11,7 +11,8 @@ class Contrato:
                  data_fim=None, descricao=None, status='rascunho', criado_por=None,
                  atualizado_por=None, aprovado_por=None, data_aprovacao=None,
                  solicitado_aprovacao=False, data_solicitacao=None,
-                 pdf_path=None, data_criacao=None, data_atualizacao=None):
+                 pdf_path=None, data_criacao=None, data_atualizacao=None,
+                 motivo_revisao=None, motivo_rejeicao=None):
         self.id = id
         self.empresa_id = empresa_id
         self.numero_contrato = numero_contrato
@@ -35,6 +36,8 @@ class Contrato:
         self.solicitado_aprovacao = solicitado_aprovacao
         self.data_solicitacao = data_solicitacao
         self.pdf_path = pdf_path
+        self.motivo_revisao = motivo_revisao
+        self.motivo_rejeicao = motivo_rejeicao
         self.data_criacao = data_criacao or datetime.now()
         self.data_atualizacao = data_atualizacao or datetime.now()
     
@@ -43,6 +46,32 @@ class Contrato:
         data = datetime.now().strftime("%Y%m%d")
         codigo = str(uuid.uuid4())[:6].upper()
         return f"CT-{data}-{codigo}"
+    
+    def get_criador_nome(self):
+        """Retorna o nome do criador do contrato"""
+        if not self.criado_por:
+            return 'Sistema'
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.criado_por,))
+        return result['nome'] if result else 'Usuário não encontrado'
+    
+    def get_aprovador_nome(self):
+        """Retorna o nome do aprovador do contrato"""
+        if not self.aprovado_por:
+            return None
+        db = Database()
+        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.aprovado_por,))
+        return result['nome'] if result else None
+    
+    def get_info_auditoria(self):
+        """Retorna informações de auditoria do contrato"""
+        return {
+            'criado_por_nome': self.get_criador_nome(),
+            'criado_em': self.data_criacao.strftime('%d/%m/%Y %H:%M') if self.data_criacao else None,
+            'atualizado_em': self.data_atualizacao.strftime('%d/%m/%Y %H:%M') if self.data_atualizacao else None,
+            'aprovado_por_nome': self.get_aprovador_nome(),
+            'aprovado_em': self.data_aprovacao.strftime('%d/%m/%Y %H:%M') if self.data_aprovacao else None
+        }
     
     def save(self):
         db = Database()
@@ -54,6 +83,7 @@ class Contrato:
                     contratada_email = %s, valor = %s, prazo_dias = %s, data_inicio = %s,
                     data_fim = %s, descricao = %s, status = %s, pdf_path = %s,
                     atualizado_por = %s, solicitado_aprovacao = %s, data_solicitacao = %s,
+                    motivo_revisao = %s, motivo_rejeicao = %s,
                     data_atualizacao = NOW()
                 WHERE id = %s
             """
@@ -62,7 +92,8 @@ class Contrato:
                 self.contratante_telefone, self.contratada_nome, self.contratada_cnpj,
                 self.contratada_email, self.valor, self.prazo_dias, self.data_inicio,
                 self.data_fim, self.descricao, self.status, self.pdf_path,
-                self.atualizado_por, self.solicitado_aprovacao, self.data_solicitacao, self.id
+                self.atualizado_por, self.solicitado_aprovacao, self.data_solicitacao,
+                self.motivo_revisao, self.motivo_rejeicao, self.id
             )
             db.execute(query, params)
             return self.id
@@ -188,7 +219,14 @@ class Contrato:
             params.append(status)
         query += " ORDER BY data_criacao DESC"
         results = db.fetch_all(query, params)
-        return [Contrato(**row) for row in results] if results else []
+        contratos = []
+        for row in results:
+            try:
+                contratos.append(Contrato(**row))
+            except Exception as e:
+                logger.error(f"Erro ao criar contrato: {e}")
+                continue
+        return contratos
     
     @staticmethod
     def listar_por_criador(usuario_id):
@@ -252,20 +290,6 @@ class Contrato:
             'media': media,
             'por_mes': por_mes
         }
-    
-    def get_criador_nome(self):
-        if not self.criado_por:
-            return 'Sistema'
-        db = Database()
-        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.criado_por,))
-        return result['nome'] if result else 'Usuário não encontrado'
-    
-    def get_aprovador_nome(self):
-        if not self.aprovado_por:
-            return None
-        db = Database()
-        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.aprovado_por,))
-        return result['nome'] if result else None
     
     def __repr__(self):
         return f"<Contrato {self.id}: {self.numero_contrato}>"

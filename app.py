@@ -1,5 +1,4 @@
-# app.py
-from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify, send_file
 from config import Config
 from core.database import Database, close_db
 from auth.login import LoginManager
@@ -8,6 +7,7 @@ from auth.ip_blocker import IPBlocker
 from models.usuario import Usuario
 from models.empresa import Empresa
 from models.contrato import Contrato
+from core.logging_config import logger
 import secrets
 from datetime import datetime
 import os
@@ -125,9 +125,8 @@ def dashboard_analista():
     empresa_id = session['usuario']['empresa_id']
     stats = Contrato.estatisticas(empresa_id)
     
-    # Top 5 contratos por valor
     contratos = Contrato.listar_por_empresa(empresa_id)
-    top_contratos = sorted(contratos, key=lambda x: x.valor, reverse=True)[:5]
+    top_contratos = sorted(contratos, key=lambda x: x.valor, reverse=True)[:5] if contratos else []
     
     return render_template('dashboard/analista.html', 
                          stats=stats, 
@@ -155,13 +154,11 @@ def listar_contratos():
     """Lista todos os contratos"""
     empresa_id = session['usuario']['empresa_id']
     
-    # Filtros
     status = request.args.get('status')
     busca = request.args.get('busca')
     
     contratos = Contrato.listar_por_empresa(empresa_id)
     
-    # Aplica filtros
     if status:
         if status == 'aguardando':
             contratos = [c for c in contratos if c.status == 'aguardando_aprovacao']
@@ -226,13 +223,44 @@ def ver_contrato(id):
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
     
-    # Verifica se o usuário tem acesso a este contrato
     empresa_id = session['usuario']['empresa_id']
     if contrato.empresa_id != empresa_id and session['usuario']['perfil'] != 'admin_sistema':
         flash('Acesso negado', 'danger')
         return redirect(url_for('listar_contratos'))
     
-    return render_template('contratos/detalhe.html', contrato=contrato)
+    info_auditoria = {}
+    try:
+        if hasattr(contrato, 'get_info_auditoria'):
+            info_auditoria = contrato.get_info_auditoria()
+        else:
+            info_auditoria = {
+                'criado_por_nome': contrato.get_criador_nome() if hasattr(contrato, 'get_criador_nome') else 'Desconhecido',
+                'criado_em': contrato.data_criacao.strftime('%d/%m/%Y %H:%M') if contrato.data_criacao else None,
+                'atualizado_em': contrato.data_atualizacao.strftime('%d/%m/%Y %H:%M') if contrato.data_atualizacao else None,
+                'aprovado_por_nome': contrato.get_aprovador_nome() if hasattr(contrato, 'get_aprovador_nome') else None,
+                'aprovado_em': contrato.data_aprovacao.strftime('%d/%m/%Y %H:%M') if contrato.data_aprovacao else None
+            }
+    except Exception as e:
+        logger.error(f"Erro ao obter info auditoria: {e}")
+        info_auditoria = {
+            'criado_por_nome': 'Desconhecido',
+            'criado_em': contrato.data_criacao.strftime('%d/%m/%Y %H:%M') if contrato.data_criacao else None,
+            'atualizado_em': None,
+            'aprovado_por_nome': None,
+            'aprovado_em': None
+        }
+    
+    # Corrige o caminho do PDF para exibir no template
+    pdf_url = None
+    if contrato.pdf_path:
+        pdf_url = contrato.pdf_path.replace('\\', '/')
+        if pdf_url.startswith('static/'):
+            pdf_url = pdf_url[7:]  # Remove 'static/' para usar com url_for
+    
+    return render_template('contratos/detalhe.html', 
+                         contrato=contrato,
+                         info_auditoria=info_auditoria,
+                         pdf_url=pdf_url)
 
 
 @app.route('/contratos/<int:id>/editar', methods=['GET', 'POST'])
@@ -381,6 +409,7 @@ def devolver_para_analista(id):
 def devolver_para_assistente(id):
     """Analista devolve contrato para assistente revisar"""
     from auth.permissoes import analista_required
+    analista_required(lambda: None)()
     
     contrato = Contrato.get_by_id(id)
     motivo = request.form.get('motivo', '')
@@ -397,10 +426,13 @@ def devolver_para_assistente(id):
     
     return redirect(url_for('ver_contrato', id=id))
 
+
 @app.route('/contratos/<int:id>/download')
 @login_required
 def download_contrato_pdf(id):
     """Download do contrato em PDF"""
+    from utils.gerador_pdf import gerar_pdf_contrato
+    
     contrato = Contrato.get_by_id(id)
     
     if not contrato:
@@ -413,26 +445,45 @@ def download_contrato_pdf(id):
         flash('Acesso negado', 'danger')
         return redirect(url_for('listar_contratos'))
     
-    # Verifica se o PDF existe
-    if not contrato.pdf_path or not os.path.exists(contrato.pdf_path):
-        flash('Arquivo PDF não encontrado. Gerando novo...', 'warning')
-        # Gera o PDF
-        from utils.gerador_pdf import gerar_pdf_contrato
-        pdf_path = gerar_pdf_contrato(contrato)
-        if pdf_path:
-            contrato.pdf_path = pdf_path
-            contrato.save()
-        else:
-            flash('Erro ao gerar PDF', 'danger')
-            return redirect(url_for('ver_contrato', id=id))
+    # Define o caminho correto do PDF (NORMALIZADO)
+    pdf_filename = f'contrato_{contrato.numero_contrato}.pdf'
+    pdf_path = os.path.join('static', 'uploads', 'contratos', pdf_filename).replace('\\', '/')
     
-    # Retorna o arquivo para download
-    return send_file(
-        contrato.pdf_path,
-        as_attachment=True,
-        download_name=f'contrato_{contrato.numero_contrato}.pdf',
-        mimetype='application/pdf'
-    )
+    # Verifica se o PDF já existe
+    if os.path.exists(pdf_path):
+        logger.info(f"PDF encontrado: {pdf_path}")
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name=pdf_filename,
+            mimetype='application/pdf'
+        )
+    
+    # Gera o PDF
+    logger.info(f"Gerando PDF para contrato {contrato.numero_contrato}")
+    flash('Gerando PDF, aguarde...', 'info')
+    
+    novo_pdf = gerar_pdf_contrato(contrato)
+    
+    if novo_pdf and os.path.exists(novo_pdf):
+        # Normaliza o caminho
+        novo_pdf = novo_pdf.replace('\\', '/')
+        contrato.pdf_path = novo_pdf
+        contrato.save()
+        
+        logger.info(f"PDF gerado com sucesso: {novo_pdf}")
+        flash('PDF gerado com sucesso!', 'success')
+        
+        return send_file(
+            novo_pdf,
+            as_attachment=True,
+            download_name=pdf_filename,
+            mimetype='application/pdf'
+        )
+    else:
+        logger.error(f"Erro ao gerar PDF para contrato {contrato.numero_contrato}")
+        flash('Erro ao gerar o PDF. Tente novamente.', 'danger')
+        return redirect(url_for('ver_contrato', id=id))
 
 
 # ==================== ROTAS DE USUÁRIO ====================
@@ -638,4 +689,5 @@ def utility_processor():
 # ==================== INICIALIZAÇÃO ====================
 
 if __name__ == '__main__':
+    logger.info("ValidaPy iniciado")
     app.run(debug=True, host='0.0.0.0', port=5000)

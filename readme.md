@@ -1,142 +1,197 @@
-## 📄 System-Contratos
+# 📄 System-Contratos
 
 Sistema web para gerenciamento corporativo de contratos, empresas e usuários.
 
-* ⚠️ Status: Projeto em desenvolvimento ativo. Estrutura arquitetural consolidada e novas funcionalidades sendo implementadas.
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Python](https://img.shields.io/badge/python-3.8+-blue)
+![Flask](https://img.shields.io/badge/flask-2.0+-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
+## ✨ Características
 
-# 📌 Sobre o Projeto
+- ✅ **Multi-empresa** - Suporte completo a múltiplas empresas
+- ✅ **RBAC** - Controle de acesso baseado em perfis (Admin Sistema, Admin Empresa, Gestor, Analista, Assistente)
+- ✅ **Fluxo de Aprovação** - Workflow completo de contratos
+- ✅ **Segurança** - Bloqueio de IP, CSRF, senhas com hash
+- ✅ **Logging** - Sistema completo de auditoria
+- ✅ **PDF** - Geração de contratos em PDF
+- ✅ **Dashboard** - Estatísticas e gráficos
+- ✅ **Responsivo** - Interface adaptável a todos dispositivos
 
-O System-Contratos é uma aplicação web desenvolvida com foco em organização modular, controle de acesso e boas práticas de backend.
+## 🚀 Tecnologias
 
-O sistema permite:
+### Backend
+- **Python 3.8+**
+- **Flask** - Framework web
+- **MySQL** - Banco de dados relacional
+- **Werkzeug** - Segurança e utilitários
+- **ReportLab/WeasyPrint** - Geração de PDF
 
-- Gestão de contratos
+### Frontend
+- **Bootstrap 5** - Framework CSS
+- **JavaScript** - Interatividade
+- **Font Awesome** - Ícones
+- **Jinja2** - Templates
 
-- Administração de empresas
+### Desenvolvimento
+- **Pytest** - Testes automatizados
+- **Logging** - Sistema de logs
+- **Git** - Controle de versão
 
-- Controle de usuários
+## 📋 Pré-requisitos
 
-- Permissões baseadas em perfil (RBAC)
+- Python 3.8 ou superior
+- MySQL 5.7 ou superior
+- pip (gerenciador de pacotes Python)
 
-- Estrutura organizada por domínio
+## 🔧 Instalação
 
-- Tratamento de erros personalizados
-
-*O projeto está em evolução. Com foco em escalabilidade e arquitetura limpa.
-
-# Stack Tecnológica
-
-*Backend:
-
-- Python
-
-- Flask
-
-- Arquitetura modular
-
-- Integração com APIs REST
-
-- ORM para abstração do banco de dados
-
-*Frontend:
-
-- HTML5
-
-- CSS3
-
-- JavaScript
-
-- Bootstrap
-
-*Banco de Dados:
-
-- MySQL
-
-# 🏗️ Estrutura Atual do Projeto
+1. **Clone o repositório**
 
 ```bash
-System-Contratos/
-│
-├── admin/
-├── auth/
-├── core/
-├── models/
-├── static/
-│   └── css/
-├── templates/
-│   ├── admin/
-│   ├── auth/
-│   ├── contratos/
-│   ├── dashboard/
-│   ├── empresa/
-│   ├── erros/
-│   ├── base.html
-│   └── login.html
-│
-├── app.py
-├── config.py
-├── contrato.py
-├── teste_conexao.py
-├── .gitignore
-└── readme.md
+git clone https://github.com/Devmoises79/System-Contratos.git
+cd System-Contratos
 ```
 
-* A organização segue separação de responsabilidades, facilitando manutenção, evolução e escalabilidade.
+# Crie um ambiente virtual
 
-# 🔐 Controle de Acesso e Perfis
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+```
 
-O sistema implementa controle de acesso baseado em papéis (RBAC), com quatro níveis administrativos distintos:
+# ou
 
-# 🔹 Administrador do Sistema
+```bash
+venv\Scripts\activate  # Windows
+Instale as dependências
+```
 
-- Gerencia o sistema globalmente
+```bash
+pip install -r requirements.txt
+Configure o banco de dados
+```
 
-- Controle estrutural da aplicação
+```bash
+# Crie o banco de dados MySQL
+mysql -u root -p
+CREATE DATABASE validapy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+EXIT;
 
-- Administração geral de empresas
-
-# 🔹 Administrador da Empresa
-
-- Gerencia usuários da própria empresa
-
-- Administra contratos internos
-
-- Acessa dashboards e estatísticas específicas
-
-# 🔹 Demais Perfis
-
-- Gestor
-
-- Analista
-
-- Assistente
-
-- Cada perfil possui permissões e visualizações específicas.
+# Execute as migrations
+python scripts/migrate.py
+Configure o arquivo config.py
+```
 
 
-# 🛡️ Recursos de Segurança
+# Execute a aplicação
 
-- Autenticação de usuários
+```bash
+python app.py
+```
 
-- Controle granular de permissões
+# 🧪 Testes
+Execute os testes automatizados:
 
-- Bloqueio de IP
+```bash
+# Instalar dependências de teste
+pip install pytest pytest-cov
 
-- Páginas de erro personalizadas (403, 404, 500)
 
-- Separação entre camadas administrativas e autenticação
+# Executar todos os 
 
-# Direcionamento Futuro
+pytest tests/ -v
 
-- Ampliação das APIs REST
+# Executar com cobertura
+pytest tests/ --cov=. --cov-report=html
 
-- Testes automatizados
+# Executar testes específicos
+pytest tests/test_models.py -v
+``` 
 
-- Refatoração arquitetural contínua
+# 📁 Estrutura do Projeto
 
-- Auditoria e logs estruturados
+```text
+System-Contratos/
+├── admin/                 # Módulo de administração
+├── auth/                  # Autenticação e autorização
+├── core/                  # Utilitários centrais
+│   ├── database.py       # Conexão com banco
+│   ├── logging_config.py # Sistema de logs
+│   └── utils.py          # Funções auxiliares
+├── models/                # Modelos de dados
+├── static/                # Arquivos estáticos
+├── templates/             # Templates HTML
+├── tests/                 # Testes automatizados
+├── utils/                 # Utilitários
+├── app.py                 # Aplicação principal
+├── config.py              # Configurações (não versionado)
+└── requirements.txt       # Dependências
+```
 
-# 📎 Observação
 
-Este projeto está sendo desenvolvido como prática avançada de backend, modelagem de domínio e controle de acesso em aplicações web corporativas.
+# 🔐 Perfis de Acesso
+
+text
+Perfil	Descrição	Permissões
+Admin Sistema	Controle total	Gerenciar empresas, usuários, logs, IPs
+Admin Empresa	Gestão da empresa	Gerenciar usuários, configurações, estatísticas
+Gestor	Aprovação	Aprovar contratos, visualizar relatórios
+Analista	Análise	Visualizar dados, exportar relatórios
+Assistente	Operacional	Criar e editar contratos
+```
+
+# 📊 Fluxo de Contratos
+
+text
+Rascunho → Em Análise → Aguardando Aprovação → Ativo
+    ↑          ↓              ↓
+    └──────────┴──────────────┘ (Revisão)
+```
+
+# 🛡️ Segurança
+
+- ✅ Senhas com hash (PBKDF2)
+
+- ✅ Proteção CSRF
+
+- ✅ Bloqueio de IP por tentativas
+
+- ✅ Sessões com timeout
+
+- ✅ Sanitização de inputs
+
+- ✅ Logs de auditoria
+
+# 📝 TODO
+- Implementar testes de integração
+
+- Adicionar API REST completa
+
+- Melhorar geração de PDF com WeasyPrint
+
+- Adicionar WebSockets para notificações
+
+- Implementar cache com Redis
+
+- Adicionar dashboard de métricas em tempo real
+
+#🤝 Contribuição
+Contribuições são bem-vindas! 
+
+* Fork o projeto
+
+* Crie sua branch. Ex.: (git checkout -b feature/suaFeature)
+
+* Commit suas mudanças. Ex.: e(git commit -m 'Add some ExFeature')
+
+* Push para a branch. Ex.: (git push origin feature/ExFeature)
+
+* Abra um Pull Request
+
+# 📄 Licença
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+
+📧 Contato
+@Devmoises79 - GitHub
+Linkedin: https://www.linkedin.com/in/moisés-aniceto-71042a251/
