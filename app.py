@@ -7,41 +7,35 @@ from auth.ip_blocker import IPBlocker
 from models.usuario import Usuario
 from models.empresa import Empresa
 from models.contrato import Contrato
+from models.notificacao import Notificacao, SistemaNotificacoes
 from core.logging_config import logger
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
-# Importação dos Blueprints
 from admin.empresa import admin_empresa_bp
 from admin.sistema import admin_sistema_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Configuração de segurança
 app.secret_key = Config.SECRET_KEY
 app.permanent_session_lifetime = Config.PERMANENT_SESSION_LIFETIME
 
-# Configuração para upload de arquivos
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, 'logos'), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, 'contratos'), exist_ok=True)
 
-# Registrar blueprints
 app.register_blueprint(admin_empresa_bp)
 app.register_blueprint(admin_sistema_bp)
 
-# Fechar conexão do banco ao final da requisição
 app.teardown_appcontext(close_db)
 
-# ==================== ROTAS PRINCIPAIS ====================
 
 @app.route('/')
 def index():
-    """Página inicial"""
     if 'usuario' in session:
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
@@ -49,30 +43,24 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Página de login"""
     if 'usuario' in session:
         return redirect(url_for('dashboard'))
-    
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
         lembrar = request.form.get('lembrar') == 'on'
-        
         sucesso, resultado = LoginManager.login(email, senha, lembrar)
-        
         if sucesso:
             flash(resultado.get('mensagem', 'Login realizado com sucesso!'), 'success')
             return redirect(resultado.get('redirect', url_for('dashboard')))
         else:
             flash(resultado.get('mensagem', 'Erro ao fazer login'), 'danger')
             return redirect(url_for('login'))
-    
     return render_template('login.html')
 
 
 @app.route('/logout')
 def logout():
-    """Logout do usuário"""
     LoginManager.logout()
     flash('Logout realizado com sucesso!', 'success')
     return redirect(url_for('login'))
@@ -81,10 +69,8 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """Dashboard baseado no perfil do usuário"""
     usuario = session['usuario']
     perfil = usuario['perfil']
-    
     if perfil == 'admin_sistema':
         return redirect(url_for('admin_sistema.dashboard'))
     elif perfil == 'admin_empresa':
@@ -95,70 +81,53 @@ def dashboard():
         return redirect(url_for('dashboard_analista'))
     elif perfil == 'assistente':
         return redirect(url_for('dashboard_assistente'))
-    
     return redirect(url_for('listar_contratos'))
 
 
 @app.route('/dashboard/gestor')
 @login_required
 def dashboard_gestor():
-    """Dashboard para gestores"""
     from auth.permissoes import gestor_required
     gestor_required(lambda: None)()
-    
     empresa_id = session['usuario']['empresa_id']
     stats = Contrato.estatisticas(empresa_id)
     contratos_pendentes = Contrato.listar_pendentes_aprovacao(empresa_id)
-    
-    return render_template('dashboard/gestor.html', 
-                         stats=stats, 
-                         contratos_pendentes=contratos_pendentes)
+    return render_template('dashboard/gestor.html', stats=stats, contratos_pendentes=contratos_pendentes)
 
 
 @app.route('/dashboard/analista')
 @login_required
 def dashboard_analista():
-    """Dashboard para analistas"""
     from auth.permissoes import analista_required
     analista_required(lambda: None)()
-    
     empresa_id = session['usuario']['empresa_id']
     stats = Contrato.estatisticas(empresa_id)
-    
     contratos = Contrato.listar_por_empresa(empresa_id)
     top_contratos = sorted(contratos, key=lambda x: x.valor, reverse=True)[:5] if contratos else []
-    
+    contratos_em_analise = Contrato.listar_em_analise(empresa_id)
     return render_template('dashboard/analista.html', 
                          stats=stats, 
-                         top_contratos=top_contratos)
+                         top_contratos=top_contratos,
+                         contratos_em_analise=contratos_em_analise)
 
 
 @app.route('/dashboard/assistente')
 @login_required
 def dashboard_assistente():
-    """Dashboard para assistentes"""
     from auth.permissoes import assistente_required
     assistente_required(lambda: None)()
-    
     usuario_id = session['usuario']['id']
     contratos = Contrato.listar_por_criador(usuario_id)
-    
     return render_template('dashboard/assistente.html', contratos=contratos)
 
-
-# ==================== ROTAS DE CONTRATOS ====================
 
 @app.route('/contratos')
 @login_required
 def listar_contratos():
-    """Lista todos os contratos"""
     empresa_id = session['usuario']['empresa_id']
-    
     status = request.args.get('status')
     busca = request.args.get('busca')
-    
     contratos = Contrato.listar_por_empresa(empresa_id)
-    
     if status:
         if status == 'aguardando':
             contratos = [c for c in contratos if c.status == 'aguardando_aprovacao']
@@ -166,31 +135,34 @@ def listar_contratos():
             contratos = [c for c in contratos if c.status == 'em_analise']
         else:
             contratos = [c for c in contratos if c.status == status]
-    
     if busca:
         busca = busca.lower()
-        contratos = [c for c in contratos if 
-                    busca in (c.numero_contrato or '').lower() or 
-                    busca in (c.contratante_nome or '').lower() or 
-                    busca in (c.contratada_nome or '').lower()]
-    
+        contratos = [c for c in contratos if busca in (c.numero_contrato or '').lower() or busca in (c.contratante_nome or '').lower() or busca in (c.contratada_nome or '').lower()]
     return render_template('contratos/listar.html', contratos=contratos)
 
 
 @app.route('/contratos/novo', methods=['GET', 'POST'])
 @login_required
 def contrato_novo():
-    """Cria um novo contrato"""
     from auth.permissoes import pode_criar_contrato
-    
     if not pode_criar_contrato():
         flash('Você não tem permissão para criar contratos.', 'danger')
         return redirect(url_for('dashboard'))
-    
     if request.method == 'POST':
         empresa_id = session['usuario']['empresa_id']
         usuario_id = session['usuario']['id']
-        
+        data_inicio_str = request.form.get('data_inicio')
+        data_inicio = None
+        if data_inicio_str:
+            try:
+                dia, mes, ano = map(int, data_inicio_str.split('/'))
+                data_inicio = datetime(ano, mes, dia).date()
+            except:
+                data_inicio = None
+        prazo_dias = request.form.get('prazo_dias', type=int)
+        data_fim = None
+        if data_inicio and prazo_dias:
+            data_fim = data_inicio + timedelta(days=prazo_dias)
         contrato = Contrato(
             empresa_id=empresa_id,
             contratante_nome=request.form.get('contratante_nome'),
@@ -201,85 +173,66 @@ def contrato_novo():
             contratada_cnpj=request.form.get('contratada_cnpj'),
             contratada_email=request.form.get('contratada_email'),
             valor=request.form.get('valor'),
-            prazo_dias=request.form.get('prazo_dias'),
+            prazo_dias=prazo_dias,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
             descricao=request.form.get('descricao'),
             criado_por=usuario_id
         )
-        
         contrato.save()
+        SistemaNotificacoes.notificar_contrato_criado(contrato, Usuario.get_by_id(usuario_id))
         flash('Contrato criado com sucesso!', 'success')
         return redirect(url_for('ver_contrato', id=contrato.id))
-    
     return render_template('contratos/novo.html')
 
 
 @app.route('/contratos/<int:id>')
 @login_required
 def ver_contrato(id):
-    """Visualiza um contrato"""
     contrato = Contrato.get_by_id(id)
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     empresa_id = session['usuario']['empresa_id']
     if contrato.empresa_id != empresa_id and session['usuario']['perfil'] != 'admin_sistema':
         flash('Acesso negado', 'danger')
         return redirect(url_for('listar_contratos'))
     
-    info_auditoria = {}
-    try:
-        if hasattr(contrato, 'get_info_auditoria'):
-            info_auditoria = contrato.get_info_auditoria()
-        else:
-            info_auditoria = {
-                'criado_por_nome': contrato.get_criador_nome() if hasattr(contrato, 'get_criador_nome') else 'Desconhecido',
-                'criado_em': contrato.data_criacao.strftime('%d/%m/%Y %H:%M') if contrato.data_criacao else None,
-                'atualizado_em': contrato.data_atualizacao.strftime('%d/%m/%Y %H:%M') if contrato.data_atualizacao else None,
-                'aprovado_por_nome': contrato.get_aprovador_nome() if hasattr(contrato, 'get_aprovador_nome') else None,
-                'aprovado_em': contrato.data_aprovacao.strftime('%d/%m/%Y %H:%M') if contrato.data_aprovacao else None
-            }
-    except Exception as e:
-        logger.error(f"Erro ao obter info auditoria: {e}")
-        info_auditoria = {
-            'criado_por_nome': 'Desconhecido',
-            'criado_em': contrato.data_criacao.strftime('%d/%m/%Y %H:%M') if contrato.data_criacao else None,
-            'atualizado_em': None,
-            'aprovado_por_nome': None,
-            'aprovado_em': None
-        }
+    usuario_atual = Usuario.get_by_id(session['usuario']['id'])
     
-    # Corrige o caminho do PDF para exibir no template
+    if session['usuario']['perfil'] == 'analista' and contrato.status == 'rascunho':
+        contrato.status = 'em_analise'
+        contrato.atualizado_por = session['usuario']['id']
+        contrato.save()
+        SistemaNotificacoes.notificar_contrato_em_analise(contrato, usuario_atual)
+        flash('Contrato agora está em análise!', 'info')
+    
+    if not (contrato.status == 'rascunho' and contrato.criado_por == session['usuario']['id']):
+        SistemaNotificacoes.notificar_contrato_visualizado(contrato, usuario_atual)
+    
+    dias_restantes = contrato.get_dias_restantes()
     pdf_url = None
     if contrato.pdf_path:
         pdf_url = contrato.pdf_path.replace('\\', '/')
         if pdf_url.startswith('static/'):
-            pdf_url = pdf_url[7:]  # Remove 'static/' para usar com url_for
-    
-    return render_template('contratos/detalhe.html', 
-                         contrato=contrato,
-                         info_auditoria=info_auditoria,
-                         pdf_url=pdf_url)
+            pdf_url = pdf_url[7:]
+    return render_template('contratos/detalhe.html', contrato=contrato, pdf_url=pdf_url, dias_restantes=dias_restantes)
 
 
 @app.route('/contratos/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_contrato(id):
-    """Edita um contrato"""
     from auth.permissoes import pode_editar_contrato
-    
     contrato = Contrato.get_by_id(id)
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     if not pode_editar_contrato(contrato):
         flash('Você não tem permissão para editar este contrato.', 'danger')
         return redirect(url_for('ver_contrato', id=id))
-    
     if request.method == 'POST':
+        usuario_editor = Usuario.get_by_id(session['usuario']['id'])
+        
         contrato.contratante_nome = request.form.get('contratante_nome')
         contrato.contratante_cnpj = request.form.get('contratante_cnpj')
         contrato.contratante_email = request.form.get('contratante_email')
@@ -291,225 +244,170 @@ def editar_contrato(id):
         contrato.prazo_dias = request.form.get('prazo_dias')
         contrato.descricao = request.form.get('descricao')
         contrato.atualizado_por = session['usuario']['id']
-        
         contrato.save()
+        
+        SistemaNotificacoes.notificar_contrato_editado(contrato, usuario_editor)
+        
         flash('Contrato atualizado com sucesso!', 'success')
         return redirect(url_for('ver_contrato', id=id))
-    
     return render_template('contratos/editar.html', contrato=contrato)
 
 
 @app.route('/contratos/<int:id>/enviar-analista', methods=['POST'])
 @login_required
 def enviar_para_analista(id):
-    """Assistente envia contrato para análise do analista"""
     from auth.permissoes import pode_enviar_para_analista
-    
     if not pode_enviar_para_analista():
         flash('Você não tem permissão para enviar contratos para análise.', 'danger')
         return redirect(url_for('dashboard'))
-    
     contrato = Contrato.get_by_id(id)
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     if contrato.criado_por != session['usuario']['id']:
         flash('Você só pode enviar seus próprios contratos.', 'danger')
         return redirect(url_for('ver_contrato', id=id))
-    
     if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao:
         contrato.enviar_para_analista(session['usuario']['id'])
+        usuario_envio = Usuario.get_by_id(session['usuario']['id'])
+        SistemaNotificacoes.notificar_contrato_enviado_analista(contrato, usuario_envio)
         flash('Contrato enviado para análise do analista!', 'success')
     else:
         flash('Este contrato não pode ser enviado para análise.', 'danger')
-    
     return redirect(url_for('ver_contrato', id=id))
 
 
 @app.route('/contratos/<int:id>/enviar-gestor', methods=['POST'])
 @login_required
 def enviar_para_gestor(id):
-    """Analista envia contrato para aprovação do gestor"""
     from auth.permissoes import pode_enviar_para_gestor
-    
     if not pode_enviar_para_gestor():
         flash('Você não tem permissão para enviar contratos para aprovação.', 'danger')
         return redirect(url_for('dashboard'))
-    
     contrato = Contrato.get_by_id(id)
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     if contrato.status == 'em_analise':
         contrato.enviar_para_gestor(session['usuario']['id'])
+        usuario_analista = Usuario.get_by_id(session['usuario']['id'])
+        SistemaNotificacoes.notificar_contrato_enviado_gestor(contrato, usuario_analista)
         flash('Contrato enviado para aprovação do gestor!', 'success')
     else:
         flash('Este contrato não pode ser enviado para aprovação.', 'danger')
-    
-    return redirect(url_for('ver_contrato', id=id))
+    return redirect(url_for('dashboard_analista'))
 
 
 @app.route('/contratos/<int:id>/aprovar', methods=['POST'])
 @login_required
 def aprovar_contrato(id):
-    """Gestor aprova o contrato"""
     from auth.permissoes import pode_aprovar_contrato
-    
     if not pode_aprovar_contrato():
         flash('Você não tem permissão para aprovar contratos.', 'danger')
         return redirect(url_for('dashboard'))
-    
     contrato = Contrato.get_by_id(id)
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     if contrato.status == 'aguardando_aprovacao':
         contrato.aprovar(session['usuario']['id'])
+        usuario_aprovador = Usuario.get_by_id(session['usuario']['id'])
+        SistemaNotificacoes.notificar_contrato_aprovado(contrato, usuario_aprovador)
         flash('Contrato aprovado com sucesso!', 'success')
     else:
         flash('Este contrato não pode ser aprovado.', 'danger')
-    
-    return redirect(url_for('ver_contrato', id=id))
+    return redirect(url_for('dashboard_gestor'))
 
 
 @app.route('/contratos/<int:id>/devolver-analista', methods=['POST'])
 @login_required
 def devolver_para_analista(id):
-    """Gestor devolve contrato para análise do analista"""
     from auth.permissoes import pode_aprovar_contrato
-    
     if not pode_aprovar_contrato():
         flash('Você não tem permissão para devolver contratos.', 'danger')
         return redirect(url_for('dashboard'))
-    
     contrato = Contrato.get_by_id(id)
     motivo = request.form.get('motivo', '')
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     if contrato.status == 'aguardando_aprovacao':
+        usuario_devolveu = Usuario.get_by_id(session['usuario']['id'])
+        analista = Usuario.get_by_id(contrato.atualizado_por) if contrato.atualizado_por else None
         contrato.devolver_para_analista(session['usuario']['id'], motivo)
+        if analista:
+            SistemaNotificacoes.notificar_contrato_devolvido_analista(contrato, usuario_devolveu, analista, motivo)
         flash('Contrato devolvido para análise do analista.', 'warning')
     else:
         flash('Este contrato não pode ser devolvido.', 'danger')
-    
-    return redirect(url_for('ver_contrato', id=id))
+    return redirect(url_for('dashboard_gestor'))
 
 
 @app.route('/contratos/<int:id>/devolver-assistente', methods=['POST'])
 @login_required
 def devolver_para_assistente(id):
-    """Analista devolve contrato para assistente revisar"""
     from auth.permissoes import analista_required
     analista_required(lambda: None)()
-    
     contrato = Contrato.get_by_id(id)
     motivo = request.form.get('motivo', '')
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
     if contrato.status == 'em_analise':
+        usuario_devolveu = Usuario.get_by_id(session['usuario']['id'])
+        assistente = Usuario.get_by_id(contrato.criado_por)
         contrato.devolver_para_assistente(session['usuario']['id'], motivo)
+        if assistente:
+            SistemaNotificacoes.notificar_contrato_devolvido_assistente(contrato, usuario_devolveu, assistente, motivo)
         flash('Contrato devolvido para o assistente revisar.', 'warning')
     else:
         flash('Este contrato não pode ser devolvido.', 'danger')
-    
-    return redirect(url_for('ver_contrato', id=id))
+    return redirect(url_for('dashboard_analista'))
 
 
 @app.route('/contratos/<int:id>/download')
 @login_required
 def download_contrato_pdf(id):
-    """Download do contrato em PDF"""
     from utils.gerador_pdf import gerar_pdf_contrato
-    
     contrato = Contrato.get_by_id(id)
-    
     if not contrato:
         flash('Contrato não encontrado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
-    # Verifica permissão
     empresa_id = session['usuario']['empresa_id']
     if contrato.empresa_id != empresa_id and session['usuario']['perfil'] != 'admin_sistema':
         flash('Acesso negado', 'danger')
         return redirect(url_for('listar_contratos'))
-    
-    # Define o caminho correto do PDF (NORMALIZADO)
     pdf_filename = f'contrato_{contrato.numero_contrato}.pdf'
     pdf_path = os.path.join('static', 'uploads', 'contratos', pdf_filename).replace('\\', '/')
-    
-    # Verifica se o PDF já existe
     if os.path.exists(pdf_path):
-        logger.info(f"PDF encontrado: {pdf_path}")
-        return send_file(
-            pdf_path,
-            as_attachment=True,
-            download_name=pdf_filename,
-            mimetype='application/pdf'
-        )
-    
-    # Gera o PDF
-    logger.info(f"Gerando PDF para contrato {contrato.numero_contrato}")
-    flash('Gerando PDF, aguarde...', 'info')
-    
+        return send_file(pdf_path, as_attachment=True, download_name=pdf_filename, mimetype='application/pdf')
     novo_pdf = gerar_pdf_contrato(contrato)
-    
     if novo_pdf and os.path.exists(novo_pdf):
-        # Normaliza o caminho
         novo_pdf = novo_pdf.replace('\\', '/')
         contrato.pdf_path = novo_pdf
         contrato.save()
-        
-        logger.info(f"PDF gerado com sucesso: {novo_pdf}")
-        flash('PDF gerado com sucesso!', 'success')
-        
-        return send_file(
-            novo_pdf,
-            as_attachment=True,
-            download_name=pdf_filename,
-            mimetype='application/pdf'
-        )
+        return send_file(novo_pdf, as_attachment=True, download_name=pdf_filename, mimetype='application/pdf')
     else:
-        logger.error(f"Erro ao gerar PDF para contrato {contrato.numero_contrato}")
         flash('Erro ao gerar o PDF. Tente novamente.', 'danger')
         return redirect(url_for('ver_contrato', id=id))
 
 
-# ==================== ROTAS DE USUÁRIO ====================
-
 @app.route('/perfil')
 @login_required
 def perfil():
-    """Perfil do usuário"""
     usuario = Usuario.get_by_id(session['usuario']['id'])
     empresa = None
-    
     if usuario and usuario.empresa_id:
         empresa = Empresa.get_by_id(usuario.empresa_id)
-    
     return render_template('perfil.html', usuario=usuario, empresa=empresa)
 
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro_usuario():
-    """Cadastro público de novo usuário"""
     from core.utils import sanitizar_entrada, apenas_digitos, validar_email
-    
     if request.method == 'POST':
         empresa_nome = sanitizar_entrada(request.form.get('empresa_nome'))
         empresa_cnpj = apenas_digitos(request.form.get('empresa_cnpj'))
-        
         nome = sanitizar_entrada(request.form.get('nome'))
         email = sanitizar_entrada(request.form.get('email'))
         perfil = request.form.get('perfil', 'admin_empresa')
@@ -518,144 +416,125 @@ def cadastro_usuario():
         celular = apenas_digitos(request.form.get('celular'))
         email_corporativo = sanitizar_entrada(request.form.get('email_corporativo'))
         senha = request.form.get('senha')
-        
         if not empresa_nome or not nome or not email or not senha:
             flash('Preencha todos os campos obrigatórios', 'danger')
             return redirect(url_for('cadastro_usuario'))
-        
         if not validar_email(email):
             flash('Email inválido', 'danger')
             return redirect(url_for('cadastro_usuario'))
-        
         if Usuario.get_by_email(email):
             flash('Email já cadastrado', 'danger')
             return redirect(url_for('cadastro_usuario'))
-        
-        # Cria a empresa
-        empresa = Empresa(
-            nome=empresa_nome,
-            cnpj=empresa_cnpj,
-            email=email,
-            telefone=telefone,
-            celular=celular,
-            status='trial'
-        )
+        empresa = Empresa(nome=empresa_nome, cnpj=empresa_cnpj, email=email, telefone=telefone, celular=celular, status='trial')
         empresa.save()
-        
-        # Cria o usuário admin
-        usuario = Usuario(
-            empresa_id=empresa.id,
-            nome=nome,
-            email=email,
-            perfil='admin_empresa',
-            cargo=cargo,
-            telefone=telefone,
-            celular=celular,
-            email_corporativo=email_corporativo,
-            primeiro_acesso=True
-        )
+        usuario = Usuario(empresa_id=empresa.id, nome=nome, email=email, perfil='admin_empresa', cargo=cargo, telefone=telefone, celular=celular, email_corporativo=email_corporativo, primeiro_acesso=True)
         usuario.definir_senha(senha)
         usuario.save()
-        
+        SistemaNotificacoes.notificar_novo_usuario(usuario)
         flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
         return redirect(url_for('login'))
-    
     db = Database()
     ramos = db.fetch_all("SELECT id, nome FROM ramos_atividade ORDER BY nome") or []
-    
-    return render_template('admin/empresa/usuario_form.html', 
-                         cadastro_publico=True, 
-                         ramos=ramos,
-                         form_data={})
+    return render_template('admin/empresa/usuario_form.html', cadastro_publico=True, ramos=ramos, form_data={})
 
-
-# ==================== ROTAS DE RECUPERAÇÃO DE SENHA ====================
 
 @app.route('/recuperar-senha', methods=['GET', 'POST'])
 def recuperar_senha():
-    """Página de recuperação de senha"""
     if request.method == 'POST':
         email = request.form.get('email')
-        
         if not email:
             flash('Digite seu e-mail', 'danger')
             return redirect(url_for('recuperar_senha'))
-        
         usuario = Usuario.get_by_email(email)
-        
         if not usuario:
             flash('Se o e-mail estiver cadastrado, você receberá as instruções em breve.', 'info')
             return redirect(url_for('login'))
-        
         token = usuario.gerar_token_recuperacao()
         link = url_for('redefinir_senha', token=token, _external=True)
-        print(f"\n{'='*50}")
-        print(f"Link de recuperação: {link}")
-        print(f"{'='*50}\n")
-        
+        print(f"\n{'='*50}\nLink de recuperação: {link}\n{'='*50}\n")
         flash('Enviamos um link de recuperação para seu e-mail.', 'success')
         return redirect(url_for('login'))
-    
     return render_template('auth/recuperar_senha.html')
 
 
 @app.route('/redefinir-senha/<token>', methods=['GET', 'POST'])
 def redefinir_senha(token):
-    """Página de redefinição de senha"""
     usuario = Usuario.get_by_token_recuperacao(token)
-    
     if not usuario:
         flash('Link inválido ou expirado. Solicite uma nova recuperação.', 'danger')
         return redirect(url_for('recuperar_senha'))
-    
     if request.method == 'POST':
         senha = request.form.get('senha')
         confirmar_senha = request.form.get('confirmar_senha')
-        
         if not senha or not confirmar_senha:
             flash('Preencha todos os campos', 'danger')
             return redirect(url_for('redefinir_senha', token=token))
-        
         if senha != confirmar_senha:
             flash('As senhas não conferem', 'danger')
             return redirect(url_for('redefinir_senha', token=token))
-        
         usuario.definir_senha(senha)
         usuario.limpar_token_recuperacao()
         usuario.save()
-        
         flash('Senha alterada com sucesso! Faça login.', 'success')
         return redirect(url_for('login'))
-    
     return render_template('auth/redefinir_senha.html')
 
-
-# ==================== ROTAS DE FEEDBACK ====================
 
 @app.route('/feedback', methods=['POST'])
 @login_required
 def feedback():
-    """Recebe feedback do usuário"""
     nota = request.form.get('nota')
     recomendaria = request.form.get('recomendaria') == 'true'
     sugestao = request.form.get('sugestao')
-    
     db = Database()
-    query = """
-        INSERT INTO feedbacks (empresa_id, usuario_id, nota, recomendaria, sugestao)
-        VALUES (%s, %s, %s, %s, %s)
-    """
-    db.execute(query, (
-        session['usuario'].get('empresa_id'),
-        session['usuario']['id'],
-        nota,
-        recomendaria,
-        sugestao
-    ))
-    
+    db.execute("INSERT INTO feedbacks (empresa_id, usuario_id, nota, recomendaria, sugestao) VALUES (%s, %s, %s, %s, %s)",
+               (session['usuario'].get('empresa_id'), session['usuario']['id'], nota, recomendaria, sugestao))
     session['feedback_enviado'] = True
-    
     return jsonify({'sucesso': True, 'mensagem': 'Feedback enviado com sucesso!'})
+
+
+# ==================== ROTAS DE NOTIFICAÇÕES ====================
+
+@app.route('/notificacoes')
+@login_required
+def notificacoes():
+    from models.notificacao import Notificacao
+    usuario_id = session['usuario']['id']
+    notificacoes = Notificacao.listar_por_usuario(usuario_id, limite=100)
+    notificacoes_nao_lidas = Notificacao.contar_nao_lidas(usuario_id)
+    return render_template('notificacoes/index.html', 
+                         notificacoes=notificacoes,
+                         notificacoes_nao_lidas=notificacoes_nao_lidas)
+
+
+@app.route('/notificacoes/nao-lidas/count')
+@login_required
+def notificacoes_count():
+    from models.notificacao import Notificacao
+    usuario_id = session['usuario']['id']
+    total = Notificacao.contar_nao_lidas(usuario_id)
+    return jsonify({'total': total})
+
+
+@app.route('/notificacoes/<int:id>/marcar-lida', methods=['POST'])
+@login_required
+def notificacao_marcar_lida(id):
+    db = Database()
+    result = db.fetch_one("SELECT * FROM notificacoes WHERE id = %s", (id,))
+    if not result:
+        return jsonify({'sucesso': False, 'erro': 'Notificação não encontrada'}), 404
+    if result['usuario_id'] != session['usuario']['id']:
+        return jsonify({'sucesso': False, 'erro': 'Acesso negado'}), 403
+    db.execute("UPDATE notificacoes SET lida = TRUE, data_leitura = NOW() WHERE id = %s", (id,))
+    return jsonify({'sucesso': True})
+
+
+@app.route('/notificacoes/marcar-todas', methods=['POST'])
+@login_required
+def notificacoes_marcar_todas():
+    db = Database()
+    db.execute("UPDATE notificacoes SET lida = TRUE, data_leitura = NOW() WHERE usuario_id = %s AND lida = FALSE", (session['usuario']['id'],))
+    return jsonify({'sucesso': True})
 
 
 # ==================== TRATAMENTO DE ERROS ====================
@@ -677,16 +556,30 @@ def internal_error(e):
 
 @app.context_processor
 def utility_processor():
-    """Funções disponíveis em todos os templates"""
     def csrf_token():
         if '_csrf_token' not in session:
             session['_csrf_token'] = secrets.token_hex(16)
         return session['_csrf_token']
-    
     return dict(csrf_token=csrf_token, now=datetime.now)
 
 
-# ==================== INICIALIZAÇÃO ====================
+@app.context_processor
+def notificacoes_context():
+    """Adiciona informações de notificações em todos os templates"""
+    if 'usuario' in session:
+        try:
+            from models.notificacao import Notificacao
+            usuario_id = session['usuario']['id']
+            total_nao_lidas = Notificacao.contar_nao_lidas(usuario_id)
+            ultimas_notificacoes = Notificacao.listar_por_usuario(usuario_id, apenas_nao_lidas=True, limite=5)
+            return {
+                'total_notificacoes_nao_lidas': total_nao_lidas,
+                'ultimas_notificacoes': ultimas_notificacoes
+            }
+        except Exception as e:
+            print(f"Erro ao carregar notificações: {e}")
+    return {'total_notificacoes_nao_lidas': 0, 'ultimas_notificacoes': []}
+
 
 if __name__ == '__main__':
     logger.info("ValidaPy iniciado")

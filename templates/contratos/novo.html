@@ -1,137 +1,174 @@
-<!-- templates/contratos/novo.html -->
 {% extends "base.html" %}
 
 {% block title %}Novo Contrato - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Cabeçalho -->
-    <div class="d-flex align-items-center mb-4">
-        <a href="{{ url_for('listar_contratos') }}" style="color: var(--cinza-texto); text-decoration: none; margin-right: 1rem;">
-            <i class="bi bi-arrow-left fs-4"></i>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Novo Contrato</h1>
+        <a href="{{ url_for('listar_contratos') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
         </a>
-        <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Novo Contrato</h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Preencha os dados para gerar um novo contrato</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" id="formContrato">
+                <!-- Dados do Contratante -->
+                <h5 class="mb-3">Dados do Contratante</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="contratante_nome" class="form-label">Nome *</label>
+                        <input type="text" class="form-control" id="contratante_nome" name="contratante_nome" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contratante_cnpj" class="form-label">CNPJ</label>
+                        <input type="text" class="form-control" id="contratante_cnpj" name="contratante_cnpj" placeholder="00.000.000/0000-00">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="contratante_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="contratante_email" name="contratante_email">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contratante_telefone" class="form-label">Telefone</label>
+                        <input type="text" class="form-control" id="contratante_telefone" name="contratante_telefone" placeholder="(00) 00000-0000">
+                    </div>
+                </div>
+
+                <!-- Dados da Contratada -->
+                <h5 class="mb-3 mt-4">Dados da Contratada</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="contratada_nome" class="form-label">Nome *</label>
+                        <input type="text" class="form-control" id="contratada_nome" name="contratada_nome" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contratada_cnpj" class="form-label">CNPJ</label>
+                        <input type="text" class="form-control" id="contratada_cnpj" name="contratada_cnpj" placeholder="00.000.000/0000-00">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="contratada_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="contratada_email" name="contratada_email">
+                    </div>
+                </div>
+
+                <!-- Valores e Prazos -->
+                <h5 class="mb-3 mt-4">Valores e Prazos</h5>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="valor" class="form-label">Valor (R$) *</label>
+                        <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="prazo_dias" class="form-label">Prazo (dias) *</label>
+                        <input type="number" class="form-control" id="prazo_dias" name="prazo_dias" readonly style="background-color: #f8f9fa;">
+                        <small class="text-muted">Calculado automaticamente</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="data_inicio" class="form-label">Data de Início</label>
+                        <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="data_fim" class="form-label">Data de Término</label>
+                        <input type="date" class="form-control" id="data_fim" name="data_fim">
+                        <small class="text-muted">Os dias serão calculados automaticamente</small>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <h5 class="mb-3 mt-4">Descrição</h5>
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">Descrição do Serviço</label>
+                    <textarea class="form-control" id="descricao" name="descricao" rows="5"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('listar_contratos') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Criar Contrato</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <!-- Card do Formulário -->
-    <div class="card-custom p-4 p-lg-5">
-        <form method="POST" id="contratoForm">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-
-            <!-- Dados do Contratante -->
-            <div class="mb-4">
-                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem; display: flex; align-items: center;">
-                    <span style="width: 32px; height: 32px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                        <i class="bi bi-person" style="color: var(--azul-principal);"></i>
-                    </span>
-                    Dados do Contratante
-                </h5>
-                
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">
-                            Nome / Razão Social <span style="color: var(--vermelho-principal);">*</span>
-                        </label>
-                        <input type="text" class="form-control" name="contratante_nome" id="contratante_nome" required
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">CNPJ/CPF</label>
-                        <input type="text" class="form-control" name="contratante_cnpj"
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">Email</label>
-                        <input type="email" class="form-control" name="contratante_email"
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dados da Contratada -->
-            <div class="mb-4">
-                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem; display: flex; align-items: center;">
-                    <span style="width: 32px; height: 32px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                        <i class="bi bi-building" style="color: var(--amarelo-escuro);"></i>
-                    </span>
-                    Dados da Contratada
-                </h5>
-                
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">
-                            Nome / Razão Social <span style="color: var(--vermelho-principal);">*</span>
-                        </label>
-                        <input type="text" class="form-control" name="contratada_nome" id="contratada_nome" required
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">CNPJ/CPF</label>
-                        <input type="text" class="form-control" name="contratada_cnpj"
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">Email</label>
-                        <input type="email" class="form-control" name="contratada_email"
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detalhes do Contrato -->
-            <div class="mb-4">
-                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem; display: flex; align-items: center;">
-                    <span style="width: 32px; height: 32px; background: var(--vermelho-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                        <i class="bi bi-file-text" style="color: var(--vermelho-principal);"></i>
-                    </span>
-                    Detalhes do Contrato
-                </h5>
-                
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">
-                            Valor (R$) <span style="color: var(--vermelho-principal);">*</span>
-                        </label>
-                        <input type="number" step="0.01" class="form-control" name="valor" id="valor" required
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">
-                            Prazo (dias) <span style="color: var(--vermelho-principal);">*</span>
-                        </label>
-                        <input type="number" class="form-control" name="prazo_dias" required
-                               style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;">
-                    </div>
-                    
-                    <div class="col-12">
-                        <label style="font-weight: 500; color: var(--cinza-texto); margin-bottom: 0.5rem; display: block;">
-                            Descrição dos Serviços <span style="color: var(--vermelho-principal);">*</span>
-                        </label>
-                        <textarea class="form-control" name="descricao" rows="6" required
-                                  style="border: 2px solid var(--cinza-claro); border-radius: 12px; padding: 0.75rem 1rem;"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botões -->
-            <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: 2px solid var(--cinza-claro);">
-                <a href="{{ url_for('listar_contratos') }}" class="btn" style="background: transparent; border: 2px solid var(--cinza-claro); color: var(--cinza-texto); padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none;">
-                    Cancelar
-                </a>
-                <button type="submit" class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; border: none;">
-                    <i class="bi bi-file-pdf me-2"></i>
-                    Gerar Contrato
-                </button>
-            </div>
-        </form>
-    </div>
 </div>
+
+<script>
+    // Elementos do DOM
+    const dataInicio = document.getElementById('data_inicio');
+    const dataFim = document.getElementById('data_fim');
+    const prazoDias = document.getElementById('prazo_dias');
+
+    // Função para calcular dias entre duas datas
+    function calcularDias() {
+        if (dataInicio.value && dataFim.value) {
+            const inicio = new Date(dataInicio.value);
+            const fim = new Date(dataFim.value);
+            
+            if (fim >= inicio) {
+                const diffTime = Math.abs(fim - inicio);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                prazoDias.value = diffDays;
+                prazoDias.style.backgroundColor = '#e8f5e9';
+                prazoDias.style.color = '#2e7d32';
+            } else {
+                prazoDias.value = '';
+                prazoDias.style.backgroundColor = '#ffebee';
+                prazoDias.style.color = '#c62828';
+                alert('A data de término deve ser maior ou igual à data de início!');
+                dataFim.value = '';
+            }
+        } else {
+            prazoDias.value = '';
+            prazoDias.style.backgroundColor = '#f8f9fa';
+            prazoDias.style.color = '#212529';
+        }
+    }
+
+    // Calcular quando a data de início mudar
+    dataInicio.addEventListener('change', function() {
+        if (dataInicio.value && dataFim.value) {
+            calcularDias();
+        } else if (dataInicio.value && !dataFim.value) {
+            const inicio = new Date(dataInicio.value);
+            const sugestao = new Date(inicio);
+            sugestao.setDate(inicio.getDate() + 30);
+            dataFim.value = sugestao.toISOString().split('T')[0];
+            calcularDias();
+        }
+    });
+
+    // Calcular quando a data de término mudar
+    dataFim.addEventListener('change', function() {
+        if (dataInicio.value && dataFim.value) {
+            calcularDias();
+        }
+    });
+
+    // Formatação automática de CNPJ
+    document.getElementById('contratante_cnpj')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 14) {
+            value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            e.target.value = value;
+        }
+    });
+
+    // Formatação automática de Telefone
+    document.getElementById('contratante_telefone')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        }
+    });
+</script>
 {% endblock %}

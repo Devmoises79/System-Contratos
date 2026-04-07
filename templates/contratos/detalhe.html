@@ -1,308 +1,210 @@
 {% extends "base.html" %}
 
-{% block title %}Contrato {{ contrato.numero_contrato }} - ValidaPy{% endblock %}
+{% block title %}Detalhe do Contrato - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="fade-in">
+<div class="container mt-4">
     <!-- Cabeçalho -->
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{{ url_for('listar_contratos') }}" style="color: var(--cinza-texto); text-decoration: none;">
-                <i class="bi bi-arrow-left fs-4"></i>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">{{ contrato.numero_contrato }}</h1>
+            <p class="text-muted">Criado em {{ contrato.data_criacao.strftime('%d/%m/%Y') }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('listar_contratos') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
             </a>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="alert alert-{{ 'success' if contrato.status == 'ativo' else 'warning' if contrato.status in ['rascunho', 'em_analise', 'aguardando_aprovacao'] else 'secondary' }} mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-{{ 'check-circle' if contrato.status == 'ativo' else 'clock-history' if contrato.status in ['rascunho', 'em_analise', 'aguardando_aprovacao'] else 'archive' }} me-2 fs-4"></i>
             <div>
-                <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Contrato {{ contrato.numero_contrato }}</h1>
-                <p style="color: var(--cinza-texto); opacity: 0.7;">Criado em {{ contrato.data_criacao.strftime('%d/%m/%Y') }}</p>
-            </div>
-        </div>
-        
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Status do contrato -->
-            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}var(--amarelo-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% elif contrato.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
-                         color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% elif contrato.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
-                         padding: 0.5rem 1rem; border-radius: 30px; font-weight: 500;">
-                {% if contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
-                    <i class="bi bi-hourglass-split me-1"></i> Aguardando Aprovação
-                {% elif contrato.status == 'rascunho' %}
-                    <i class="bi bi-pencil me-1"></i> Rascunho
+                <strong>Status:</strong> 
+                {% if contrato.status == 'rascunho' %}
+                    Rascunho
+                {% elif contrato.status == 'em_analise' %}
+                    Em Análise
+                {% elif contrato.status == 'aguardando_aprovacao' %}
+                    Aguardando Aprovação
                 {% elif contrato.status == 'ativo' %}
-                    <i class="bi bi-check-circle me-1"></i> Ativo
+                    Ativo
                 {% elif contrato.status == 'encerrado' %}
-                    <i class="bi bi-archive me-1"></i> Encerrado
-                {% elif contrato.status == 'cancelado' %}
-                    <i class="bi bi-x-circle me-1"></i> Cancelado
+                    Encerrado
                 {% else %}
-                    {{ contrato.status|capitalize }}
+                    Cancelado
                 {% endif %}
-            </span>
+            </div>
         </div>
     </div>
 
-    <!-- Botões de Ação por Perfil -->
-    <div class="mb-4 d-flex gap-2 flex-wrap">
-        <!-- Botão de Download/Visualizar PDF -->
-        {% if pdf_url %}
-            <a href="{{ url_for('static', filename=pdf_url) }}" class="btn btn-success" target="_blank">
-                <i class="fas fa-file-pdf me-2"></i>Visualizar PDF
-            </a>
-            <a href="{{ url_for('download_contrato_pdf', id=contrato.id) }}" class="btn btn-primary">
-                <i class="fas fa-download me-2"></i>Baixar PDF
-            </a>
-        {% else %}
-            <a href="{{ url_for('download_contrato_pdf', id=contrato.id) }}" class="btn btn-primary">
-                <i class="fas fa-file-pdf me-2"></i>Gerar PDF
-            </a>
-        {% endif %}
-        
-        <!-- Assistentes: botão enviar para analista -->
-        {% if session.usuario.perfil == 'assistente' and contrato.status == 'rascunho' and not contrato.solicitado_aprovacao and contrato.criado_por == session.usuario.id %}
-        <form action="{{ url_for('enviar_para_analista', id=contrato.id) }}" method="POST" style="display: inline;">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-send-check me-2"></i>Enviar para Análise
-            </button>
-        </form>
-        {% endif %}
-        
-        <!-- Analistas: botão enviar para gestor e devolver para assistente -->
-        {% if session.usuario.perfil == 'analista' and contrato.status == 'em_analise' %}
-        <form action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" method="POST" style="display: inline;">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-send-check me-2"></i>Enviar para Gestor
-            </button>
-        </form>
-        
-        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#devolverAssistenteModal">
-            <i class="bi bi-arrow-return-left me-2"></i>Devolver para Assistente
-        </button>
-        {% endif %}
-        
-        <!-- Gestores/Admins: botões aprovar e devolver para analista -->
-        {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] and contrato.status == 'aguardando_aprovacao' %}
-        <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" method="POST" style="display: inline;">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-check-circle me-2"></i>Aprovar
-            </button>
-        </form>
-        
-        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#devolverAnalistaModal">
-            <i class="bi bi-x-circle me-2"></i>Devolver para Analista
-        </button>
-        {% endif %}
-        
-        <!-- Editar: apenas rascunhos não enviados -->
-        {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
-            {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa', 'admin_sistema'] %}
-                {% if session.usuario.perfil != 'assistente' or contrato.criado_por == session.usuario.id %}
-                <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-outline-primary">
-                    <i class="bi bi-pencil me-2"></i>Editar
+    <!-- Seção de Ações - Botões -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Ações</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <!-- Botão Editar - aparece apenas para quem tem permissão -->
+                {% if contrato.status == 'rascunho' %}
+                    {% if session.usuario.perfil == 'assistente' and contrato.criado_por == session.usuario.id %}
+                        <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-warning">
+                            <i class="bi bi-pencil-square"></i> Editar Contrato
+                        </a>
+                    {% elif session.usuario.perfil in ['analista', 'gestor', 'admin_empresa', 'admin_sistema'] %}
+                        <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-warning">
+                            <i class="bi bi-pencil-square"></i> Editar Contrato
+                        </a>
+                    {% endif %}
+                {% elif contrato.status == 'em_analise' and session.usuario.perfil in ['analista', 'gestor', 'admin_empresa', 'admin_sistema'] %}
+                    <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-warning">
+                        <i class="bi bi-pencil-square"></i> Editar Contrato
+                    </a>
+                {% endif %}
+                
+                <!-- Botão Download PDF -->
+                <a href="{{ url_for('download_contrato_pdf', id=contrato.id) }}" class="btn btn-primary">
+                    <i class="bi bi-file-pdf"></i> {% if contrato.pdf_path %}Download PDF{% else %}Gerar PDF{% endif %}
                 </a>
+                
+                <!-- Botões de fluxo de aprovação -->
+                {% if contrato.status == 'rascunho' and session.usuario.perfil == 'assistente' and contrato.criado_por == session.usuario.id %}
+                <form action="{{ url_for('enviar_para_analista', id=contrato.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-send"></i> Enviar para Análise
+                    </button>
+                </form>
                 {% endif %}
-            {% endif %}
-        {% endif %}
-    </div>
-
-    <!-- Card Principal -->
-    <div class="card-custom p-0 overflow-hidden">
-        <!-- Cabeçalho do Contrato -->
-        <div style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); color: white; padding: 2rem;">
-            <div class="d-flex align-items-center justify-content-between flex-wrap">
-                <div>
-                    <h3 style="font-weight: 600; margin-bottom: 0.5rem;">{{ contrato.contratante_nome }}</h3>
-                    <p style="opacity: 0.9;">Contratante</p>
-                </div>
-                <i class="bi bi-handshake" style="font-size: 3rem; opacity: 0.3;"></i>
-            </div>
-            <div class="d-flex gap-4 mt-3 flex-wrap">
-                <span><i class="bi bi-calendar me-2"></i>Início: {{ contrato.data_inicio.strftime('%d/%m/%Y') if contrato.data_inicio else 'Não definido' }}</span>
-                <span><i class="bi bi-calendar-check me-2"></i>Término: {{ contrato.data_fim.strftime('%d/%m/%Y') if contrato.data_fim else 'Não definido' }}</span>
-                <span><i class="bi bi-clock me-2"></i>Prazo: {{ contrato.prazo_dias }} dias</span>
+                
+                {% if contrato.status == 'em_analise' and session.usuario.perfil == 'analista' %}
+                <form action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i> Enviar para Aprovação
+                    </button>
+                </form>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDevolverAssistente">
+                    <i class="bi bi-arrow-return-left"></i> Devolver para Assistente
+                </button>
+                {% endif %}
+                
+                {% if contrato.status == 'aguardando_aprovacao' and session.usuario.perfil == 'gestor' %}
+                <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Aprovar Contrato
+                    </button>
+                </form>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDevolverAnalista">
+                    <i class="bi bi-arrow-return-left"></i> Devolver para Analista
+                </button>
+                {% endif %}
             </div>
         </div>
+    </div>
 
-        <!-- Informações do Contrato -->
-        <div class="p-4 p-lg-5">
-            <!-- Grid de Partes -->
-            <div class="row g-4 mb-4">
-                <!-- Contratante -->
+    <!-- Dados do Contrato -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Contratante</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nome:</strong> {{ contrato.contratante_nome or '-' }}</p>
+                    <p><strong>CNPJ:</strong> {{ contrato.contratante_cnpj or '-' }}</p>
+                    <p><strong>Email:</strong> {{ contrato.contratante_email or '-' }}</p>
+                    <p><strong>Telefone:</strong> {{ contrato.contratante_telefone or '-' }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Contratada</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nome:</strong> {{ contrato.contratada_nome or '-' }}</p>
+                    <p><strong>CNPJ:</strong> {{ contrato.contratada_cnpj or '-' }}</p>
+                    <p><strong>Email:</strong> {{ contrato.contratada_email or '-' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Valores e Prazos -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Valores e Prazos</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Valor:</strong> R$ {{ "%.2f"|format(contrato.valor) }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Prazo:</strong> {{ contrato.prazo_dias }} dias</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Data Início:</strong> {{ contrato.data_inicio.strftime('%d/%m/%Y') if contrato.data_inicio else '-' }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Data Fim:</strong> {{ contrato.data_fim.strftime('%d/%m/%Y') if contrato.data_fim else '-' }}</p>
+                </div>
+                {% if dias_restantes %}
+                <div class="col-md-4">
+                    <p><strong>Dias Restantes:</strong> {{ dias_restantes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Descrição -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Descrição</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ contrato.descricao or 'Nenhuma descrição fornecida.' }}</p>
+        </div>
+    </div>
+
+    <!-- Informações de Auditoria -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Informações de Auditoria</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
                 <div class="col-md-6">
-                    <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
-                        <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
-                            <span style="width: 28px; height: 28px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                                <i class="bi bi-person" style="color: var(--azul-principal);"></i>
-                            </span>
-                            CONTRATANTE
-                        </h6>
-                        
-                        <div style="margin-bottom: 0.75rem;">
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Nome / Razão Social</div>
-                            <div style="font-weight: 500;">{{ contrato.contratante_nome }}</div>
-                        </div>
-                        
-                        {% if contrato.contratante_cnpj %}
-                        <div style="margin-bottom: 0.75rem;">
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">CNPJ/CPF</div>
-                            <div>{{ contrato.contratante_cnpj }}</div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if contrato.contratante_email %}
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Email</div>
-                            <div>{{ contrato.contratante_email }}</div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if contrato.contratante_telefone %}
-                        <div class="mt-2">
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Telefone</div>
-                            <div>{{ contrato.contratante_telefone }}</div>
-                        </div>
-                        {% endif %}
-                    </div>
+                    <p><strong>Criado por:</strong> {{ contrato.get_criador_nome() }}</p>
+                    <p><strong>Data de Criação:</strong> {{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
                 </div>
-
-                <!-- Contratada -->
                 <div class="col-md-6">
-                    <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
-                        <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
-                            <span style="width: 28px; height: 28px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                                <i class="bi bi-building" style="color: var(--amarelo-escuro);"></i>
-                            </span>
-                            CONTRATADA
-                        </h6>
-                        
-                        <div style="margin-bottom: 0.75rem;">
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Nome / Razão Social</div>
-                            <div style="font-weight: 500;">{{ contrato.contratada_nome }}</div>
-                        </div>
-                        
-                        {% if contrato.contratada_cnpj %}
-                        <div style="margin-bottom: 0.75rem;">
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">CNPJ/CPF</div>
-                            <div>{{ contrato.contratada_cnpj }}</div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if contrato.contratada_email %}
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--cinza-texto); opacity: 0.7;">Email</div>
-                            <div>{{ contrato.contratada_email }}</div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cards de Resumo -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="p-3 text-center" style="background: var(--azul-claro); border-radius: 16px;">
-                        <span style="font-size: 0.8rem; color: var(--azul-escuro); text-transform: uppercase;">Valor do Contrato</span>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">R$ {{ "%.2f"|format(contrato.valor) }}</div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="p-3 text-center" style="background: var(--amarelo-claro); border-radius: 16px;">
-                        <span style="font-size: 0.8rem; color: var(--amarelo-escuro); text-transform: uppercase;">Prazo</span>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">{{ contrato.prazo_dias }} dias</div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="p-3 text-center" style="background: var(--vermelho-claro); border-radius: 16px;">
-                        <span style="font-size: 0.8rem; color: var(--vermelho-escuro); text-transform: uppercase;">Status</span>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">
-                            {% if contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
-                                Aguardando
-                            {% else %}
-                                {{ contrato.status|capitalize }}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Descrição dos Serviços -->
-            <div class="mb-4">
-                <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
-                    <span style="width: 28px; height: 28px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                        <i class="bi bi-file-text" style="color: var(--azul-principal);"></i>
-                    </span>
-                    DESCRIÇÃO DOS SERVIÇOS
-                </h6>
-                <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
-                    <p style="margin: 0; white-space: pre-line;">{{ contrato.descricao or 'Nenhuma descrição fornecida.' }}</p>
-                </div>
-            </div>
-
-            <!-- Informações Adicionais -->
-            <div class="row g-4">
-                <div class="col-md-12">
-                    <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1rem; display: flex; align-items: center;">
-                        <span style="width: 28px; height: 28px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                            <i class="bi bi-info-circle" style="color: var(--amarelo-escuro);"></i>
-                        </span>
-                        INFORMAÇÕES ADICIONAIS
-                    </h6>
-                    <div class="p-3" style="background: var(--branco-fundo); border-radius: 16px;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span style="color: var(--cinza-texto); opacity: 0.7;">Criado por:</span>
-                                    <span style="font-weight: 500;">{{ contrato.get_criador_nome() }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span style="color: var(--cinza-texto); opacity: 0.7;">Data de criação:</span>
-                                    <span>{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span style="color: var(--cinza-texto); opacity: 0.7;">Última atualização:</span>
-                                    <span>{{ contrato.data_atualizacao.strftime('%d/%m/%Y %H:%M') if contrato.data_atualizacao else '-' }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                {% if contrato.solicitado_aprovacao %}
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span style="color: var(--cinza-texto); opacity: 0.7;">Solicitado em:</span>
-                                    <span>{{ contrato.data_solicitacao.strftime('%d/%m/%Y %H:%M') if contrato.data_solicitacao else '-' }}</span>
-                                </div>
-                                {% endif %}
-                                {% if contrato.aprovado_por %}
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span style="color: var(--cinza-texto); opacity: 0.7;">Aprovado por:</span>
-                                    <span style="font-weight: 500;">{{ contrato.get_aprovador_nome() }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span style="color: var(--cinza-texto); opacity: 0.7;">Data de aprovação:</span>
-                                    <span>{{ contrato.data_aprovacao.strftime('%d/%m/%Y %H:%M') if contrato.data_aprovacao else '-' }}</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+                    {% if contrato.aprovado_por %}
+                    <p><strong>Aprovado por:</strong> {{ contrato.get_aprovador_nome() }}</p>
+                    <p><strong>Data de Aprovação:</strong> {{ contrato.data_aprovacao.strftime('%d/%m/%Y %H:%M') if contrato.data_aprovacao else '-' }}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal para devolver para analista -->
-<div class="modal fade" id="devolverAnalistaModal" tabindex="-1">
+<!-- Modal Devolver para Analista -->
+<div class="modal fade" id="modalDevolverAnalista" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="{{ url_for('devolver_para_analista', id=contrato.id) }}" method="POST">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-header">
                     <h5 class="modal-title">Devolver Contrato para Análise</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <label class="form-label">Motivo da devolução</label>
-                    <textarea name="motivo" class="form-control" rows="3" required placeholder="Descreva o motivo da devolução..."></textarea>
+                    <div class="mb-3">
+                        <label for="motivo" class="form-label">Motivo da devolução</label>
+                        <textarea class="form-control" id="motivo" name="motivo" rows="3" required></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -313,23 +215,24 @@
     </div>
 </div>
 
-<!-- Modal para devolver para assistente -->
-<div class="modal fade" id="devolverAssistenteModal" tabindex="-1">
+<!-- Modal Devolver para Assistente -->
+<div class="modal fade" id="modalDevolverAssistente" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="{{ url_for('devolver_para_assistente', id=contrato.id) }}" method="POST">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-header">
                     <h5 class="modal-title">Devolver Contrato para Assistente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <label class="form-label">Motivo da revisão</label>
-                    <textarea name="motivo" class="form-control" rows="3" required placeholder="Descreva o motivo da devolução..."></textarea>
+                    <div class="mb-3">
+                        <label for="motivo" class="form-label">Motivo da devolução</label>
+                        <textarea class="form-control" id="motivo" name="motivo" rows="3" required></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning">Devolver</button>
+                    <button type="submit" class="btn btn-danger">Devolver</button>
                 </div>
             </form>
         </div>

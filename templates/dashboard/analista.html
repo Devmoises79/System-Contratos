@@ -4,249 +4,178 @@
 
 {% block content %}
 <div class="fade-in">
-    <!-- Cabeçalho -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="fw-bold" style="color: var(--cinza-texto);">Dashboard do Analista</h1>
-            <p class="text-muted">Análise de dados e relatórios estatísticos</p>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">
+                <i class="bi bi-bar-chart-steps me-2" style="color: var(--azul-principal);"></i>
+                Dashboard do Analista
+            </h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7;">Gerencie os contratos em análise</p>
         </div>
-        <span class="badge bg-success px-3 py-2">Analista</span>
+        <span class="badge bg-primary fs-6 px-3 py-2">Analista</span>
     </div>
 
-    <!-- Cards de Estatísticas -->
+    <!-- Cards -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Total de Contratos</h6>
-                <h2 class="fw-bold">{{ stats.total if stats else 0 }}</h2>
+            <div class="card-custom p-3 text-center">
+                <h6 class="text-muted">Total Contratos</h6>
+                <div class="display-4 fw-bold">{{ stats.total or 0 }}</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Contratos Ativos</h6>
-                <h2 class="fw-bold text-primary">{{ stats.ativos if stats else 0 }}</h2>
+            <div class="card-custom p-3 text-center">
+                <h6 class="text-muted">Em Análise</h6>
+                <div class="display-4 fw-bold text-warning">{{ stats.em_analise or 0 }}</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Aguardando Aprovação</h6>
-                <h2 class="fw-bold text-warning">{{ stats.aguardando if stats else 0 }}</h2>
+            <div class="card-custom p-3 text-center">
+                <h6 class="text-muted">Aguardando Aprovação</h6>
+                <div class="display-4 fw-bold text-info">{{ stats.aguardando or 0 }}</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Valor Total</h6>
-                <h2 class="fw-bold text-success">R$ {{ "%.2f"|format(stats.total_valor if stats else 0) }}</h2>
+            <div class="card-custom p-3 text-center">
+                <h6 class="text-muted">Ativos</h6>
+                <div class="display-4 fw-bold text-success">{{ stats.ativos or 0 }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Segunda Linha de Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Rascunhos</h6>
-                <h2 class="fw-bold text-secondary">{{ stats.rascunhos if stats else 0 }}</h2>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Encerrados</h6>
-                <h2 class="fw-bold text-info">{{ stats.encerrados if stats else 0 }}</h2>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Cancelados</h6>
-                <h2 class="fw-bold text-danger">{{ stats.cancelados if stats else 0 }}</h2>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-custom p-3">
-                <h6 class="text-muted mb-2">Ticket Médio</h6>
-                <h2 class="fw-bold text-warning">R$ {{ "%.2f"|format(stats.media if stats else 0) }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráfico de Contratos por Mês -->
+    <!-- CONTRATOS EM ANÁLISE -->
     <div class="card-custom p-4 mb-4">
-        <h5 class="fw-semibold mb-3">Evolução de Contratos</h5>
+        <h4 class="mb-3">
+            <i class="bi bi-hourglass-split me-2 text-warning"></i>
+            Contratos em Análise ({{ contratos_em_analise|length }})
+        </h4>
         
-        {% if stats and stats.por_mes and stats.por_mes|length > 0 %}
-            {% set max_valor = stats.por_mes|map(attribute='quantidade')|max|default(1) %}
-            {% if max_valor == 0 %}{% set max_valor = 1 %}{% endif %}
-            
-            <div class="d-flex justify-content-around align-items-end" style="height: 300px;">
-                {% for mes in stats.por_mes[:6] %}
-                <div class="text-center" style="width: 80px;">
-                    <div class="bg-primary rounded-top mx-auto" 
-                         style="height: {{ (mes.quantidade / max_valor * 200) if max_valor > 0 else 0 }}px; width: 50px;">
-                    </div>
-                    <small class="d-block mt-2 fw-bold">{{ mes.mes }}</small>
-                    <small class="text-muted">{{ mes.quantidade }} contrato(s)</small>
-                    <small class="text-success d-block">R$ {{ "%.0f"|format(mes.valor_total) }}</small>
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-bar-chart" style="font-size: 3rem; color: var(--cinza-claro);"></i>
-                <p class="text-muted mt-3">Nenhum contrato cadastrado ainda.</p>
-                <a href="{{ url_for('contrato_novo') }}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle me-2"></i>Criar primeiro contrato
-                </a>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Distribuição por Status -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card-custom p-4">
-                <h5 class="fw-semibold mb-3">Distribuição por Status</h5>
-                
-                {% set total = stats.total if stats else 0 %}
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Ativos</span>
-                        <span class="fw-bold">{{ stats.ativos if stats else 0 }}</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-primary" style="width: {{ (stats.ativos / total * 100) if total > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Aguardando Aprovação</span>
-                        <span class="fw-bold">{{ stats.aguardando if stats else 0 }}</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-warning" style="width: {{ (stats.aguardando / total * 100) if total > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Rascunhos</span>
-                        <span class="fw-bold">{{ stats.rascunhos if stats else 0 }}</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-secondary" style="width: {{ (stats.rascunhos / total * 100) if total > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Encerrados</span>
-                        <span class="fw-bold">{{ stats.encerrados if stats else 0 }}</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-info" style="width: {{ (stats.encerrados / total * 100) if total > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-                
-                <div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Cancelados</span>
-                        <span class="fw-bold">{{ stats.cancelados if stats else 0 }}</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-danger" style="width: {{ (stats.cancelados / total * 100) if total > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card-custom p-4">
-                <h5 class="fw-semibold mb-3">Top 5 Contratos por Valor</h5>
-                
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Contrato</th>
-                                <th>Contratante</th>
-                                <th>Valor</th>
-                            </thead>
-                        <tbody>
-                            {% if top_contratos and top_contratos|length > 0 %}
-                                {% for contrato in top_contratos %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>
-                                        <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none">
-                                            {{ contrato.numero_contrato }}
-                                        </a>
-                                    </td>
-                                    <td>{{ contrato.contratante_nome }}</td>
-                                    <td class="fw-bold text-success">R$ {{ "%.2f"|format(contrato.valor) }}</td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-3">
-                                        Nenhum contrato cadastrado
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabela de Contratos por Período -->
-    <div class="card-custom p-4">
-        <h5 class="fw-semibold mb-3">Contratos por Período</h5>
-        
+        {% if contratos_em_analise %}
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead>
+                <thead class="table-light">
                     <tr>
-                        <th>Período</th>
-                        <th>Quantidade</th>
-                        <th>Valor Total</th>
-                        <th>Valor Médio</th>
+                        <th>Nº Contrato</th>
+                        <th>Contratante</th>
+                        <th>Contratada</th>
+                        <th>Valor</th>
+                        <th>Data Envio</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% if stats and stats.por_mes and stats.por_mes|length > 0 %}
-                        {% for mes in stats.por_mes %}
-                        <tr>
-                            <td><strong>{{ mes.mes }}</strong></td>
-                            <td>{{ mes.quantidade }}</td>
-                            <td class="text-success fw-bold">R$ {{ "%.2f"|format(mes.valor_total) }}</td>
-                            <td>R$ {{ "%.2f"|format(mes.valor_total / mes.quantidade) if mes.quantidade > 0 else 0 }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">
-                                Nenhum dado disponível
-                            </td>
-                        </tr>
-                    {% endif %}
+                    {% for contrato in contratos_em_analise %}
+                    <tr id="contrato-row-{{ contrato.id }}">
+                        <td>
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none">
+                                <strong>{{ contrato.numero_contrato }}</strong>
+                            </a>
+                        </td>
+                        <td>{{ contrato.contratante_nome }}</td>
+                        <td>{{ contrato.contratada_nome }}</td>
+                        <td>R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        <td>{{ contrato.data_atualizacao.strftime('%d/%m/%Y %H:%M') if contrato.data_atualizacao else '-' }}</td>
+                        <td>
+                            <form action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" method="POST" style="display: inline;">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Enviar este contrato para aprovação do gestor?')">
+                                    <i class="bi bi-send-check"></i> Enviar para Gestor
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#devolverModal{{ contrato.id }}">
+                                <i class="bi bi-arrow-return-left"></i> Devolver
+                            </button>
+                         </td>
+                     </tr>
+
+                    <!-- Modal Devolver -->
+                    <div class="modal fade" id="devolverModal{{ contrato.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form action="{{ url_for('devolver_para_assistente', id=contrato.id) }}" method="POST">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Devolver Contrato para Assistente</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <label class="form-label">Motivo da devolução</label>
+                                        <textarea name="motivo" class="form-control" rows="3" required placeholder="Descreva o motivo da devolução..."></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-warning">Devolver</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="alert alert-info text-center py-4">
+            <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
+            <p class="mb-0">Nenhum contrato em análise no momento.</p>
+            <p class="mb-0 mt-2 small">Peça para um assistente criar e enviar um contrato para análise.</p>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- Ações Rápidas -->
-    <div class="mt-4 text-center">
-        <a href="{{ url_for('listar_contratos') }}" class="btn btn-primary">
-            <i class="bi bi-file-text me-2"></i>
-            Ver todos os contratos
-        </a>
-        <a href="{{ url_for('contrato_novo') }}" class="btn btn-outline-primary ms-2">
-            <i class="bi bi-plus-circle me-2"></i>
-            Novo contrato
-        </a>
+    <!-- Top Contratos -->
+    <div class="card-custom p-4">
+        <h4 class="mb-3">
+            <i class="bi bi-trophy me-2 text-warning"></i>
+            Top 5 Contratos por Valor
+        </h4>
+        
+        {% if top_contratos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nº Contrato</th>
+                        <th>Contratante</th>
+                        <th>Contratada</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contrato in top_contratos %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none">
+                                <strong>{{ contrato.numero_contrato }}</strong>
+                            </a>
+                        </td>
+                        <td>{{ contrato.contratante_nome }}</td>
+                        <td>{{ contrato.contratada_nome }}</td>
+                        <td>R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        <td>
+                            <span class="badge {% if contrato.status == 'ativo' %}bg-success{% elif contrato.status == 'em_analise' %}bg-warning{% elif contrato.status == 'aguardando_aprovacao' %}bg-info{% else %}bg-secondary{% endif %}">
+                                {{ contrato.status|replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            <p>Nenhum contrato encontrado</p>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<script>
+    // Auto-refresh a cada 30 segundos para atualizar a lista
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
 {% endblock %}

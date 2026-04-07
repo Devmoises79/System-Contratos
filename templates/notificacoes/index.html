@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Notificações - ValidaPy{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Notificações</h1>
+            <p class="text-muted">Acompanhe as atividades do sistema em tempo real</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if notificacoes_nao_lidas > 0 %}
+            <button id="btnMarcarTodas" class="btn btn-outline-secondary">
+                <i class="bi bi-check2-all"></i> Marcar todas como lidas
+            </button>
+            {% endif %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                <i class="bi bi-speedometer2"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#todas">
+                        Todas <span class="badge bg-secondary ms-1">{{ notificacoes|length }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#naoLidas">
+                        Não lidas <span class="badge bg-primary ms-1">{{ notificacoes_nao_lidas }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-0">
+            <div class="tab-content">
+                <!-- Todas as notificações -->
+                <div class="tab-pane fade show active" id="todas">
+                    <div class="list-group list-group-flush">
+                        {% if notificacoes %}
+                            {% for notif in notificacoes %}
+                            <div class="list-group-item {% if not notif.lida %}list-group-item-light{% endif %}" id="notif-{{ notif.id }}">
+                                <div class="d-flex align-items-start gap-3">
+                                    <!-- Ícone -->
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle p-2" style="background: {{ notif.get_cor_por_tipo() }}20;">
+                                            <i class="bi {{ notif.get_icone_por_tipo() }} fs-4" style="color: {{ notif.get_cor_por_tipo() }};"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Conteúdo -->
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="mb-1">{{ notif.titulo }}</h5>
+                                                <!-- EXIBE O REMETENTE AQUI -->
+                                                {% if notif.remetente_nome and notif.remetente_nome != 'Sistema' %}
+                                                <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-person-circle"></i> 
+                                                    <strong>{{ notif.remetente_nome }}</strong> • 
+                                                    {{ notif.data_criacao.strftime('%d/%m/%Y às %H:%M') }}
+                                                </p>
+                                                {% else %}
+                                                <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-robot"></i> 
+                                                    <strong>Sistema</strong> • 
+                                                    {{ notif.data_criacao.strftime('%d/%m/%Y às %H:%M') }}
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                            {% if not notif.lida %}
+                                            <button class="btn btn-sm btn-outline-secondary marcar-lida" data-id="{{ notif.id }}">
+                                                <i class="bi bi-check-lg"></i> Marcar como lida
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mb-2">{{ notif.mensagem }}</p>
+                                        {% if notif.link %}
+                                        <a href="{{ notif.link }}" class="btn btn-sm btn-link ps-0">
+                                            Ver detalhes <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-bell-slash fs-1 text-muted"></i>
+                                <p class="text-muted mt-3">Nenhuma notificação encontrada</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Apenas não lidas -->
+                <div class="tab-pane fade" id="naoLidas">
+                    <div class="list-group list-group-flush">
+                        {% set nao_lidas = notificacoes|selectattr('lida', 'equalto', False)|list %}
+                        {% if nao_lidas %}
+                            {% for notif in nao_lidas %}
+                            <div class="list-group-item list-group-item-light" id="notif-{{ notif.id }}">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle p-2" style="background: {{ notif.get_cor_por_tipo() }}20;">
+                                            <i class="bi {{ notif.get_icone_por_tipo() }} fs-4" style="color: {{ notif.get_cor_por_tipo() }};"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="mb-1">{{ notif.titulo }}</h5>
+                                                <!-- EXIBE O REMETENTE AQUI -->
+                                                {% if notif.remetente_nome and notif.remetente_nome != 'Sistema' %}
+                                                <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-person-circle"></i> 
+                                                    <strong>{{ notif.remetente_nome }}</strong> • 
+                                                    {{ notif.data_criacao.strftime('%d/%m/%Y às %H:%M') }}
+                                                </p>
+                                                {% else %}
+                                                <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-robot"></i> 
+                                                    <strong>Sistema</strong> • 
+                                                    {{ notif.data_criacao.strftime('%d/%m/%Y às %H:%M') }}
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-secondary marcar-lida" data-id="{{ notif.id }}">
+                                                <i class="bi bi-check-lg"></i> Marcar como lida
+                                            </button>
+                                        </div>
+                                        <p class="mb-2">{{ notif.mensagem }}</p>
+                                        {% if notif.link %}
+                                        <a href="{{ notif.link }}" class="btn btn-sm btn-link ps-0">
+                                            Ver detalhes <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-check-circle fs-1 text-muted"></i>
+                                <p class="text-muted mt-3">Todas as notificações foram lidas!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Marcar notificação individual como lida
+    document.querySelectorAll('.marcar-lida').forEach(button => {
+        button.addEventListener('click', async function() {
+            const notifId = this.dataset.id;
+            try {
+                const response = await fetch(`/notificacoes/${notifId}/marcar-lida`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    // Remover destaque da notificação
+                    const notifElement = document.getElementById(`notif-${notifId}`);
+                    if (notifElement) {
+                        notifElement.classList.remove('list-group-item-light');
+                        // Remover o botão marcar como lida
+                        const btn = notifElement.querySelector('.marcar-lida');
+                        if (btn) btn.remove();
+                    }
+                    // Atualizar contador no header
+                    atualizarContadorNotificacoes();
+                }
+            } catch (error) {
+                console.error('Erro ao marcar notificação como lida:', error);
+            }
+        });
+    });
+
+    // Marcar todas como lidas
+    const btnMarcarTodas = document.getElementById('btnMarcarTodas');
+    if (btnMarcarTodas) {
+        btnMarcarTodas.addEventListener('click', async function() {
+            try {
+                const response = await fetch('/notificacoes/marcar-todas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Erro ao marcar todas notificações como lidas:', error);
+            }
+        });
+    }
+
+    function atualizarContadorNotificacoes() {
+        fetch('/notificacoes/nao-lidas/count')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.nav-link .badge');
+                if (badge && data.total !== undefined) {
+                    badge.textContent = data.total;
+                }
+            })
+            .catch(error => console.error('Erro ao atualizar contador:', error));
+    }
+</script>
+{% endblock %}

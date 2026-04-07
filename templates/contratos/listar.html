@@ -1,4 +1,3 @@
-<!-- templates/contratos/listar.html -->
 {% extends "base.html" %}
 
 {% block title %}Contratos - ValidaPy{% endblock %}
@@ -8,105 +7,58 @@
     <!-- Cabeçalho -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Contratos</h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie todos os contratos da empresa</p>
+            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">
+                <i class="bi bi-file-text me-2" style="color: var(--azul-principal);"></i>
+                Contratos
+            </h1>
+            <p style="color: var(--cinza-texto); opacity: 0.7;">Gerencie todos os contratos da empresa</p>
         </div>
-        {% if session.usuario.perfil in ['analista', 'assistente', 'gestor', 'admin_empresa', 'admin_sistema'] %}
-        <a href="{{ url_for('contrato_novo') }}" class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 500;">
-            <i class="bi bi-plus-circle me-2"></i>
+        
+        {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa'] %}
+        <a href="{{ url_for('contrato_novo') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
             Novo Contrato
         </a>
         {% endif %}
     </div>
 
-    <!-- Cards de Resumo por Status -->
-    <div class="row g-4 mb-4">
-        {% set status_count = {
-            'rascunho': contratos|selectattr('status', 'equalto', 'rascunho')|selectattr('solicitado_aprovacao', 'equalto', false)|list|length,
-            'aguardando': contratos|selectattr('status', 'equalto', 'rascunho')|selectattr('solicitado_aprovacao', 'equalto', true)|list|length,
-            'ativo': contratos|selectattr('status', 'equalto', 'ativo')|list|length,
-            'encerrado': contratos|selectattr('status', 'equalto', 'encerrado')|list|length,
-            'cancelado': contratos|selectattr('status', 'equalto', 'cancelado')|list|length
-        } %}
-        
-        <div class="col-md-2">
-            <div class="card-custom p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span style="color: var(--cinza-texto); opacity: 0.7;">Rascunho</span>
-                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--amarelo-escuro);">{{ status_count.rascunho }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-2">
-            <div class="card-custom p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span style="color: var(--cinza-texto); opacity: 0.7;">Aguardando</span>
-                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--amarelo-principal);">{{ status_count.aguardando }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-2">
-            <div class="card-custom p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span style="color: var(--cinza-texto); opacity: 0.7;">Ativo</span>
-                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--azul-principal);">{{ status_count.ativo }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-2">
-            <div class="card-custom p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span style="color: var(--cinza-texto); opacity: 0.7;">Encerrado</span>
-                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--cinza-texto);">{{ status_count.encerrado }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-2">
-            <div class="card-custom p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span style="color: var(--cinza-texto); opacity: 0.7;">Cancelado</span>
-                    <span style="font-size: 1.5rem; font-weight: 700; color: var(--vermelho-principal);">{{ status_count.cancelado }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Filtros -->
     <div class="card-custom p-4 mb-4">
-        <form method="GET" class="row g-3">
-            <div class="col-md-5">
+        <div class="row g-3">
+            <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
                         <i class="bi bi-search" style="color: var(--azul-principal);"></i>
                     </span>
-                    <input type="text" class="form-control border-start-0" name="busca" 
+                    <input type="text" class="form-control border-start-0" id="searchInput" 
                            style="border-color: var(--cinza-claro);"
-                           placeholder="Buscar por número, contratante ou contratada..."
-                           value="{{ request.args.get('busca', '') }}">
+                           placeholder="Buscar por número, contratante ou contratada...">
                 </div>
             </div>
             
-            <div class="col-md-4">
-                <select name="status" class="form-select" style="border-color: var(--cinza-claro);">
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select" style="border-color: var(--cinza-claro);">
                     <option value="">Todos os status</option>
-                    <option value="rascunho" {% if request.args.get('status') == 'rascunho' %}selected{% endif %}>Rascunho</option>
-                    <option value="aguardando" {% if request.args.get('status') == 'aguardando' %}selected{% endif %}>Aguardando Aprovação</option>
-                    <option value="ativo" {% if request.args.get('status') == 'ativo' %}selected{% endif %}>Ativo</option>
-                    <option value="encerrado" {% if request.args.get('status') == 'encerrado' %}selected{% endif %}>Encerrado</option>
-                    <option value="cancelado" {% if request.args.get('status') == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    <option value="rascunho">Rascunho</option>
+                    <option value="em_analise">Em Análise</option>
+                    <option value="aguardando_aprovacao">Aguardando Aprovação</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="encerrado">Encerrado</option>
                 </select>
             </div>
             
-            <div class="col-md-3">
-                <button type="submit" class="btn w-100" style="background: var(--azul-principal); color: white;">
-                    Filtrar
+            <div class="col-md-2">
+                <button class="btn w-100" style="background: var(--azul-claro); color: var(--azul-principal);" onclick="filterTable()">
+                    <i class="bi bi-funnel me-2"></i>Filtrar
                 </button>
             </div>
-        </form>
+            
+            <div class="col-md-3">
+                <button class="btn w-100" style="background: var(--cinza-claro); color: var(--cinza-texto);" onclick="clearFilters()">
+                    <i class="bi bi-eraser me-2"></i>Limpar Filtros
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Tabela de Contratos -->
@@ -124,128 +76,99 @@
                         <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="contratosTable">
                     {% for contrato in contratos %}
-                    <tr style="background: white; border-radius: 12px;">
+                    <tr class="contrato-row" 
+                        data-numero="{{ contrato.numero_contrato|lower }}"
+                        data-contratante="{{ contrato.contratante_nome|lower }}"
+                        data-contratada="{{ contrato.contratada_nome|lower }}"
+                        data-status="{{ contrato.status }}"
+                        style="background: white; border-radius: 12px;">
+                        
                         <td style="padding: 1rem;">
                             <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
                                 {{ contrato.numero_contrato }}
                             </a>
                         </td>
-                        <td style="padding: 1rem;">
-                            <div class="d-flex align-items-center">
-                                <div style="width: 32px; height: 32px; background: var(--azul-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                                    <span style="color: var(--azul-principal); font-weight: 600;">{{ contrato.contratante_nome[:1] }}</span>
-                                </div>
-                                {{ contrato.contratante_nome }}
-                            </div>
-                        </td>
-                        <td style="padding: 1rem;">
-                            <div class="d-flex align-items-center">
-                                <div style="width: 32px; height: 32px; background: var(--amarelo-claro); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                                    <span style="color: var(--amarelo-escuro); font-weight: 600;">{{ contrato.contratada_nome[:1] }}</span>
-                                </div>
-                                {{ contrato.contratada_nome }}
-                            </div>
-                        </td>
+                        
+                        <td style="padding: 1rem;">{{ contrato.contratante_nome }}</td>
+                        <td style="padding: 1rem;">{{ contrato.contratada_nome }}</td>
+                        
                         <td style="padding: 1rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                        
                         <td style="padding: 1rem;">
-                            {% if contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
+                            {% if contrato.status == 'ativo' %}
+                            <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
+                                <i class="bi bi-check-circle me-1"></i>Ativo
+                            </span>
+                            {% elif contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
                             <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
                                 <i class="bi bi-hourglass-split me-1"></i>Aguardando
                             </span>
                             {% elif contrato.status == 'rascunho' %}
                             <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                Rascunho
+                                <i class="bi bi-pencil me-1"></i>Rascunho
                             </span>
-                            {% elif contrato.status == 'ativo' %}
+                            {% elif contrato.status == 'em_analise' %}
                             <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                <i class="bi bi-check-circle me-1"></i>Ativo
+                                <i class="bi bi-search me-1"></i>Em Análise
                             </span>
                             {% elif contrato.status == 'encerrado' %}
                             <span style="background: var(--cinza-claro); color: var(--cinza-texto); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                Encerrado
-                            </span>
-                            {% elif contrato.status == 'cancelado' %}
+                                <i class="bi bi-archive me-1"></i>Encerrado
+                            {% else %}
                             <span style="background: var(--vermelho-claro); color: var(--vermelho-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                Cancelado
+                                {{ contrato.status|capitalize }}
                             </span>
                             {% endif %}
                         </td>
+                        
                         <td style="padding: 1rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
+                        
                         <td style="padding: 1rem;">
                             <div class="d-flex gap-2">
-                                <!-- Botão Visualizar (todos) -->
-                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" 
-                                   style="color: var(--azul-principal); text-decoration: none;" 
-                                   title="Ver detalhes">
+                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="btn btn-sm btn-outline-primary" title="Visualizar">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 
-                                <!-- Botão Editar (analista, assistente, gestor, admin) -->
-                                {% if session.usuario.perfil in ['analista', 'assistente', 'gestor', 'admin_empresa', 'admin_sistema'] %}
-                                    {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
-                                    <a href="{{ url_for('editar_contrato', id=contrato.id) }}" 
-                                       style="color: var(--amarelo-escuro); text-decoration: none;" 
-                                       title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
+                                    {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa'] %}
+                                        {% if session.usuario.perfil != 'assistente' or contrato.criado_por == session.usuario.id %}
+                                        <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                                 
-                                <!-- Botão Enviar para Aprovação (analista e assistente) -->
-                                {% if session.usuario.perfil in ['analista', 'assistente'] %}
-                                    {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
-                                    <form action="{{ url_for('enviar_contrato_aprovacao', id=contrato.id) }}" 
-                                          method="POST" style="display: inline;">
-                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" 
-                                                style="background: none; border: none; color: var(--verde-principal); cursor: pointer;" 
-                                                title="Enviar para aprovação">
-                                            <i class="bi bi-send-check"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
+                                <!-- Botão Enviar para Análise (Assistente) -->
+                                {% if session.usuario.perfil == 'assistente' and contrato.status == 'rascunho' and not contrato.solicitado_aprovacao and contrato.criado_por == session.usuario.id %}
+                                <form action="{{ url_for('enviar_para_analista', id=contrato.id) }}" method="POST" style="display: inline;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-warning" title="Enviar para Análise">
+                                        <i class="bi bi-send-check"></i>
+                                    </button>
+                                </form>
                                 {% endif %}
                                 
-                                <!-- Botão Aprovar (gestor e admin) -->
-                                {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] %}
-                                    {% if contrato.solicitado_aprovacao and contrato.status == 'rascunho' %}
-                                    <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" 
-                                          method="POST" style="display: inline;">
-                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" 
-                                                style="background: none; border: none; color: var(--verde-principal); cursor: pointer;" 
-                                                title="Aprovar contrato">
-                                            <i class="bi bi-check-circle"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
+                                <!-- Botão Enviar para Gestor (Analista) -->
+                                {% if session.usuario.perfil == 'analista' and contrato.status == 'em_analise' %}
+                                <form action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" method="POST" style="display: inline;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Enviar para Gestor">
+                                        <i class="bi bi-check2-circle"></i>
+                                    </button>
+                                </form>
                                 {% endif %}
                                 
-                                <!-- Botão Rejeitar (gestor e admin) -->
-                                {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] %}
-                                    {% if contrato.solicitado_aprovacao and contrato.status == 'rascunho' %}
-                                    <form action="{{ url_for('rejeitar_contrato', id=contrato.id) }}" 
-                                          method="POST" style="display: inline;">
-                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" 
-                                                style="background: none; border: none; color: var(--vermelho-principal); cursor: pointer;" 
-                                                title="Rejeitar contrato">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                {% endif %}
-                                
-                                <!-- Download PDF -->
-                                {% if contrato.pdf_path %}
-                                <a href="{{ url_for('static', filename=contrato.pdf_path.replace('static/', '')) }}" 
-                                   target="_blank" 
-                                   style="color: var(--azul-principal); text-decoration: none;" 
-                                   title="Download PDF">
-                                    <i class="bi bi-file-pdf"></i>
-                                </a>
+                                <!-- Botão Aprovar (Gestor) -->
+                                {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] and contrato.status == 'aguardando_aprovacao' %}
+                                <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" method="POST" style="display: inline;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Aprovar">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
                                 {% endif %}
                             </div>
                         </td>
@@ -253,8 +176,12 @@
                     {% else %}
                     <tr>
                         <td colspan="7" class="text-center py-5" style="color: var(--cinza-texto); opacity: 0.7;">
-                            <i class="bi bi-file-text" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
                             Nenhum contrato encontrado
+                            {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa'] %}
+                            <br>
+                            <a href="{{ url_for('contrato_novo') }}" style="color: var(--azul-principal);">Criar primeiro contrato</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -263,4 +190,39 @@
         </div>
     </div>
 </div>
+
+<script>
+function filterTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusValue = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('.contrato-row');
+
+    rows.forEach(row => {
+        const numero = row.dataset.numero;
+        const contratante = row.dataset.contratante;
+        const contratada = row.dataset.contratada;
+        const status = row.dataset.status;
+
+        const matchesSearch = numero.includes(searchTerm) || 
+                             contratante.includes(searchTerm) || 
+                             contratada.includes(searchTerm);
+        const matchesStatus = !statusValue || status === statusValue;
+
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    filterTable();
+}
+
+document.getElementById('searchInput').addEventListener('keyup', filterTable);
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+</script>
 {% endblock %}

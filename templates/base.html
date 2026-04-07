@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,9 +8,6 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Font Awesome 6 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -329,6 +325,35 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        /* Notificações */
+        .notification-dropdown {
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .notification-item-dropdown {
+            transition: background 0.2s ease;
+        }
+
+        .notification-item-dropdown:hover {
+            background: var(--azul-claro);
+        }
+
+        .notification-item-dropdown.unread {
+            background: var(--branco-fundo);
+        }
+
+        .notification-badge {
+            transform: translate(10%, -10%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(10%, -10%) scale(1); opacity: 1; }
+            50% { transform: translate(10%, -10%) scale(1.2); opacity: 0.8; }
+            100% { transform: translate(10%, -10%) scale(1); opacity: 1; }
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -357,11 +382,54 @@
                 <button class="btn btn-link p-0 position-relative" style="color: var(--cinza-texto);" onclick="window.location.reload()" title="Recarregar">
                     <i class="fas fa-sync-alt"></i>
                 </button>
-                
-                <button class="btn btn-link p-0 position-relative" style="color: var(--cinza-texto);">
-                    <i class="fas fa-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle p-1 rounded-circle" style="background: var(--vermelho-principal); width: 8px; height: 8px;"></span>
-                </button>
+
+                <!-- Notificações Dropdown -->
+                <div class="dropdown me-2">
+                    <button class="btn btn-link position-relative" type="button" data-bs-toggle="dropdown" style="color: var(--cinza-texto);">
+                        <i class="bi bi-bell fs-5"></i>
+                        {% if total_notificacoes_nao_lidas > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" style="font-size: 0.65rem;">
+                            {{ total_notificacoes_nao_lidas if total_notificacoes_nao_lidas < 100 else '99+' }}
+                        </span>
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 380px; max-height: 450px; overflow-y: auto;">
+                        <li class="dropdown-header d-flex justify-content-between align-items-center">
+                            <span>Notificações</span>
+                            <a href="{{ url_for('notificacoes') }}" class="text-decoration-none small">Ver todas</a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        
+                        {% if ultimas_notificacoes %}
+                            {% for notif in ultimas_notificacoes %}
+                            <li>
+                                <a class="dropdown-item notification-item-dropdown {% if not notif.lida %}unread{% endif %}" 
+                                   href="{{ notif.link or url_for('notificacoes') }}"
+                                   style="white-space: normal; padding: 12px 16px;">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <i class="bi {{ notif.get_icone_por_tipo() }} mt-1" style="color: {{ notif.get_cor_por_tipo() }};"></i>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold small">{{ notif.titulo }}</div>
+                                            <div class="small text-muted">{{ notif.mensagem|truncate(60) }}</div>
+                                            <div class="text-muted" style="font-size: 0.65rem;">{{ notif.data_criacao.strftime('%d/%m/%Y %H:%M') }}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% if not loop.last %}<li><hr class="dropdown-divider my-1"></li>{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <li class="text-center py-3 text-muted small">
+                                <i class="bi bi-inbox"></i> Nenhuma notificação
+                            </li>
+                        {% endif %}
+                        
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li class="text-center py-2">
+                            <a href="{{ url_for('notificacoes') }}" class="text-decoration-none small">Ver todas as notificações</a>
+                        </li>
+                    </ul>
+                </div>
 
                 <div class="dropdown">
                     <button class="btn d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: transparent; border: none; padding: 0;">
@@ -515,17 +583,6 @@
             {% endwith %}
         </div>
 
-        <!-- Mensagens flash tradicionais (fallback) -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div style="display: none;">
-                    {% for category, message in messages %}
-                        <!-- Já tratado pelos toasts acima -->
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
         <!-- Conteúdo da página -->
         {% block content %}{% endblock %}
     </main>
@@ -616,7 +673,6 @@
             });
             toastList.forEach(toast => toast.show());
             
-            // Remove toasts antigos após o tempo
             setTimeout(() => {
                 document.querySelectorAll('.toast').forEach(toast => {
                     if (toast) toast.remove();
@@ -627,6 +683,27 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
+
+        // Atualizar notificações em tempo real
+        function atualizarNotificacoes() {
+            fetch('/notificacoes/nao-lidas/count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.querySelector('.notification-badge');
+                    if (badge) {
+                        if (data.total > 0) {
+                            badge.textContent = data.total > 99 ? '99+' : data.total;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Erro:', error));
+        }
+
+        // Atualizar a cada 30 segundos
+        setInterval(atualizarNotificacoes, 30000);
 
         {% if session.usuario and not session.get('feedback_enviado') %}
         const stars = document.querySelectorAll('.star');
@@ -658,7 +735,6 @@
                     const modal = bootstrap.Modal.getInstance(document.getElementById('feedback-modal'));
                     modal.hide();
                     
-                    // Mostra toast de agradecimento
                     const toastContainer = document.querySelector('.toast-container');
                     const toast = document.createElement('div');
                     toast.className = 'toast align-items-center border-0 show mb-2 bg-success text-white';
@@ -689,12 +765,10 @@
         }
         {% endif %}
 
-        // Previne reenvio de formulários ao atualizar a página
         if (window.history.replaceState) {
             window.history.replaceState(null, null, window.location.href);
         }
 
-        // Fecha sidebar ao clicar fora (mobile)
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.querySelector('[onclick="toggleSidebar()"]');

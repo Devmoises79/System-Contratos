@@ -1,9 +1,19 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from core.database import Database
 from core.logging_config import logger
 import uuid
 
 class Contrato:
+    """Modelo de Contrato com fluxo de aprovação completo"""
+    
+    STATUS = {
+        'rascunho': 'Rascunho',
+        'em_analise': 'Em Análise',
+        'aguardando_aprovacao': 'Aguardando Aprovação',
+        'ativo': 'Ativo',
+        'encerrado': 'Encerrado'
+    }
+    
     def __init__(self, id=None, empresa_id=None, numero_contrato=None, 
                  contratante_nome=None, contratante_cnpj=None, contratante_email=None, 
                  contratante_telefone=None, contratada_nome=None, contratada_cnpj=None, 
@@ -48,7 +58,6 @@ class Contrato:
         return f"CT-{data}-{codigo}"
     
     def get_criador_nome(self):
-        """Retorna o nome do criador do contrato"""
         if not self.criado_por:
             return 'Sistema'
         db = Database()
@@ -56,7 +65,6 @@ class Contrato:
         return result['nome'] if result else 'Usuário não encontrado'
     
     def get_aprovador_nome(self):
-        """Retorna o nome do aprovador do contrato"""
         if not self.aprovado_por:
             return None
         db = Database()
@@ -64,7 +72,6 @@ class Contrato:
         return result['nome'] if result else None
     
     def get_info_auditoria(self):
-        """Retorna informações de auditoria do contrato"""
         return {
             'criado_por_nome': self.get_criador_nome(),
             'criado_em': self.data_criacao.strftime('%d/%m/%Y %H:%M') if self.data_criacao else None,
@@ -72,6 +79,17 @@ class Contrato:
             'aprovado_por_nome': self.get_aprovador_nome(),
             'aprovado_em': self.data_aprovacao.strftime('%d/%m/%Y %H:%M') if self.data_aprovacao else None
         }
+    
+    def get_dias_restantes(self):
+        if self.data_fim and self.status == 'ativo':
+            hoje = datetime.now().date()
+            if isinstance(self.data_fim, str):
+                data_fim = datetime.strptime(self.data_fim, '%Y-%m-%d').date()
+            else:
+                data_fim = self.data_fim
+            dias = (data_fim - hoje).days
+            return max(0, dias)
+        return None
     
     def save(self):
         db = Database()
@@ -203,6 +221,37 @@ class Contrato:
         self.data_solicitacao = None
         return True
     
+    def encerrar(self):
+        if self.data_fim:
+            hoje = datetime.now().date()
+            if isinstance(self.data_fim, str):
+                data_fim = datetime.strptime(self.data_fim, '%Y-%m-%d').date()
+            else:
+                data_fim = self.data_fim
+            if hoje > data_fim:
+                db = Database()
+                db.execute("UPDATE contratos SET status = 'encerrado' WHERE id = %s", (self.id,))
+                self.status = 'encerrado'
+                return True
+        return False
+    
+    @staticmethod
+    def verificar_vencimentos():
+        db = Database()
+        contratos = db.fetch_all("SELECT id, data_fim, status FROM contratos WHERE status = 'ativo'")
+        encerrados = 0
+        for c in contratos:
+            if c['data_fim']:
+                hoje = datetime.now().date()
+                if isinstance(c['data_fim'], str):
+                    data_fim = datetime.strptime(c['data_fim'], '%Y-%m-%d').date()
+                else:
+                    data_fim = c['data_fim']
+                if hoje > data_fim:
+                    db.execute("UPDATE contratos SET status = 'encerrado' WHERE id = %s", (c['id'],))
+                    encerrados += 1
+        return encerrados
+    
     @staticmethod
     def get_by_id(contrato_id):
         db = Database()
@@ -247,6 +296,17 @@ class Contrato:
         return [Contrato(**row) for row in results] if results else []
     
     @staticmethod
+    def listar_em_analise(empresa_id=None):
+        db = Database()
+        if empresa_id:
+            query = "SELECT * FROM contratos WHERE status = 'em_analise' AND empresa_id = %s ORDER BY data_atualizacao DESC"
+            results = db.fetch_all(query, (empresa_id,))
+        else:
+            query = "SELECT * FROM contratos WHERE status = 'em_analise' ORDER BY data_atualizacao DESC"
+            results = db.fetch_all(query)
+        return [Contrato(**row) for row in results] if results else []
+    
+    @staticmethod
     def estatisticas(empresa_id):
         db = Database()
         total = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
@@ -263,6 +323,9 @@ class Contrato:
         
         aguardando = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'aguardando_aprovacao'", (empresa_id,))
         aguardando = aguardando['total'] if aguardando else 0
+        
+        encerrados = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'encerrado'", (empresa_id,))
+        encerrados = encerrados['total'] if encerrados else 0
         
         valor_total = db.fetch_one("SELECT SUM(valor) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
         valor_total = float(valor_total['total']) if valor_total and valor_total['total'] else 0
@@ -286,6 +349,7 @@ class Contrato:
             'rascunhos': rascunhos,
             'em_analise': em_analise,
             'aguardando': aguardando,
+            'encerrados': encerrados,
             'total_valor': valor_total,
             'media': media,
             'por_mes': por_mes

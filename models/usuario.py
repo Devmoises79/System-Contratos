@@ -206,7 +206,7 @@ class Usuario(LoggerMixin):
         return self.id
     
     def _criar(self, db):
-        """Cria novo usuário - CORRIGIDO: garante hash válido"""
+        """Cria novo usuário. Garante hash válido"""
         # VERIFICAÇÃO CRÍTICA
         if not self.senha_hash or len(self.senha_hash) < 20:
             self.log_error(f"Hash inválido para novo usuário {self.email}: {self.senha_hash}")

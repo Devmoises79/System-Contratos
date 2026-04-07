@@ -1,126 +1,107 @@
-# auth/permissoes.py
+"""
+Permissões e decorators de acesso
+"""
 from functools import wraps
-from flask import session, redirect, url_for, flash, jsonify, request
+from flask import session, flash, redirect, url_for
+
+def usuario_logado():
+    """Verifica se há usuário logado"""
+    return 'usuario' in session
 
 def login_required(f):
-    """Decorator: exige login"""
+    """Decorator para exigir login"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'usuario' not in session:
+        if not usuario_logado():
             flash('Faça login para acessar esta página.', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
-def perfil_required(*perfis_permitidos):
-    """Decorator: exige um dos perfis especificados"""
+def perfil_required(*perfis):
+    """Decorator para exigir perfil específico"""
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if 'usuario' not in session:
+            if not usuario_logado():
                 flash('Faça login para acessar esta página.', 'warning')
                 return redirect(url_for('login'))
-            
-            usuario = session['usuario']
-            if usuario['perfil'] not in perfis_permitidos:
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return jsonify({'erro': 'Acesso negado'}), 403
-                
+            if session['usuario']['perfil'] not in perfis:
                 flash('Você não tem permissão para acessar esta página.', 'danger')
                 return redirect(url_for('dashboard'))
-            
             return f(*args, **kwargs)
         return decorated_function
     return decorator
-
-# ==================== DECORADORES POR PERFIL ====================
 
 def admin_sistema_required(f):
     """Apenas admin do sistema"""
     return perfil_required('admin_sistema')(f)
 
 def admin_empresa_required(f):
-    """Admin da empresa OU admin do sistema"""
+    """Apenas admin da empresa"""
     return perfil_required('admin_empresa', 'admin_sistema')(f)
 
 def gestor_required(f):
-    """Gestor, admin empresa ou admin sistema"""
+    """Apenas gestor"""
     return perfil_required('gestor', 'admin_empresa', 'admin_sistema')(f)
 
 def analista_required(f):
-    """Analista, gestor, admin empresa ou admin sistema"""
+    """Apenas analista"""
     return perfil_required('analista', 'gestor', 'admin_empresa', 'admin_sistema')(f)
 
 def assistente_required(f):
-    """Assistente, analista, gestor, admin empresa ou admin sistema"""
+    """Apenas assistente"""
     return perfil_required('assistente', 'analista', 'gestor', 'admin_empresa', 'admin_sistema')(f)
 
-
-# ==================== FUNÇÕES DE VERIFICAÇÃO ====================
+# ============ FUNÇÕES DE PERMISSÃO PARA CONTRATOS ============
 
 def pode_criar_contrato():
-    """Verifica se o usuário pode criar contrato"""
-    if 'usuario' not in session:
+    """Verifica se usuário pode criar contrato"""
+    if not usuario_logado():
         return False
     perfil = session['usuario']['perfil']
     return perfil in ['assistente', 'analista', 'gestor', 'admin_empresa', 'admin_sistema']
 
 def pode_editar_contrato(contrato):
-    """Verifica se pode editar contrato (apenas rascunho não enviado)"""
-    if 'usuario' not in session:
+    """Verifica se o usuário pode editar o contrato"""
+    if not usuario_logado():
         return False
     
-    perfil = session['usuario']['perfil']
+    usuario = session['usuario']
+    perfil = usuario['perfil']
     
-    # Se não for rascunho ou já foi enviado, não pode editar
-    if contrato.status != 'rascunho' or contrato.solicitado_aprovacao:
-        return False
+    # Admin pode editar qualquer contrato
+    if perfil in ['admin_sistema', 'admin_empresa']:
+        return True
     
-    # Assistentes só editam seus próprios contratos
+    # Gestor pode editar contratos em rascunho ou em análise
+    if perfil == 'gestor':
+        return contrato.status in ['rascunho', 'em_analise']
+    
+    # Analista pode editar contratos em rascunho ou em análise
+    if perfil == 'analista':
+        return contrato.status in ['rascunho', 'em_analise']
+    
+    # Assistente só pode editar seus próprios rascunhos
     if perfil == 'assistente':
-        return contrato.criado_por == session['usuario']['id']
+        return contrato.status == 'rascunho' and contrato.criado_por == usuario['id']
     
-    # Demais perfis podem editar qualquer contrato da empresa
-    return perfil in ['analista', 'gestor', 'admin_empresa', 'admin_sistema']
+    return False
 
 def pode_enviar_para_analista():
-    """Assistente pode enviar para analista"""
-    if 'usuario' not in session:
+    """Verifica se pode enviar para analista"""
+    if not usuario_logado():
         return False
-    perfil = session['usuario']['perfil']
-    return perfil in ['assistente']
+    return session['usuario']['perfil'] == 'assistente'
 
 def pode_enviar_para_gestor():
-    """Analista pode enviar para gestor"""
-    if 'usuario' not in session:
+    """Verifica se pode enviar para gestor"""
+    if not usuario_logado():
         return False
-    perfil = session['usuario']['perfil']
-    return perfil in ['analista', 'assistente']
+    return session['usuario']['perfil'] == 'analista'
 
 def pode_aprovar_contrato():
-    """Gestor pode aprovar/rejeitar"""
-    if 'usuario' not in session:
+    """Verifica se pode aprovar contrato"""
+    if not usuario_logado():
         return False
-    perfil = session['usuario']['perfil']
-    return perfil in ['gestor', 'admin_empresa', 'admin_sistema']
-
-def pode_visualizar_todos_contratos():
-    """Analista, gestor e admin veem todos os contratos da empresa"""
-    if 'usuario' not in session:
-        return False
-    perfil = session['usuario']['perfil']
-    return perfil in ['analista', 'gestor', 'admin_empresa', 'admin_sistema']
-
-def pode_visualizar_estatisticas():
-    """Analista e acima veem estatísticas"""
-    if 'usuario' not in session:
-        return False
-    perfil = session['usuario']['perfil']
-    return perfil in ['analista', 'gestor', 'admin_empresa', 'admin_sistema']
-
-def pode_gerenciar_usuarios():
-    """Apenas admin empresa e admin sistema"""
-    if 'usuario' not in session:
-        return False
-    perfil = session['usuario']['perfil']
-    return perfil in ['admin_empresa', 'admin_sistema']
+    return session['usuario']['perfil'] == 'gestor'
