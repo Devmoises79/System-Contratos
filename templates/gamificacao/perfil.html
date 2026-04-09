@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header do Perfil -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, {{ nivel_atual.cor }}20 0%, #fff 100%);">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="display-1">{{ nivel_atual.icone }}</div>
+                        </div>
+                        <div class="col">
+                            <h2 class="mb-0">{{ session.usuario.nome }}</h2>
+                            <p class="text-muted mb-2">
+                                Nível {{ nivel_atual.nivel }} - {{ nivel_atual.titulo }}
+                                {% if session.usuario.perfil == 'analista' %}
+                                    <span class="badge bg-info ms-2">Analista</span>
+                                {% elif session.usuario.perfil == 'assistente' %}
+                                    <span class="badge bg-primary ms-2">Assistente</span>
+                                {% elif session.usuario.perfil == 'gestor' %}
+                                    <span class="badge bg-warning ms-2">Gestor</span>
+                                {% endif %}
+                            </p>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" style="width: {{ progresso }}%; background-color: {{ nivel_atual.cor }};"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small>{{ pontos }} pontos</small>
+                                {% if proximo_nivel %}
+                                <small>{{ proximo_nivel.pontos_minimos - pontos }} pontos para {{ proximo_nivel.titulo }}</small>
+                                {% else %}
+                                <small>🏆 Nível Máximo Alcançado!</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto text-center">
+                            <div class="h2 mb-0">{{ conquistas_obtidas|length }}</div>
+                            <small>de {{ total_conquistas }} conquistas</small>
+                            <div class="mt-2">
+                                <span class="badge bg-success">#{{ ranking_posicao }} na empresa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-file-text-fill fs-1 text-primary"></i>
+                    <h3 class="mb-0 mt-2">{{ total_contratos }}</h3>
+                    <small class="text-muted">contratos criados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                    <h3 class="mb-0 mt-2">{{ taxa_acerto }}%</h3>
+                    <small class="text-muted">taxa de acerto</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-award-fill fs-1 text-warning"></i>
+                    <h3 class="mb-0 mt-2">{{ conquistas_obtidas|length }}</h3>
+                    <small class="text-muted">conquistas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conquistas Obtidas -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Suas Conquistas</h5>
+            <small>Conquistas que você já desbloqueou</small>
+        </div>
+        <div class="card-body">
+            {% if conquistas_obtidas %}
+                <div class="row">
+                    {% for conquista in conquistas_obtidas %}
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card h-100 text-center border-0 shadow-sm conquista-card" style="background: linear-gradient(135deg, {{ conquista.cor }}15 0%, #fff 100%);">
+                            <div class="card-body">
+                                <div class="display-4">{{ conquista.icone|safe }}</div>
+                                <h6 class="mt-2 mb-1">{{ conquista.nome }}</h6>
+                                <small class="text-muted">{{ conquista.descricao }}</small>
+                                <div class="mt-2">
+                                    <span class="badge" style="background-color: {{ conquista.cor }};">+{{ conquista.pontos }} pts</span>
+                                    <small class="d-block text-muted mt-1">{{ conquista.data_conquista.strftime('%d/%m/%Y') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-emoji-smile fs-1 text-muted"></i>
+                    <p class="mt-2">Você ainda não tem conquistas. Continue trabalhando que elas virão! 🌟</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Próximas Conquistas -->
+    {% if proximas_conquistas %}
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-star"></i> Próximas Conquistas</h5>
+            <small>Continue assim para desbloquear</small>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for conquista in proximas_conquistas %}
+                <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="card h-100 text-center border-0 bg-light proxima-card">
+                        <div class="card-body">
+                            <div class="display-4 opacity-50">{{ conquista.icone|safe }}</div>
+                            <h6 class="mt-2 mb-1">{{ conquista.nome }}</h6>
+                            <small class="text-muted">{{ conquista.descricao }}</small>
+                            <div class="mt-2">
+                                <span class="badge bg-secondary">+{{ conquista.pontos }} pts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.conquista-card {
+    transition: transform 0.2s;
+}
+.conquista-card:hover {
+    transform: translateY(-5px);
+}
+.proxima-card {
+    opacity: 0.7;
+    filter: grayscale(0.2);
+    transition: all 0.2s;
+}
+.proxima-card:hover {
+    opacity: 0.9;
+    filter: grayscale(0);
+    transform: translateY(-3px);
+}
+</style>
+{% endblock %}

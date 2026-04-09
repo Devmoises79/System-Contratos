@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="avatar-circle" style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 1.5rem; font-weight: bold;">{{ session.usuario.nome[:2].upper() }}</span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h3 class="mb-0">Olá, {{ session.usuario.nome }}!</h3>
+                            <p class="mb-0 opacity-75">Este é seu espaço de autoconhecimento. Acompanhe sua evolução e desempenho.</p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-calendar"></i> {{ now().strftime('%d/%m/%Y') }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-file-text-fill fs-1 text-primary"></i>
+                    <h2 class="mb-0 mt-2">{{ stats.total_contratos or 0 }}</h2>
+                    <small class="text-muted">Total de Contratos</small>
+                    <div class="mt-2">
+                        <span class="badge bg-info">Criados por você</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                    <h2 class="mb-0 mt-2">{{ stats.ativos or 0 }}</h2>
+                    <small class="text-muted">Contratos Ativos</small>
+                    <div class="mt-2">
+                        <span class="badge bg-success">Em vigor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-clock-history fs-1 text-warning"></i>
+                    <h2 class="mb-0 mt-2">{{ stats.aguardando or 0 }}</h2>
+                    <small class="text-muted">Aguardando Aprovação</small>
+                    <div class="mt-2">
+                        <span class="badge bg-warning">Pendentes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-star-fill fs-1 text-info"></i>
+                    <h2 class="mb-0 mt-2">{{ taxa_acerto }}%</h2>
+                    <small class="text-muted">Taxa de Acerto</small>
+                    <div class="mt-2">
+                        <span class="badge {% if taxa_acerto > 80 %}bg-success{% elif taxa_acerto > 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                            {% if taxa_acerto > 80 %}Excelente{% elif taxa_acerto > 50 %}Bom{% else %}Melhorar{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Individual -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Evolução Mensal</h5>
+                    <small>Quantidade de contratos por mês</small>
+                </div>
+                <div class="card-body">
+                    <canvas id="evolucaoChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Distribuição por Status</h5>
+                    <small>Situação dos seus contratos</small>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Qualidade vs Quantidade -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart-steps"></i> Qualidade vs Quantidade</h5>
+                    <small>Relação entre contratos criados e taxa de acerto</small>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar bg-success" style="width: {{ taxa_acerto }}%;">
+                                    Acertos: {{ taxa_acerto }}%
+                                </div>
+                                <div class="progress-bar bg-danger" style="width: {{ 100 - taxa_acerto }}%;">
+                                    Correções: {{ 100 - taxa_acerto }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="display-6">{{ stats.total_contratos or 0 }}</div>
+                            <small>Total de contratos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights e Recomendações -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Insights para seu Desenvolvimento</h5>
+                </div>
+                <div class="card-body">
+                    {% if taxa_acerto > 80 %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-trophy-fill"></i>
+                        <strong>Excelente performance!</strong>
+                        <p class="mb-0 mt-2">Sua taxa de acerto está acima da média. Continue mantendo esse padrão de qualidade!</p>
+                    </div>
+                    {% elif taxa_acerto > 50 %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-arrow-up-circle"></i>
+                        <strong>Bom progresso!</strong>
+                        <p class="mb-0 mt-2">Você está no caminho certo. Revise os detalhes antes de enviar para aumentar sua taxa de aprovação direta.</p>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-question-circle"></i>
+                        <strong>Área de oportunidade</strong>
+                        <p class="mb-0 mt-2">Que tal revisar os contratos com mais atenção antes de enviar? Pequenos ajustes podem aumentar sua taxa de acerto!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Próximos Passos</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% if stats.total_contratos < 10 %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-muted"></i> Complete 10 contratos para desbloquear conquistas
+                        </li>
+                        {% endif %}
+                        {% if taxa_acerto < 70 %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-muted"></i> Atingir 70% de taxa de acerto
+                        </li>
+                        {% endif %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-muted"></i> Acompanhar métricas semanalmente
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de Evolução
+const evolucaoCtx = document.getElementById('evolucaoChart').getContext('2d');
+new Chart(evolucaoCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in evolucao %}'{{ item.mes }}',{% endfor %}],
+        datasets: [{
+            label: 'Contratos Criados',
+            data: [{% for item in evolucao %}{{ item.total }},{% endfor %}],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.3,
+            fill: true
+        }, {
+            label: 'Contratos Ativos',
+            data: [{% for item in evolucao %}{{ item.ativos }},{% endfor %}],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { position: 'top' }
+        }
+    }
+});
+
+// Gráfico de Status
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Ativos', 'Aguardando Aprovação', 'Em Análise', 'Outros'],
+        datasets: [{
+            data: [
+                {{ stats.ativos or 0 }},
+                {{ stats.aguardando or 0 }},
+                {{ stats.em_analise or 0 }},
+                {{ (stats.total_contratos or 0) - ((stats.ativos or 0) + (stats.aguardando or 0) + (stats.em_analise or 0)) }}
+            ],
+            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#6b7280']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+</script>
+{% endblock %}

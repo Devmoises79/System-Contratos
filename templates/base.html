@@ -17,8 +17,8 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14'>📄</text></svg>" type="image/svg+xml">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         * {
@@ -28,195 +28,312 @@
         }
 
         :root {
-            --branco: #ffffff;
-            --branco-fundo: #f8fafc;
-            --azul-principal: #2563eb;
-            --azul-escuro: #1e40af;
-            --azul-claro: #dbeafe;
-            --vermelho-principal: #dc2626;
-            --vermelho-escuro: #b91c1c;
-            --vermelho-claro: #fee2e2;
-            --amarelo-principal: #fbbf24;
-            --amarelo-escuro: #d97706;
-            --amarelo-claro: #fef3c7;
-            --verde-principal: #10b981;
-            --verde-claro: #d1fae5;
-            --cinza-texto: #334155;
-            --cinza-claro: #e2e8f2;
+            --bg-primary: #f0f2f5;
+            --bg-white: #ffffff;
+            --text-primary: #1a1f36;
+            --text-secondary: #5a6e8a;
+            --text-muted: #8b9ab0;
+            --border-light: #e4e7ed;
+            --blue-primary: #3b82f6;
+            --blue-dark: #2563eb;
+            --blue-light: #eff6ff;
+            --green-primary: #10b981;
+            --green-light: #ecfdf5;
+            --red-primary: #ef4444;
+            --red-light: #fef2f2;
+            --yellow-primary: #f59e0b;
+            --yellow-light: #fffbeb;
+            --purple-primary: #8b5cf6;
+            --purple-light: #f5f3ff;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--branco-fundo);
-            color: var(--cinza-texto);
-            padding-top: 70px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding-top: 72px;
         }
 
         /* Navbar */
-        .navbar-custom {
-            background: var(--branco);
-            border-bottom: 3px solid var(--azul-principal);
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
-            padding: 0.75rem 0;
+        .navbar {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0.75rem 1.5rem;
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 1030;
-            height: 70px;
         }
 
-        .logo-container {
-            background: linear-gradient(135deg, var(--azul-principal), var(--vermelho-principal));
-            width: 40px;
-            height: 40px;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--purple-primary));
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
             font-weight: 700;
             color: white;
         }
 
-        .brand-name {
-            font-size: 1.5rem;
+        .logo-text {
+            font-size: 1.3rem;
             font-weight: 700;
-            color: var(--cinza-texto);
+            color: var(--text-primary);
         }
 
-        .brand-name span {
-            color: var(--azul-principal);
+        .logo-text span {
+            color: var(--blue-primary);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--purple-primary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
         }
 
         /* Sidebar */
         .sidebar {
             position: fixed;
-            top: 70px;
+            top: 72px;
             left: 0;
-            width: 250px;
-            height: calc(100vh - 70px);
-            background: var(--branco);
-            border-right: 2px solid var(--cinza-claro);
-            padding: 1.5rem 1rem;
+            width: 280px;
+            height: calc(100vh - 72px);
+            background: var(--bg-white);
+            border-right: 1px solid var(--border-light);
             overflow-y: auto;
-            transition: all 0.3s ease;
+            padding: 1.5rem 1rem;
             z-index: 1020;
         }
 
         .sidebar::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: var(--cinza-claro);
+            background: var(--border-light);
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: var(--azul-principal);
-            border-radius: 10px;
+            background: var(--blue-primary);
+            border-radius: 4px;
         }
 
         .nav-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.75rem;
         }
 
         .nav-section-title {
             font-size: 0.7rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--cinza-texto);
-            opacity: 0.5;
+            color: var(--text-muted);
             margin-bottom: 0.75rem;
             padding-left: 0.75rem;
-            font-weight: 600;
         }
 
         .nav-link-custom {
             display: flex;
             align-items: center;
-            padding: 0.6rem 1rem;
-            margin: 0.2rem 0;
+            gap: 12px;
+            padding: 0.6rem 0.75rem;
             border-radius: 10px;
-            color: var(--cinza-texto);
+            color: var(--text-secondary);
             text-decoration: none;
-            transition: all 0.2s ease;
+            font-size: 0.875rem;
             font-weight: 500;
-            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
-        .nav-link-custom i {
-            width: 22px;
-            margin-right: 10px;
+        .nav-link-custom i, 
+        .nav-link-custom .bi {
+            width: 20px;
             font-size: 1rem;
-            color: var(--cinza-texto);
-            opacity: 0.7;
+            color: var(--text-muted);
         }
 
         .nav-link-custom:hover {
-            background: var(--azul-claro);
-            color: var(--azul-principal);
+            background: var(--blue-light);
+            color: var(--blue-primary);
         }
 
-        .nav-link-custom:hover i {
-            color: var(--azul-principal);
-            opacity: 1;
+        .nav-link-custom:hover i,
+        .nav-link-custom:hover .bi {
+            color: var(--blue-primary);
         }
 
         .nav-link-custom.active {
-            background: var(--azul-principal);
-            color: var(--branco);
+            background: var(--blue-light);
+            color: var(--blue-primary);
         }
 
-        .nav-link-custom.active i {
-            color: var(--branco);
-            opacity: 1;
+        .nav-link-custom.active i,
+        .nav-link-custom.active .bi {
+            color: var(--blue-primary);
         }
 
         /* Main Content */
         .main-content {
-            margin-left: 250px;
+            margin-left: 280px;
             padding: 1.5rem;
-            min-height: calc(100vh - 70px);
-        }
-
-        .main-content-full {
-            padding: 1.5rem;
-            min-height: calc(100vh - 70px);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-            .main-content-full {
-                padding: 1rem;
-            }
+            min-height: calc(100vh - 72px);
         }
 
         /* Cards */
-        .card-custom {
-            background: var(--branco);
-            border: 1px solid var(--cinza-claro);
+        .card-dashboard {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             transition: all 0.2s ease;
+            box-shadow: var(--card-shadow);
         }
 
-        .card-custom:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            border-color: var(--azul-claro);
+        .card-dashboard:hover {
+            box-shadow: var(--card-shadow-hover);
+            border-color: transparent;
+        }
+
+        .card-stats {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 1.25rem;
+            border-left: 4px solid;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-stats.blue { border-left-color: var(--blue-primary); }
+        .card-stats.green { border-left-color: var(--green-primary); }
+        .card-stats.yellow { border-left-color: var(--yellow-primary); }
+        .card-stats.purple { border-left-color: var(--purple-primary); }
+        .card-stats.red { border-left-color: var(--red-primary); }
+
+        /* Badges */
+        .badge-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .badge-success { background: var(--green-light); color: var(--green-primary); }
+        .badge-warning { background: var(--yellow-light); color: var(--yellow-primary); }
+        .badge-danger { background: var(--red-light); color: var(--red-primary); }
+        .badge-info { background: var(--blue-light); color: var(--blue-primary); }
+
+        /* Botões */
+        .btn-primary-custom {
+            background: var(--blue-primary);
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-custom {
+            border: 1px solid var(--border-light);
+            background: var(--bg-white);
+            border-radius: 10px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .btn-outline-custom:hover {
+            border-color: var(--blue-primary);
+            color: var(--blue-primary);
+        }
+
+        /* Notificações */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--red-primary);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.15rem 0.4rem;
+            border-radius: 20px;
+        }
+
+        .notification-dropdown {
+            width: 360px;
+            border-radius: 16px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .notification-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: var(--blue-light);
+        }
+
+        .notification-item.unread {
+            background: #fafbff;
+        }
+
+        /* Gamificação */
+        .gamification-badge {
+            background: linear-gradient(135deg, var(--yellow-primary), #ea580c);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Tabelas */
+        .table-custom {
+            width: 100%;
+        }
+
+        .table-custom thead th {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table-custom tbody td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border-light);
         }
 
         /* Page Header */
@@ -225,247 +342,124 @@
         }
 
         .page-header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--cinza-texto);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 0.25rem;
         }
 
         .page-header p {
-            color: var(--cinza-texto);
-            opacity: 0.7;
-            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
-        /* Botões */
-        .btn-primary {
-            background: var(--azul-principal);
-            border: none;
-            border-radius: 10px;
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-        }
-
-        .btn-primary:hover {
-            background: var(--azul-escuro);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--azul-principal);
-            color: var(--azul-principal);
-            border-radius: 10px;
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--azul-principal);
-            color: white;
-        }
-
-        /* Formulários */
-        .form-control, .input-group-text {
-            border: 1px solid var(--cinza-claro);
-            border-radius: 10px;
-            padding: 0.5rem 0.75rem;
-        }
-
-        .form-control:focus {
-            border-color: var(--azul-principal);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            outline: none;
-        }
-
-        /* Alertas */
-        .alert {
-            border: none;
-            border-radius: 12px;
-            padding: 1rem;
-        }
-
-        /* Toasts */
-        .toast {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .toast-header {
-            border-radius: 12px 12px 0 0;
-            font-weight: 600;
-        }
-        
-        .toast-body {
-            padding: 0.75rem 1rem;
-        }
-
-        /* Animações */
-        .fade-in {
-            animation: fadeIn 0.3s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .sidebar.show {
+                transform: translateX(0);
             }
-        }
-        
-        .spin {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Notificações */
-        .notification-dropdown {
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .notification-item-dropdown {
-            transition: background 0.2s ease;
-        }
-
-        .notification-item-dropdown:hover {
-            background: var(--azul-claro);
-        }
-
-        .notification-item-dropdown.unread {
-            background: var(--branco-fundo);
-        }
-
-        .notification-badge {
-            transform: translate(10%, -10%);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: translate(10%, -10%) scale(1); opacity: 1; }
-            50% { transform: translate(10%, -10%) scale(1.2); opacity: 0.8; }
-            100% { transform: translate(10%, -10%) scale(1); opacity: 1; }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            .notification-dropdown {
+                width: 320px;
+            }
         }
     </style>
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+
     <!-- Navbar -->
-    <nav class="navbar-custom">
-        <div class="container-fluid px-4 d-flex justify-content-between align-items-center h-100">
-            <div class="d-flex align-items-center">
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
                 {% if session.usuario %}
-                <button class="btn btn-link d-md-none p-0 me-3" type="button" onclick="toggleSidebar()" style="color: var(--cinza-texto);">
-                    <i class="fas fa-bars"></i>
+                <button class="btn d-md-none p-0" type="button" onclick="toggleSidebar()" style="color: var(--text-secondary);">
+                    <i class="fas fa-bars fs-5"></i>
                 </button>
                 {% endif %}
                 
-                <a class="d-flex align-items-center text-decoration-none" href="{% if session.usuario %}{{ url_for('dashboard') }}{% else %}{{ url_for('login') }}{% endif %}">
-                    <div class="logo-container me-2">
-                        <span class="logo-text">V</span>
-                    </div>
-                    <span class="brand-name">Valida<span>Py</span></span>
+                <a href="{{ url_for('dashboard') if session.usuario else url_for('login') }}" class="logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">Valida<span>Py</span></span>
                 </a>
             </div>
 
             {% if session.usuario %}
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-link p-0 position-relative" style="color: var(--cinza-texto);" onclick="window.location.reload()" title="Recarregar">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <!-- Gamificação Badge -->
+                <div class="gamification-badge d-none d-md-block">
+                    <i class="bi bi-trophy-fill me-1"></i>
+                    {{ gamificacao_titulo }} · {{ gamificacao_pontos }} pts
+                </div>
 
-                <!-- Notificações Dropdown -->
-                <div class="dropdown me-2">
-                    <button class="btn btn-link position-relative" type="button" data-bs-toggle="dropdown" style="color: var(--cinza-texto);">
+                <!-- Notificações -->
+                <div class="dropdown">
+                    <button class="btn p-0 position-relative" type="button" data-bs-toggle="dropdown" style="color: var(--text-secondary);">
                         <i class="bi bi-bell fs-5"></i>
                         {% if total_notificacoes_nao_lidas > 0 %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" style="font-size: 0.65rem;">
-                            {{ total_notificacoes_nao_lidas if total_notificacoes_nao_lidas < 100 else '99+' }}
-                        </span>
+                        <span class="notification-badge">{{ total_notificacoes_nao_lidas if total_notificacoes_nao_lidas < 100 else '99+' }}</span>
                         {% endif %}
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 380px; max-height: 450px; overflow-y: auto;">
-                        <li class="dropdown-header d-flex justify-content-between align-items-center">
-                            <span>Notificações</span>
-                            <a href="{{ url_for('notificacoes') }}" class="text-decoration-none small">Ver todas</a>
+                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown p-0">
+                        <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Notificações</span>
+                            <a href="{{ url_for('notificacoes') }}" class="small text-decoration-none">Ver todas</a>
                         </li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        
                         {% if ultimas_notificacoes %}
                             {% for notif in ultimas_notificacoes %}
                             <li>
-                                <a class="dropdown-item notification-item-dropdown {% if not notif.lida %}unread{% endif %}" 
-                                   href="{{ notif.link or url_for('notificacoes') }}"
-                                   style="white-space: normal; padding: 12px 16px;">
-                                    <div class="d-flex align-items-start gap-2">
+                                <a class="dropdown-item notification-item {% if not notif.lida %}unread{% endif %}" 
+                                   href="{{ notif.link or url_for('notificacoes') }}">
+                                    <div class="d-flex gap-2">
                                         <i class="bi {{ notif.get_icone_por_tipo() }} mt-1" style="color: {{ notif.get_cor_por_tipo() }};"></i>
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold small">{{ notif.titulo }}</div>
-                                            <div class="small text-muted">{{ notif.mensagem|truncate(60) }}</div>
-                                            <div class="text-muted" style="font-size: 0.65rem;">{{ notif.data_criacao.strftime('%d/%m/%Y %H:%M') }}</div>
+                                            <div class="small text-secondary">{{ notif.mensagem|truncate(55) }}</div>
+                                            <div class="text-secondary" style="font-size: 0.6rem;">{{ notif.data_criacao.strftime('%d/%m/%Y %H:%M') }}</div>
                                         </div>
                                     </div>
                                 </a>
                             </li>
-                            {% if not loop.last %}<li><hr class="dropdown-divider my-1"></li>{% endif %}
                             {% endfor %}
                         {% else %}
-                            <li class="text-center py-3 text-muted small">
-                                <i class="bi bi-inbox"></i> Nenhuma notificação
+                            <li class="text-center py-3 text-secondary small">
+                                <i class="bi bi-inbox"></i><br>Nenhuma notificação
                             </li>
                         {% endif %}
-                        
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li class="text-center py-2">
-                            <a href="{{ url_for('notificacoes') }}" class="text-decoration-none small">Ver todas as notificações</a>
-                        </li>
                     </ul>
                 </div>
 
+                <!-- Dropdown Usuário -->
                 <div class="dropdown">
-                    <button class="btn d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="background: transparent; border: none; padding: 0;">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--azul-principal), var(--vermelho-principal)); color: white; font-weight: 600; font-size: 0.9rem;">
+                    <button class="btn p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                        <div class="user-avatar">
                             {{ session.usuario.nome[:1] }}{{ session.usuario.nome.split()[-1][:1] if session.usuario.nome.split()|length > 1 else '' }}
                         </div>
-                        <div class="text-start d-none d-md-block">
-                            <div style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto);">{{ session.usuario.nome }}</div>
-                            <div style="font-size: 0.7rem; color: var(--cinza-texto); opacity: 0.7;">
-                                <i class="fas fa-user-tag me-1"></i>
-                                {{ session.usuario.perfil|replace('_', ' ')|title }}
-                            </div>
+                        <div class="d-none d-md-block text-start">
+                            <div class="fw-semibold small">{{ session.usuario.nome }}</div>
+                            <div class="text-secondary" style="font-size: 0.65rem;">{{ session.usuario.perfil|replace('_', ' ')|title }}</div>
                         </div>
-                        <i class="fas fa-chevron-down" style="color: var(--cinza-texto); font-size: 0.8rem;"></i>
+                        <i class="fas fa-chevron-down small text-secondary"></i>
                     </button>
-                                    
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('perfil') }}">
-                                <i class="fas fa-user-circle me-2" style="color: var(--azul-principal);"></i>
-                                Meu Perfil
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#feedback-modal">
-                                <i class="fas fa-star me-2" style="color: var(--amarelo-principal);"></i>
-                                Feedback
-                            </a>
-                        </li>
+                        <li><a class="dropdown-item" href="{{ url_for('perfil') }}"><i class="fas fa-user me-2"></i> Meu Perfil</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Sair
-                            </a>
-                        </li>
+                        <li><a class="dropdown-item" href="{{ url_for('metricas_pessoais') }}"><i class="bi bi-graph-up me-2"></i> Minhas Métricas</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('gamificacao_perfil') }}"><i class="bi bi-trophy-fill me-2"></i> Minhas Conquistas</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('gamificacao_ranking') }}"><i class="bi bi-bar-chart-fill me-2"></i> Ranking da Empresa</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('metricas_empresa') }}"><i class="bi bi-building me-2"></i> Métricas da Empresa</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#feedback-modal"><i class="fas fa-star me-2 text-warning"></i> Feedback</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
                     </ul>
                 </div>
             </div>
@@ -473,109 +467,87 @@
         </div>
     </nav>
 
-    {% if session.usuario %}
     <!-- Sidebar -->
+    {% if session.usuario %}
     <div class="sidebar" id="sidebar">
+        <!-- PRINCIPAL -->
         <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="fas fa-th-large me-1"></i>
-                PRINCIPAL
-            </div>
-            
+            <div class="nav-section-title">PRINCIPAL</div>
             <a href="{{ url_for('dashboard') }}" class="nav-link-custom {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Dashboard</span>
+                <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
-            
             <a href="{{ url_for('listar_contratos') }}" class="nav-link-custom {% if request.endpoint == 'listar_contratos' %}active{% endif %}">
-                <i class="fas fa-file-contract"></i>
-                <span>Contratos</span>
+                <i class="fas fa-file-contract"></i> Contratos
             </a>
-            
             {% if session.usuario.perfil in ['admin_empresa', 'gestor', 'assistente'] %}
             <a href="{{ url_for('contrato_novo') }}" class="nav-link-custom">
-                <i class="fas fa-plus-circle"></i>
-                <span>Novo Contrato</span>
+                <i class="fas fa-plus-circle"></i> Novo Contrato
             </a>
             {% endif %}
         </div>
 
+        <!-- MÉTRICAS & GAMIFICAÇÃO -->
+        <div class="nav-section">
+            <div class="nav-section-title">MÉTRICAS & GAMIFICAÇÃO</div>
+            <a href="{{ url_for('metricas_pessoais') }}" class="nav-link-custom">
+                <i class="bi bi-graph-up"></i> Minhas Métricas
+            </a>
+            <a href="{{ url_for('metricas_empresa') }}" class="nav-link-custom">
+                <i class="bi bi-building"></i> Métricas da Empresa
+            </a>
+            <a href="{{ url_for('gamificacao_perfil') }}" class="nav-link-custom">
+                <i class="bi bi-trophy-fill"></i> Minhas Conquistas
+            </a>
+            <a href="{{ url_for('gamificacao_ranking') }}" class="nav-link-custom">
+                <i class="bi bi-bar-chart-fill"></i> Ranking da Empresa
+            </a>
+            <a href="{{ url_for('gamificacao_historico') }}" class="nav-link-custom">
+                <i class="bi bi-clock-history"></i> Histórico de Pontos
+            </a>
+        </div>
+
+        <!-- ADMIN SISTEMA -->
         {% if session.usuario.perfil == 'admin_sistema' %}
         <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="fas fa-cog me-1"></i>
-                ADMINISTRAÇÃO
-            </div>
-            
-            <a href="{{ url_for('admin_sistema.empresas') }}" class="nav-link-custom">
-                <i class="fas fa-building"></i>
-                <span>Empresas</span>
-            </a>
-            
-            <a href="{{ url_for('admin_sistema.ips_bloqueados') }}" class="nav-link-custom">
-                <i class="fas fa-shield-alt"></i>
-                <span>IPs Bloqueados</span>
-            </a>
-            
-            <a href="{{ url_for('admin_sistema.logs') }}" class="nav-link-custom">
-                <i class="fas fa-history"></i>
-                <span>Logs</span>
-            </a>
-            
-            <a href="{{ url_for('admin_sistema.feedbacks') }}" class="nav-link-custom">
-                <i class="fas fa-star"></i>
-                <span>Feedbacks</span>
-            </a>
+            <div class="nav-section-title">ADMINISTRAÇÃO</div>
+            <a href="{{ url_for('admin_sistema.empresas') }}" class="nav-link-custom"><i class="fas fa-building"></i> Empresas</a>
+            <a href="{{ url_for('admin_sistema.ips_bloqueados') }}" class="nav-link-custom"><i class="fas fa-shield-alt"></i> IPs Bloqueados</a>
+            <a href="{{ url_for('admin_sistema.logs') }}" class="nav-link-custom"><i class="fas fa-history"></i> Logs</a>
+            <a href="{{ url_for('admin_sistema.feedbacks') }}" class="nav-link-custom"><i class="fas fa-star"></i> Feedbacks</a>
         </div>
         {% endif %}
 
+        <!-- ADMIN EMPRESA -->
         {% if session.usuario.perfil == 'admin_empresa' %}
         <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="fas fa-building me-1"></i>
-                EMPRESA
-            </div>
-            
-            <a href="{{ url_for('admin_empresa.usuarios') }}" class="nav-link-custom">
-                <i class="fas fa-users"></i>
-                <span>Usuários</span>
-            </a>
-            
-            <a href="{{ url_for('admin_empresa.configuracoes') }}" class="nav-link-custom">
-                <i class="fas fa-cog"></i>
-                <span>Configurações</span>
-            </a>
-            
-            <a href="{{ url_for('admin_empresa.estatisticas') }}" class="nav-link-custom">
-                <i class="fas fa-chart-bar"></i>
-                <span>Estatísticas</span>
-            </a>
+            <div class="nav-section-title">EMPRESA</div>
+            <a href="{{ url_for('admin_empresa.usuarios') }}" class="nav-link-custom"><i class="fas fa-users"></i> Usuários</a>
+            <a href="{{ url_for('admin_empresa.configuracoes') }}" class="nav-link-custom"><i class="fas fa-cog"></i> Configurações</a>
+            <a href="{{ url_for('admin_empresa.estatisticas') }}" class="nav-link-custom"><i class="fas fa-chart-bar"></i> Estatísticas</a>
         </div>
         {% endif %}
     </div>
     {% endif %}
 
     <!-- Main Content -->
-    <main class="{% if session.usuario %}main-content{% else %}main-content-full{% endif %}">
-        <!-- Container de Toasts para mensagens flash -->
-        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 80px;">
+    <main class="{% if session.usuario %}main-content{% else %}main-content-full p-4{% endif %}">
+        
+        <!-- Flash Messages Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090; margin-top: 80px;">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="toast align-items-center border-0 show mb-2 fade-in" 
-                             role="alert" aria-live="assertive" aria-atomic="true" 
-                             data-bs-autohide="true" data-bs-delay="5000"
-                             style="background: {% if category == 'success' %}var(--verde-principal){% elif category == 'danger' %}var(--vermelho-principal){% elif category == 'warning' %}var(--amarelo-escuro){% else %}var(--azul-principal){% endif %}; color: white;">
+                        <div class="toast show mb-2" role="alert" data-bs-autohide="true" data-bs-delay="5000" style="background: white; border: 1px solid var(--border-light); border-radius: 12px;">
                             <div class="d-flex">
-                                <div class="toast-body">
+                                <div class="toast-body py-2 px-3">
                                     <i class="bi 
-                                        {% if category == 'success' %}bi-check-circle-fill
-                                        {% elif category == 'danger' %}bi-exclamation-triangle-fill
-                                        {% elif category == 'warning' %}bi-exclamation-circle-fill
-                                        {% else %}bi-info-circle-fill{% endif %} me-2"></i>
+                                        {% if category == 'success' %}bi-check-circle-fill text-success
+                                        {% elif category == 'danger' %}bi-exclamation-triangle-fill text-danger
+                                        {% elif category == 'warning' %}bi-exclamation-circle-fill text-warning
+                                        {% else %}bi-info-circle-fill text-primary{% endif %} me-2"></i>
                                     {{ message }}
                                 </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+                                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
                             </div>
                         </div>
                     {% endfor %}
@@ -583,108 +555,79 @@
             {% endwith %}
         </div>
 
-        <!-- Conteúdo da página -->
+        <!-- Conteúdo -->
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Modal de Feedback -->
+    <!-- Modal Feedback -->
     {% if session.usuario and not session.get('feedback_enviado') %}
     <div class="modal fade" id="feedback-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">
-                        <i class="fas fa-star me-2" style="color: var(--amarelo-principal);"></i>
-                        Avalie o ValidaPy
-                    </h5>
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-star text-warning me-2"></i>Avalie o ValidaPy</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-4">Sua opinião nos ajuda a melhorar!</p>
-                    
+                <div class="modal-body px-4 pb-2">
+                    <p class="text-secondary small">Sua opinião nos ajuda a melhorar!</p>
                     <form id="feedback-form">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-medium mb-3">Nota</label>
-                            <div class="d-flex justify-content-center gap-3">
+                        <div class="mb-4 text-center">
+                            <label class="form-label fw-semibold mb-3">Nota</label>
+                            <div class="d-flex justify-content-center gap-2">
                                 {% for i in range(1, 6) %}
-                                <button type="button" onclick="setRating({{ i }})" class="star btn btn-link text-decoration-none p-0" data-rating="{{ i }}" style="font-size: 2rem; color: #d1d5db;">
+                                <button type="button" onclick="setRating({{ i }})" class="star btn p-0" data-rating="{{ i }}" style="font-size: 2rem; color: #cbd5e1;">
                                     <i class="fas fa-star"></i>
                                 </button>
                                 {% endfor %}
                             </div>
                             <input type="hidden" name="nota" id="nota-feedback" value="0">
                         </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-medium mb-2">Recomendaria?</label>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Recomendaria?</label>
                             <div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="recomendaria" value="true" id="recomendaSim">
-                                    <label class="form-check-label" for="recomendaSim">
-                                        <i class="fas fa-thumbs-up me-1 text-success"></i>
-                                        Sim
-                                    </label>
+                                    <label class="form-check-label" for="recomendaSim"><i class="fas fa-thumbs-up text-success me-1"></i> Sim</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="recomendaria" value="false" id="recomendaNao">
-                                    <label class="form-check-label" for="recomendaNao">
-                                        <i class="fas fa-thumbs-down me-1 text-danger"></i>
-                                        Não
-                                    </label>
+                                    <label class="form-check-label" for="recomendaNao"><i class="fas fa-thumbs-down text-danger me-1"></i> Não</label>
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="mb-3">
-                            <label class="form-label fw-medium mb-2">
-                                <i class="fas fa-pencil-alt me-1"></i>
-                                Sugestões
-                            </label>
-                            <textarea class="form-control" name="sugestao" rows="4" placeholder="Compartilhe sua experiência..."></textarea>
+                            <label class="form-label fw-semibold">Sugestões</label>
+                            <textarea class="form-control" name="sugestao" rows="3" placeholder="Compartilhe sua experiência..." style="border-radius: 12px;"></textarea>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>
-                        Agora não
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="submitFeedback()">
-                        <i class="fas fa-paper-plane me-2"></i>
-                        Enviar Feedback
-                    </button>
+                <div class="modal-footer border-0 pb-4 px-4">
+                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Agora não</button>
+                    <button type="button" class="btn btn-primary-custom" onclick="submitFeedback()">Enviar Feedback</button>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Inicializa todos os toasts automaticamente
+        // Inicializar toasts
         document.addEventListener('DOMContentLoaded', function() {
-            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-            var toastList = toastElList.map(function(toastEl) {
-                return new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+            document.querySelectorAll('.toast').forEach(el => {
+                new bootstrap.Toast(el, { autohide: true, delay: 4000 }).show();
             });
-            toastList.forEach(toast => toast.show());
-            
-            setTimeout(() => {
-                document.querySelectorAll('.toast').forEach(toast => {
-                    if (toast) toast.remove();
-                });
-            }, 6000);
         });
 
+        // Toggle sidebar mobile
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
 
-        // Atualizar notificações em tempo real
+        // Atualizar notificações AJAX
         function atualizarNotificacoes() {
             fetch('/notificacoes/nao-lidas/count')
                 .then(response => response.json())
@@ -701,10 +644,9 @@
                 })
                 .catch(error => console.error('Erro:', error));
         }
-
-        // Atualizar a cada 30 segundos
         setInterval(atualizarNotificacoes, 30000);
 
+        // Feedback
         {% if session.usuario and not session.get('feedback_enviado') %}
         const stars = document.querySelectorAll('.star');
         const notaInput = document.getElementById('nota-feedback');
@@ -712,11 +654,7 @@
         function setRating(rating) {
             notaInput.value = rating;
             stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.style.color = 'var(--amarelo-principal)';
-                } else {
-                    star.style.color = '#d1d5db';
-                }
+                star.style.color = index < rating ? '#f59e0b' : '#cbd5e1';
             });
         }
 
@@ -725,62 +663,30 @@
             fetch('/feedback', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.sucesso) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('feedback-modal'));
-                    modal.hide();
-                    
-                    const toastContainer = document.querySelector('.toast-container');
+                    bootstrap.Modal.getInstance(document.getElementById('feedback-modal')).hide();
                     const toast = document.createElement('div');
-                    toast.className = 'toast align-items-center border-0 show mb-2 bg-success text-white';
-                    toast.innerHTML = `
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                Obrigado pelo seu feedback!
-                            </div>
-                        </div>
-                    `;
-                    toastContainer.appendChild(toast);
+                    toast.className = 'toast show mb-2';
+                    toast.style.cssText = 'background: white; border: 1px solid #e4e7ed; border-radius: 12px;';
+                    toast.innerHTML = `<div class="d-flex"><div class="toast-body py-2 px-3 text-success"><i class="bi bi-check-circle-fill me-2"></i>${data.mensagem}</div></div>`;
+                    document.querySelector('.toast-container').appendChild(toast);
                     new bootstrap.Toast(toast).show();
                     setTimeout(() => toast.remove(), 5000);
-                } else {
-                    alert('Erro ao enviar feedback.');
                 }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao enviar feedback.');
             });
-        }
-
-        const feedbackModal = document.getElementById('feedback-modal');
-        if (feedbackModal) {
-            new bootstrap.Modal(feedbackModal);
         }
         {% endif %}
 
+        // Prevenir resubmissão
         if (window.history.replaceState) {
             window.history.replaceState(null, null, window.location.href);
         }
-
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.querySelector('[onclick="toggleSidebar()"]');
-            
-            if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('show')) {
-                if (!sidebar.contains(event.target) && toggleBtn && !toggleBtn.contains(event.target)) {
-                    sidebar.classList.remove('show');
-                }
-            }
-        });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

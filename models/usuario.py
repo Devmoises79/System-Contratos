@@ -1,285 +1,81 @@
-from datetime import datetime
-from core.database import Database
+"""
+Modelo de Usuário do System-Contratos
+"""
 from werkzeug.security import generate_password_hash, check_password_hash
-from core.logging_config import logger, LoggerMixin
+from core.database import Database
+from core.logging_config import logger
+from datetime import datetime, timedelta
 import secrets
-from datetime import timedelta
-import re
 
-class Usuario(LoggerMixin):
-    """Modelo de usuário com logging e validações robustas"""
+
+class Usuario:
+    """Modelo de usuário do sistema"""
     
-    PERFIS_VALIDOS = ['admin_sistema', 'admin_empresa', 'gestor', 'analista', 'assistente']
+    PERFIS = {
+        'admin_sistema': 'Administrador do Sistema',
+        'admin_empresa': 'Administrador da Empresa',
+        'gestor': 'Gestor',
+        'analista': 'Analista',
+        'assistente': 'Assistente'
+    }
     
-    def __init__(self, id=None, empresa_id=None, nome=None, email=None, senha_hash=None,
-                 perfil='assistente', cargo=None, telefone=None, celular=None,
-                 email_corporativo=None, ativo=True, primeiro_acesso=True,
-                 ultimo_login=None, ultimo_ip=None, avatar_path=None,
+    def __init__(self, id=None, empresa_id=None, nome=None, email=None, 
+                 senha_hash=None, perfil='assistente', cargo=None,
+                 telefone=None, celular=None, email_corporativo=None,
+                 ativo=True, primeiro_acesso=True, data_cadastro=None,
+                 ultimo_login=None, empresa_nome=None, avatar_path=None,
                  token_recuperacao=None, token_expiracao=None,
-                 data_criacao=None, data_atualizacao=None):
+                 ultimo_ip=None, tentativas_falhas=0, bloqueado_ate=None,
+                 data_criacao=None,
+                 # Campos de gamificação
+                 pontos_totais=0, nivel=1, streak_dias=0, ultimo_acesso=None):
         self.id = id
         self.empresa_id = empresa_id
         self.nome = nome
         self.email = email
         self.senha_hash = senha_hash
-        self.perfil = perfil if perfil in self.PERFIS_VALIDOS else 'assistente'
+        self.perfil = perfil
         self.cargo = cargo
         self.telefone = telefone
         self.celular = celular
         self.email_corporativo = email_corporativo
         self.ativo = ativo
+        self.data_criacao = data_criacao
         self.primeiro_acesso = primeiro_acesso
+        self.data_cadastro = data_cadastro
         self.ultimo_login = ultimo_login
-        self.ultimo_ip = ultimo_ip
+        self.empresa_nome = empresa_nome
         self.avatar_path = avatar_path
         self.token_recuperacao = token_recuperacao
         self.token_expiracao = token_expiracao
-        self.data_criacao = data_criacao or datetime.now()
-        self.data_atualizacao = data_atualizacao or datetime.now()
+        self.ultimo_ip = ultimo_ip
+        self.tentativas_falhas = tentativas_falhas or 0
+        self.bloqueado_ate = bloqueado_ate
+        # Gamificação
+        self.pontos_totais = pontos_totais if pontos_totais is not None else 0
+        self.nivel = nivel if nivel is not None else 1
+        self.streak_dias = streak_dias if streak_dias is not None else 0
+        self.ultimo_acesso = ultimo_acesso
     
     def definir_senha(self, senha):
-        """Gera hash da senha - CORRIGIDO: sempre retorna hash válido"""
-        if not senha:
-            self.log_error("Tentativa de definir senha vazia")
-            return False
-        
-        try:
-            # Gera hash usando método pbkdf2:sha256
-            self.senha_hash = generate_password_hash(senha, method='pbkdf2:sha256')
-            
-            # VERIFICAÇÃO CRÍTICA: garantir que o hash não ficou vazio
-            if not self.senha_hash or len(self.senha_hash) < 20:
-                self.log_error(f"Hash gerado é inválido: {self.senha_hash}")
-                return False
-            
-            self.log_info(f"Senha definida com sucesso, hash length: {len(self.senha_hash)}")
-            return True
-            
-        except Exception as e:
-            self.log_error(f"Erro ao gerar hash da senha: {e}")
-            return False
-    
-    @staticmethod
-    def validar_forca_senha(senha):
-        """Valida se a senha atende aos requisitos de segurança"""
-        if len(senha) < 8:
-            return False, "A senha deve ter no mínimo 8 caracteres"
-        if not re.search(r'[A-Z]', senha):
-            return False, "A senha deve conter pelo menos uma letra maiúscula"
-        if not re.search(r'[a-z]', senha):
-            return False, "A senha deve conter pelo menos uma letra minúscula"
-        if not re.search(r'[0-9]', senha):
-            return False, "A senha deve conter pelo menos um número"
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', senha):
-            return False, "A senha deve conter pelo menos um caractere especial"
-        return True, "Senha válida"
+        """Define hash da senha"""
+        self.senha_hash = generate_password_hash(senha)
+        logger.info(f"Senha definida com sucesso, hash length: {len(self.senha_hash) if self.senha_hash else 0}")
     
     def verificar_senha(self, senha):
-        """
-        Verifica se a senha está correta.
-        CORREÇÃO CRÍTICA: Lida com hashes vazios/inválidos
-        """
-        # CASO 1: Hash vazio ou muito curto
-        if not self.senha_hash or len(self.senha_hash) < 20:
-            self.log_error(f"Hash inválido para {self.email} - tamanho: {len(self.senha_hash) if self.senha_hash else 0}")
-            
-            # Se veio uma senha, tenta corrigir
-            if senha:
-                self.log_info(f"Tentando corrigir hash para {self.email}")
-                self.definir_senha(senha)
-                self.save()
-                # Verifica novamente com o novo hash
-                return check_password_hash(self.senha_hash, senha)
-            return False
-        
-        if not senha:
-            return False
-        
+        """Verifica se a senha está correta"""
         try:
+            if not self.senha_hash:
+                logger.error(f"[Usuario] Senha hash vazia para usuário {self.email}")
+                return False
             resultado = check_password_hash(self.senha_hash, senha)
-            
-            if resultado:
-                self.log_info(f"Login bem-sucedido para {self.email}")
-            else:
-                self.log_warning(f"Senha incorreta para {self.email}")
-            
             return resultado
-            
-        except ValueError as e:
-            self.log_error(f"Erro ao verificar senha: {e}")
-            
-            # Tenta recriar o hash com a senha fornecida
-            if senha:
-                self.definir_senha(senha)
-                self.save()
-                return check_password_hash(self.senha_hash, senha)
-            
-            return False
         except Exception as e:
-            self.log_error(f"Erro inesperado: {e}")
+            logger.error(f"[Usuario] Erro ao verificar senha: {str(e)}")
             return False
-    
-    def gerar_token_recuperacao(self):
-        """Gera um token para recuperação de senha"""
-        self.token_recuperacao = secrets.token_urlsafe(32)
-        self.token_expiracao = datetime.now() + timedelta(hours=24)
-        self.save()
-        return self.token_recuperacao
-    
-    def verificar_token_recuperacao(self, token):
-        """Verifica se o token é válido"""
-        if not self.token_recuperacao or not self.token_expiracao:
-            return False
-        if self.token_recuperacao != token:
-            return False
-        if datetime.now() > self.token_expiracao:
-            return False
-        return True
-    
-    def limpar_token_recuperacao(self):
-        """Limpa o token após uso"""
-        self.token_recuperacao = None
-        self.token_expiracao = None
-        self.save()
-    
-    def save(self):
-        """Salva ou atualiza o usuário no banco"""
-        db = Database()
-        
-        # Validações básicas
-        if not self.nome or not self.email:
-            self.log_error("Tentativa de salvar usuário sem nome ou email")
-            return None
-        
-        # CRÍTICO: Validar hash antes de salvar
-        if not self.id and (not self.senha_hash or len(self.senha_hash) < 20):
-            self.log_error(f"Tentativa de criar usuário sem hash válido para {self.email}")
-            return None
-        
-        try:
-            if self.id:
-                result = self._atualizar(db)
-                return result
-            else:
-                result = self._criar(db)
-                return result
-        except Exception as e:
-            self.log_error(f"Erro ao salvar usuário: {e}")
-            return None
-    
-    def _atualizar(self, db):
-        """Atualiza usuário existente"""
-        if self.senha_hash:
-            query = """
-                UPDATE usuarios SET
-                    nome = %s, perfil = %s, cargo = %s, telefone = %s,
-                    celular = %s, email_corporativo = %s, ativo = %s,
-                    primeiro_acesso = %s, senha_hash = %s, avatar_path = %s,
-                    token_recuperacao = %s, token_expiracao = %s,
-                    data_atualizacao = NOW()
-                WHERE id = %s
-            """
-            params = (
-                self.nome, self.perfil, self.cargo, self.telefone,
-                self.celular, self.email_corporativo, self.ativo,
-                self.primeiro_acesso, self.senha_hash, self.avatar_path,
-                self.token_recuperacao, self.token_expiracao, self.id
-            )
-        else:
-            query = """
-                UPDATE usuarios SET
-                    nome = %s, perfil = %s, cargo = %s, telefone = %s,
-                    celular = %s, email_corporativo = %s, ativo = %s,
-                    primeiro_acesso = %s, avatar_path = %s,
-                    token_recuperacao = %s, token_expiracao = %s,
-                    data_atualizacao = NOW()
-                WHERE id = %s
-            """
-            params = (
-                self.nome, self.perfil, self.cargo, self.telefone,
-                self.celular, self.email_corporativo, self.ativo,
-                self.primeiro_acesso, self.avatar_path,
-                self.token_recuperacao, self.token_expiracao, self.id
-            )
-        
-        db.execute(query, params)
-        return self.id
-    
-    def _criar(self, db):
-        """Cria novo usuário. Garante hash válido"""
-        # VERIFICAÇÃO CRÍTICA
-        if not self.senha_hash or len(self.senha_hash) < 20:
-            self.log_error(f"Hash inválido para novo usuário {self.email}: {self.senha_hash}")
-            return None
-        
-        query = """
-            INSERT INTO usuarios (
-                empresa_id, nome, email, senha_hash, perfil, cargo,
-                telefone, celular, email_corporativo, ativo, primeiro_acesso,
-                avatar_path, token_recuperacao, token_expiracao
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        params = (
-            self.empresa_id, self.nome, self.email, self.senha_hash,
-            self.perfil, self.cargo, self.telefone, self.celular,
-            self.email_corporativo, self.ativo, self.primeiro_acesso,
-            self.avatar_path, self.token_recuperacao, self.token_expiracao
-        )
-        return db.execute_return_id(query, params)
-    
-    def registrar_login(self, ip):
-        """Registra o último login do usuário"""
-        db = Database()
-        query = """
-            UPDATE usuarios 
-            SET ultimo_login = NOW(), ultimo_ip = %s, 
-                primeiro_acesso = FALSE, data_atualizacao = NOW()
-            WHERE id = %s
-        """
-        db.execute(query, (ip, self.id))
-        self.ultimo_login = datetime.now()
-        self.ultimo_ip = ip
-        self.primeiro_acesso = False
-    
-    @staticmethod
-    def get_by_id(usuario_id):
-        db = Database()
-        result = db.fetch_one("SELECT * FROM usuarios WHERE id = %s", (usuario_id,))
-        return Usuario(**result) if result else None
-    
-    @staticmethod
-    def get_by_email(email):
-        db = Database()
-        result = db.fetch_one("SELECT * FROM usuarios WHERE email = %s", (email,))
-        return Usuario(**result) if result else None
-    
-    @staticmethod
-    def get_by_token_recuperacao(token):
-        db = Database()
-        result = db.fetch_one(
-            "SELECT * FROM usuarios WHERE token_recuperacao = %s AND token_expiracao > NOW()",
-            (token,)
-        )
-        return Usuario(**result) if result else None
-    
-    @staticmethod
-    def listar_por_empresa(empresa_id, apenas_ativos=False):
-        db = Database()
-        if apenas_ativos:
-            query = "SELECT * FROM usuarios WHERE empresa_id = %s AND ativo = TRUE ORDER BY nome"
-        else:
-            query = "SELECT * FROM usuarios WHERE empresa_id = %s ORDER BY nome"
-        results = db.fetch_all(query, (empresa_id,))
-        return [Usuario(**row) for row in results] if results else []
-    
-    @staticmethod
-    def listar_por_perfil(perfil):
-        db = Database()
-        query = "SELECT * FROM usuarios WHERE perfil = %s ORDER BY nome"
-        results = db.fetch_all(query, (perfil,))
-        return [Usuario(**row) for row in results] if results else []
     
     def get_perfil_display(self):
+        """Retorna o nome legível do perfil"""
         perfis = {
             'admin_sistema': 'Administrador do Sistema',
             'admin_empresa': 'Administrador da Empresa',
@@ -289,25 +85,193 @@ class Usuario(LoggerMixin):
         }
         return perfis.get(self.perfil, self.perfil)
     
-    def get_empresa(self):
-        from models.empresa import Empresa
-        if self.empresa_id:
-            return Empresa.get_by_id(self.empresa_id)
+    def save(self):
+        """Salva ou atualiza o usuário no banco"""
+        db = Database()
+        if self.id:
+            query = """
+                UPDATE usuarios 
+                SET empresa_id = %s, nome = %s, email = %s, senha_hash = %s,
+                    perfil = %s, cargo = %s, telefone = %s, celular = %s,
+                    email_corporativo = %s, ativo = %s, primeiro_acesso = %s,
+                    avatar_path = %s, token_recuperacao = %s, token_expiracao = %s,
+                    ultimo_ip = %s, tentativas_falhas = %s, bloqueado_ate = %s,
+                    pontos_totais = %s, nivel = %s, streak_dias = %s, ultimo_acesso = %s
+                WHERE id = %s
+            """
+            db.execute(query, (
+                self.empresa_id, self.nome, self.email, self.senha_hash,
+                self.perfil, self.cargo, self.telefone, self.celular,
+                self.email_corporativo, self.ativo, self.primeiro_acesso,
+                self.avatar_path, self.token_recuperacao, self.token_expiracao,
+                self.ultimo_ip, self.tentativas_falhas, self.bloqueado_ate,
+                self.pontos_totais, self.nivel, self.streak_dias, self.ultimo_acesso,
+                self.id
+            ))
+        else:
+            query = """
+                INSERT INTO usuarios (empresa_id, nome, email, senha_hash, perfil, cargo,
+                                      telefone, celular, email_corporativo, ativo, primeiro_acesso,
+                                      avatar_path, token_recuperacao, token_expiracao,
+                                      ultimo_ip, tentativas_falhas, bloqueado_ate,
+                                      pontos_totais, nivel, streak_dias, ultimo_acesso)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            self.id = db.execute_return_id(query, (
+                self.empresa_id, self.nome, self.email, self.senha_hash,
+                self.perfil, self.cargo, self.telefone, self.celular,
+                self.email_corporativo, self.ativo, self.primeiro_acesso,
+                self.avatar_path, self.token_recuperacao, self.token_expiracao,
+                self.ultimo_ip, self.tentativas_falhas, self.bloqueado_ate,
+                self.pontos_totais, self.nivel, self.streak_dias, self.ultimo_acesso
+            ))
+        return self.id
+    
+    @staticmethod
+    def get_by_id(id):
+        """Busca usuário por ID"""
+        db = Database()
+        result = db.fetch_one("SELECT * FROM usuarios WHERE id = %s", (id,))
+        if result:
+            # Buscar nome da empresa se necessário
+            if result.get('empresa_id'):
+                empresa = db.fetch_one("SELECT nome FROM empresas WHERE id = %s", (result['empresa_id'],))
+                if empresa:
+                    result['empresa_nome'] = empresa['nome']
+            return Usuario(**result)
         return None
     
-    def tem_permissao(self, permissao):
-        permissoes = {
-            'admin_sistema': ['*'],
-            'admin_empresa': ['gerenciar_empresa', 'gerenciar_usuarios', 'gerenciar_contratos', 'visualizar_estatisticas'],
-            'gestor': ['aprovar_contratos', 'visualizar_contratos', 'visualizar_estatisticas', 'gerenciar_contratos'],
-            'analista': ['visualizar_contratos', 'visualizar_estatisticas', 'exportar_relatorios'],
-            'assistente': ['criar_contratos', 'editar_contratos', 'visualizar_contratos']
-        }
+    @staticmethod
+    def get_by_email(email):
+        """Busca usuário por email"""
+        db = Database()
+        result = db.fetch_one("SELECT * FROM usuarios WHERE email = %s", (email,))
+        if result:
+            # Buscar nome da empresa se necessário
+            if result.get('empresa_id'):
+                empresa = db.fetch_one("SELECT nome FROM empresas WHERE id = %s", (result['empresa_id'],))
+                if empresa:
+                    result['empresa_nome'] = empresa['nome']
+            return Usuario(**result)
+        return None
+    
+    @staticmethod
+    def listar_por_empresa(empresa_id):
+        """Lista todos os usuários de uma empresa"""
+        db = Database()
+        results = db.fetch_all("SELECT * FROM usuarios WHERE empresa_id = %s ORDER BY nome", (empresa_id,))
+        return [Usuario(**row) for row in results] if results else []
+    
+    @staticmethod
+    def listar_por_perfil(empresa_id, perfil):
+        """Lista usuários por perfil"""
+        db = Database()
+        results = db.fetch_all(
+            "SELECT * FROM usuarios WHERE empresa_id = %s AND perfil = %s AND ativo = TRUE ORDER BY nome",
+            (empresa_id, perfil)
+        )
+        return [Usuario(**row) for row in results] if results else []
+    
+    @staticmethod
+    def autenticar(email, senha):
+        """Autentica um usuário"""
+        usuario = Usuario.get_by_email(email)
+        if usuario and usuario.verificar_senha(senha) and usuario.ativo:
+            # Verificar se está bloqueado
+            if usuario.bloqueado_ate and usuario.bloqueado_ate > datetime.now():
+                logger.warning(f"Usuário {email} bloqueado até {usuario.bloqueado_ate}")
+                return None
+            
+            # Atualizar último login
+            db = Database()
+            db.execute("UPDATE usuarios SET ultimo_login = NOW(), tentativas_falhas = 0 WHERE id = %s", (usuario.id,))
+            return usuario
+        return None
+    
+    def registrar_tentativa_falha(self):
+        """Registra uma tentativa de login falha"""
+        self.tentativas_falhas = (self.tentativas_falhas or 0) + 1
+        db = Database()
         
-        if self.perfil == 'admin_sistema':
-            return True
+        # Bloquear após 5 tentativas
+        if self.tentativas_falhas >= 5:
+            self.bloqueado_ate = datetime.now() + timedelta(minutes=15)
+            db.execute(
+                "UPDATE usuarios SET tentativas_falhas = %s, bloqueado_ate = %s WHERE id = %s",
+                (self.tentativas_falhas, self.bloqueado_ate, self.id)
+            )
+            logger.warning(f"Usuário {self.email} bloqueado por 15 minutos")
+        else:
+            db.execute("UPDATE usuarios SET tentativas_falhas = %s WHERE id = %s", (self.tentativas_falhas, self.id))
+    
+    def gerar_token_recuperacao(self):
+        """Gera token para recuperação de senha"""
+        token = secrets.token_urlsafe(32)
+        self.token_recuperacao = token
+        self.token_expiracao = datetime.now() + timedelta(hours=1)
+        db = Database()
+        db.execute(
+            "UPDATE usuarios SET token_recuperacao = %s, token_expiracao = %s WHERE id = %s",
+            (self.token_recuperacao, self.token_expiracao, self.id)
+        )
+        return token
+    
+    @staticmethod
+    def get_by_token_recuperacao(token):
+        """Busca usuário por token de recuperação"""
+        db = Database()
+        result = db.fetch_one(
+            "SELECT * FROM usuarios WHERE token_recuperacao = %s AND token_expiracao > NOW()",
+            (token,)
+        )
+        if result:
+            return Usuario(**result)
+        return None
+    
+    def limpar_token_recuperacao(self):
+        """Limpa o token de recuperação"""
+        self.token_recuperacao = None
+        self.token_expiracao = None
+        db = Database()
+        db.execute("UPDATE usuarios SET token_recuperacao = NULL, token_expiracao = NULL WHERE id = %s", (self.id,))
+    
+    def atualizar_pontos(self, pontos):
+        """Atualiza os pontos totais do usuário"""
+        self.pontos_totais = (self.pontos_totais or 0) + pontos
+        db = Database()
+        db.execute("UPDATE usuarios SET pontos_totais = %s WHERE id = %s", (self.pontos_totais, self.id))
+    
+    def atualizar_nivel(self, novo_nivel):
+        """Atualiza o nível do usuário"""
+        self.nivel = novo_nivel
+        db = Database()
+        db.execute("UPDATE usuarios SET nivel = %s WHERE id = %s", (self.nivel, self.id))
+    
+    def atualizar_streak(self):
+        """Atualiza a sequência de dias trabalhados"""
+        hoje = datetime.now().date()
         
-        return permissao in permissoes.get(self.perfil, [])
+        if self.ultimo_acesso:
+            if isinstance(self.ultimo_acesso, str):
+                ultimo = datetime.strptime(self.ultimo_acesso, '%Y-%m-%d %H:%M:%S').date()
+            else:
+                ultimo = self.ultimo_acesso.date()
+            
+            diferenca = (hoje - ultimo).days
+            
+            if diferenca == 1:
+                self.streak_dias = (self.streak_dias or 0) + 1
+            elif diferenca > 1:
+                self.streak_dias = 1
+        else:
+            self.streak_dias = 1
+        
+        self.ultimo_acesso = datetime.now()
+        db = Database()
+        db.execute(
+            "UPDATE usuarios SET streak_dias = %s, ultimo_acesso = %s WHERE id = %s",
+            (self.streak_dias, self.ultimo_acesso, self.id)
+        )
     
     def __repr__(self):
-        return f"<Usuario {self.id}: {self.nome}>"
+        return f"<Usuario {self.id}: {self.nome} ({self.perfil})>"

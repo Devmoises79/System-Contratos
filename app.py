@@ -430,7 +430,6 @@ def cadastro_usuario():
         usuario = Usuario(empresa_id=empresa.id, nome=nome, email=email, perfil='admin_empresa', cargo=cargo, telefone=telefone, celular=celular, email_corporativo=email_corporativo, primeiro_acesso=True)
         usuario.definir_senha(senha)
         usuario.save()
-        SistemaNotificacoes.notificar_novo_usuario(usuario)
         flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
         return redirect(url_for('login'))
     db = Database()
@@ -493,12 +492,265 @@ def feedback():
     return jsonify({'sucesso': True, 'mensagem': 'Feedback enviado com sucesso!'})
 
 
+# ==================== ROTAS DE MÉTRICAS ====================
+
+@app.route('/metricas/pessoais')
+@login_required
+def metricas_pessoais():
+    """Métricas pessoais do usuário"""
+    usuario_id = session['usuario']['id']
+    empresa_id = session['usuario']['empresa_id']
+    db = Database()
+    
+    try:
+        total_contratos = db.fetch_one("""
+            SELECT COUNT(*) as total FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s
+        """, (usuario_id, empresa_id)) or {'total': 0}
+        
+        aprovados = db.fetch_one("""
+            SELECT COUNT(*) as total FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s AND status = 'ativo'
+        """, (usuario_id, empresa_id)) or {'total': 0}
+        
+        em_analise = db.fetch_one("""
+            SELECT COUNT(*) as total FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s AND status = 'em_analise'
+        """, (usuario_id, empresa_id)) or {'total': 0}
+        
+        aguardando = db.fetch_one("""
+            SELECT COUNT(*) as total FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s AND status = 'aguardando_aprovacao'
+        """, (usuario_id, empresa_id)) or {'total': 0}
+        
+        valor_total = db.fetch_one("""
+            SELECT SUM(valor) as total FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s AND status = 'ativo'
+        """, (usuario_id, empresa_id)) or {'total': 0}
+        
+        contratos_por_mes = db.fetch_all("""
+            SELECT 
+                DATE_FORMAT(data_criacao, '%Y-%m') as mes,
+                COUNT(*) as total
+            FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s 
+                AND data_criacao >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+            GROUP BY DATE_FORMAT(data_criacao, '%Y-%m')
+            ORDER BY mes DESC
+        """, (usuario_id, empresa_id)) or []
+        
+        status_contratos = db.fetch_all("""
+            SELECT 
+                status,
+                COUNT(*) as total
+            FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s
+            GROUP BY status
+        """, (usuario_id, empresa_id)) or []
+        
+        ultimos_contratos = db.fetch_all("""
+            SELECT id, numero_contrato, contratante_nome, valor, status, data_criacao
+            FROM contratos 
+            WHERE criado_por = %s AND empresa_id = %s
+            ORDER BY data_criacao DESC
+            LIMIT 5
+        """, (usuario_id, empresa_id)) or []
+        
+        taxa_aprovacao = 0
+        if total_contratos['total'] > 0:
+            taxa_aprovacao = (aprovados['total'] / total_contratos['total']) * 100
+        
+        stats = {
+            'total_contratos': total_contratos['total'] or 0,
+            'aprovados': aprovados['total'] or 0,
+            'em_analise': em_analise['total'] or 0,
+            'aguardando': aguardando['total'] or 0,
+            'valor_total': float(valor_total['total'] or 0),
+            'taxa_aprovacao': round(taxa_aprovacao, 1)
+        }
+        
+        return render_template('metricas/pessoais.html',
+                             stats=stats,
+                             contratos_por_mes=contratos_por_mes,
+                             status_contratos=status_contratos,
+                             ultimos_contratos=ultimos_contratos)
+                             
+    except Exception as e:
+        logger.error(f"Erro em metricas_pessoais: {e}")
+        stats = {
+            'total_contratos': 0,
+            'aprovados': 0,
+            'em_analise': 0,
+            'aguardando': 0,
+            'valor_total': 0,
+            'taxa_aprovacao': 0
+        }
+        return render_template('metricas/pessoais.html',
+                             stats=stats,
+                             contratos_por_mes=[],
+                             status_contratos=[],
+                             ultimos_contratos=[])
+
+
+@app.route('/metricas/empresa')
+@login_required
+def metricas_empresa():
+    """Métricas da empresa"""
+    empresa_id = session['usuario']['empresa_id']
+    db = Database()
+    
+    try:
+        total_contratos = db.fetch_one("""
+            SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s
+        """, (empresa_id,)) or {'total': 0}
+        
+        contratos_por_status = db.fetch_all("""
+            SELECT status, COUNT(*) as total 
+            FROM contratos 
+            WHERE empresa_id = %s 
+            GROUP BY status
+        """, (empresa_id,)) or []
+        
+        valor_total = db.fetch_one("""
+            SELECT SUM(valor) as total FROM contratos 
+            WHERE empresa_id = %s AND status = 'ativo'
+        """, (empresa_id,)) or {'total': 0}
+        
+        total_usuarios = db.fetch_one("""
+            SELECT COUNT(*) as total FROM usuarios WHERE empresa_id = %s AND ativo = 1
+        """, (empresa_id,)) or {'total': 0}
+        
+        contratos_por_mes = db.fetch_all("""
+            SELECT 
+                DATE_FORMAT(data_criacao, '%Y-%m') as mes,
+                COUNT(*) as total
+            FROM contratos 
+            WHERE empresa_id = %s 
+                AND data_criacao >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+            GROUP BY DATE_FORMAT(data_criacao, '%Y-%m')
+            ORDER BY mes DESC
+        """, (empresa_id,)) or []
+        
+        stats = {
+            'total_contratos': total_contratos['total'] or 0,
+            'valor_total': float(valor_total['total'] or 0),
+            'total_usuarios': total_usuarios['total'] or 0
+        }
+        
+        return render_template('metricas/empresa.html',
+                             stats=stats,
+                             contratos_por_status=contratos_por_status,
+                             contratos_por_mes=contratos_por_mes)
+                             
+    except Exception as e:
+        logger.error(f"Erro em metricas_empresa: {e}")
+        stats = {
+            'total_contratos': 0,
+            'valor_total': 0,
+            'total_usuarios': 0
+        }
+        return render_template('metricas/empresa.html',
+                             stats=stats,
+                             contratos_por_status=[],
+                             contratos_por_mes=[])
+
+
+# ==================== ROTAS DE GAMIFICAÇÃO ====================
+
+@app.route('/gamificacao/perfil')
+@login_required
+def gamificacao_perfil():
+    """Perfil de gamificação do usuário"""
+    usuario_id = session['usuario']['id']
+    db = Database()
+    
+    try:
+        pontos = db.fetch_one("""
+            SELECT COALESCE(SUM(pontos), 0) as total FROM gamificacao_pontos 
+            WHERE usuario_id = %s
+        """, (usuario_id,)) or {'total': 0}
+        
+        conquistas = db.fetch_all("""
+            SELECT g.*, 
+                   CASE WHEN gp.id IS NOT NULL THEN TRUE ELSE FALSE END as conquistada
+            FROM gamificacao_conquistas g
+            LEFT JOIN gamificacao_pontos gp ON g.id = gp.conquista_id AND gp.usuario_id = %s
+            WHERE g.empresa_id = %s OR g.empresa_id IS NULL
+            ORDER BY g.pontos_necessarios ASC
+        """, (usuario_id, session['usuario']['empresa_id'])) or []
+        
+        nivel = 'Bronze'
+        if pontos['total'] >= 1000:
+            nivel = 'Diamante'
+        elif pontos['total'] >= 500:
+            nivel = 'Ouro'
+        elif pontos['total'] >= 200:
+            nivel = 'Prata'
+        
+        return render_template('gamificacao/perfil.html',
+                             pontos=pontos['total'],
+                             nivel=nivel,
+                             conquistas=conquistas)
+    except Exception as e:
+        logger.error(f"Erro em gamificacao_perfil: {e}")
+        return render_template('gamificacao/perfil.html',
+                             pontos=0,
+                             nivel='Bronze',
+                             conquistas=[])
+
+
+@app.route('/gamificacao/ranking')
+@login_required
+def gamificacao_ranking():
+    """Ranking da empresa"""
+    empresa_id = session['usuario']['empresa_id']
+    db = Database()
+    
+    try:
+        ranking = db.fetch_all("""
+            SELECT u.id, u.nome, u.email, u.perfil,
+                   COALESCE(SUM(gp.pontos), 0) as pontos,
+                   RANK() OVER (ORDER BY COALESCE(SUM(gp.pontos), 0) DESC) as posicao
+            FROM usuarios u
+            LEFT JOIN gamificacao_pontos gp ON u.id = gp.usuario_id
+            WHERE u.empresa_id = %s AND u.ativo = 1
+            GROUP BY u.id, u.nome, u.email, u.perfil
+            ORDER BY pontos DESC
+            LIMIT 20
+        """, (empresa_id,)) or []
+        
+        return render_template('gamificacao/ranking.html', ranking=ranking)
+    except Exception as e:
+        logger.error(f"Erro em gamificacao_ranking: {e}")
+        return render_template('gamificacao/ranking.html', ranking=[])
+
+
+@app.route('/gamificacao/historico')
+@login_required
+def gamificacao_historico():
+    """Histórico de pontos do usuário"""
+    usuario_id = session['usuario']['id']
+    db = Database()
+    
+    try:
+        historico = db.fetch_all("""
+            SELECT * FROM gamificacao_pontos 
+            WHERE usuario_id = %s 
+            ORDER BY data_criacao DESC
+            LIMIT 50
+        """, (usuario_id,)) or []
+        
+        return render_template('gamificacao/historico.html', historico=historico)
+    except Exception as e:
+        logger.error(f"Erro em gamificacao_historico: {e}")
+        return render_template('gamificacao/historico.html', historico=[])
+
+
 # ==================== ROTAS DE NOTIFICAÇÕES ====================
 
 @app.route('/notificacoes')
 @login_required
 def notificacoes():
-    from models.notificacao import Notificacao
     usuario_id = session['usuario']['id']
     notificacoes = Notificacao.listar_por_usuario(usuario_id, limite=100)
     notificacoes_nao_lidas = Notificacao.contar_nao_lidas(usuario_id)
@@ -510,7 +762,6 @@ def notificacoes():
 @app.route('/notificacoes/nao-lidas/count')
 @login_required
 def notificacoes_count():
-    from models.notificacao import Notificacao
     usuario_id = session['usuario']['id']
     total = Notificacao.contar_nao_lidas(usuario_id)
     return jsonify({'total': total})
@@ -533,8 +784,24 @@ def notificacao_marcar_lida(id):
 @login_required
 def notificacoes_marcar_todas():
     db = Database()
-    db.execute("UPDATE notificacoes SET lida = TRUE, data_leitura = NOW() WHERE usuario_id = %s AND lida = FALSE", (session['usuario']['id'],))
+    db.execute("UPDATE notificacoes SET lida = TRUE, data_leitura = NOW() WHERE usuario_id = %s AND lida = FALSE", 
+               (session['usuario']['id'],))
     return jsonify({'sucesso': True})
+
+
+@app.route('/testar-notificacao')
+@login_required
+def testar_notificacao():
+    Notificacao.criar(
+        usuario_id=session['usuario']['id'],
+        empresa_id=session['usuario'].get('empresa_id'),
+        titulo="🔔 Teste de Notificação",
+        mensagem="Se você está vendo esta mensagem, o sistema de notificações está funcionando!",
+        tipo="success",
+        link="/dashboard"
+    )
+    flash('Notificação de teste criada!', 'success')
+    return redirect(url_for('dashboard'))
 
 
 # ==================== TRATAMENTO DE ERROS ====================
@@ -568,17 +835,37 @@ def notificacoes_context():
     """Adiciona informações de notificações em todos os templates"""
     if 'usuario' in session:
         try:
-            from models.notificacao import Notificacao
             usuario_id = session['usuario']['id']
             total_nao_lidas = Notificacao.contar_nao_lidas(usuario_id)
             ultimas_notificacoes = Notificacao.listar_por_usuario(usuario_id, apenas_nao_lidas=True, limite=5)
+            
+            # Buscar pontos de gamificação
+            db = Database()
+            pontos = db.fetch_one("SELECT COALESCE(SUM(pontos), 0) as total FROM gamificacao_pontos WHERE usuario_id = %s", (usuario_id,))
+            total_pontos = pontos['total'] if pontos else 0
+            
+            nivel = 'Bronze'
+            if total_pontos >= 1000:
+                nivel = 'Diamante'
+            elif total_pontos >= 500:
+                nivel = 'Ouro'
+            elif total_pontos >= 200:
+                nivel = 'Prata'
+            
             return {
                 'total_notificacoes_nao_lidas': total_nao_lidas,
-                'ultimas_notificacoes': ultimas_notificacoes
+                'ultimas_notificacoes': ultimas_notificacoes,
+                'gamificacao_pontos': total_pontos,
+                'gamificacao_titulo': nivel
             }
         except Exception as e:
             print(f"Erro ao carregar notificações: {e}")
-    return {'total_notificacoes_nao_lidas': 0, 'ultimas_notificacoes': []}
+    return {
+        'total_notificacoes_nao_lidas': 0, 
+        'ultimas_notificacoes': [],
+        'gamificacao_pontos': 0,
+        'gamificacao_titulo': 'Bronze'
+    }
 
 
 if __name__ == '__main__':
