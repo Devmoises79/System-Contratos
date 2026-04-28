@@ -43,48 +43,84 @@ O sistema foi estruturado com foco em organização de código, separação de r
 
 ---
 
-## 🧠 Regras de Negócio
+### Regras de negócio 🧠
 
-# 📌 Descrição dos Estados
+## 👥 Ações por Perfil em Cada Etapa
 
-- **Rascunho**
-  - Contrato em criação ou edição
-  - Pode ser alterado pelo criador (Assistente/Analista)
+### 📝 Rascunho
+- **Assistente**
+  - Criar contrato
+  - Editar contrato
 
-- **Em Análise**
-  - Contrato enviado para validação técnica
-  - Analista pode revisar, editar ou devolver para ajustes
+- **Analista**
+  - Criar contrato
+  - Editar contrato
 
-- **Aguardando Aprovação**
-  - Contrato validado e enviado para decisão
-  - Gestor pode aprovar ou solicitar alterações
-
-- **Ativo**
-  - Contrato aprovado e finalizado
-  - Disponível para consulta e download (PDF)
+- **Gestor / Admin Empresa**
+  - Visualizar
+  - Solicitar ajustes (com justificativa)
 
 ---
 
-### 🔁 Regras de Transição
+### 🔍 Em Análise
+- **Analista**
+  - Revisar contrato
+  - Editar dados
+  - Aprovar para próxima etapa (enviar para gestor)
+  - Devolver para revisão (com justificativa)
 
-- Um contrato só pode avançar para o próximo estado se cumprir as regras de permissão
-- Contratos podem ser **devolvidos para revisão em qualquer etapa intermediária**
-- Toda solicitação de alteração exige **justificativa obrigatória**
-- O sistema registra:
-  - usuário responsável  
-  - data e horário  
-  - motivo da alteração  
+- **Assistente**
+  - Visualizar
+  - Ajustar contrato quando devolvido
+
+- **Gestor / Admin Empresa**
+  - Acompanhar andamento
 
 ---
 
-### 🎯 Objetivo do Fluxo
+### ⏳ Aguardando Aprovação
+- **Gestor**
+  - Aprovar contrato
+  - Solicitar alterações (com justificativa)
 
-Garantir:
+- **Admin Empresa**
+  - Aprovar contrato
+  - Solicitar alterações
 
-- Controle sobre o ciclo de vida do contrato
-- Separação de responsabilidades (RBAC)
-- Rastreabilidade de alterações
-- Redução de erros e inconsistências
+- **Analista**
+  - Acompanhar status
+  - Realizar ajustes quando devolvido
+
+---
+
+### ✅ Ativo
+- **Todos os perfis autorizados**
+  - Visualizar contrato
+  - Baixar PDF
+
+- **Gestor / Admin**
+  - Monitorar contratos ativos
+
+---
+
+## 🔁 Regras Gerais do Fluxo
+
+- Transições entre estados seguem regras de permissão (RBAC)
+- Qualquer devolução exige **justificativa obrigatória**
+- O sistema registra automaticamente:
+  - usuário responsável
+  - data e horário
+  - motivo da ação
+- Contratos podem retornar para revisão a partir de qualquer etapa intermediária
+
+---
+
+## 🎯 Objetivo do Fluxo
+
+- Garantir controle do ciclo de vida do contrato
+- Separar responsabilidades por perfil
+- Permitir rastreabilidade completa das alterações
+- Reduzir inconsistências no processo de aprovação
 
 ---
 
