@@ -47,11 +47,11 @@ O sistema foi estruturado com foco em organização de código, separação de r
 
 O sistema implementa um fluxo completo de contratos:
 
-
+```text
 Rascunho → Em Análise → Aguardando Aprovação → Ativo
 ↑ ↓ ↓
 └───────────┴───────────────┘ (Revisão)
-
+```
 
 Ações disponíveis:
 
