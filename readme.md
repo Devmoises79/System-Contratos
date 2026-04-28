@@ -375,6 +375,7 @@ Este projeto demonstra:
 - Testes de integração
 - Cache com Redis
 - WebSockets para notificações em tempo real
+- Geração de PDFs com WeasyPrint
 
 # 🤝 Contribuição
 
