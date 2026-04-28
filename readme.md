@@ -174,6 +174,129 @@ System-Contratos/
 ├── tests/ # Testes automatizados
 ├── app.py # Aplicação principal
 ```
+---
+
+## 🏗️ Decisões Técnicas
+
+Esta seção descreve as principais escolhas feitas durante o desenvolvimento do sistema e seus objetivos.
+
+---
+
+### 🔹 Uso do Flask
+
+O Flask foi escolhido por ser um framework leve e flexível, permitindo maior controle sobre a estrutura da aplicação.
+
+**Motivo:**
+- Facilidade para entender o ciclo completo da aplicação
+- Menor abstração, favorecendo aprendizado de arquitetura
+- Adequado para projetos modulares de pequeno a médio porte
+
+---
+
+### 🔹 Arquitetura Modular
+
+O projeto foi organizado em módulos (`auth`, `models`, `core`, `admin`), separando responsabilidades.
+
+**Motivo:**
+- Melhor organização do código
+- Facilidade de manutenção
+- Separação entre regras de negócio, autenticação e acesso a dados
+
+---
+
+### 🔹 Uso de MySQL
+
+Banco relacional utilizado para persistência dos dados.
+
+**Motivo:**
+- Estrutura consistente para dados relacionais (contratos, usuários, empresas)
+- Suporte a integridade referencial
+- Facilidade de consultas para relatórios e métricas
+
+---
+
+### 🔹 Implementação de RBAC
+
+Controle de acesso baseado em perfis (Admin, Gestor, Analista, Assistente).
+
+**Motivo:**
+- Separar responsabilidades no fluxo de contratos
+- Evitar acesso indevido a funcionalidades
+- Simular cenários reais de sistemas corporativos
+
+---
+
+### 🔹 Workflow de Contratos
+
+Implementação de estados (rascunho, análise, aprovação, ativo) com transições controladas.
+
+**Motivo:**
+- Representar o ciclo de vida real de contratos
+- Garantir controle sobre alterações
+- Evitar inconsistências no processo
+
+---
+
+### 🔹 Auditoria de Alterações
+
+Registro de ações com usuário, data, horário e justificativa.
+
+**Motivo:**
+- Garantir rastreabilidade
+- Aumentar transparência nas mudanças
+- Simular requisitos comuns em sistemas corporativos
+
+---
+
+### 🔹 Geração de PDF
+
+Uso de bibliotecas como ReportLab/WeasyPrint para exportação de contratos.
+
+**Motivo:**
+- Permitir documentação formal dos contratos
+- Simular funcionalidade comum em sistemas empresariais
+
+---
+
+### 🔹 Segurança Básica
+
+Implementação de proteção contra CSRF, hash de senha e bloqueio de IP.
+
+**Motivo:**
+- Evitar vulnerabilidades comuns
+- Introduzir boas práticas de segurança
+- Proteger autenticação e dados sensíveis
+
+---
+
+### 🔹 Sistema de Notificações
+
+Notificações internas para eventos do sistema (criação, análise, aprovação).
+
+**Motivo:**
+- Melhorar comunicação entre usuários
+- Acompanhar ações no fluxo de contratos
+
+---
+
+### 🔹 Efeitos Sonoros
+
+Implementação de feedback sonoro para ações do sistema (ex: sucesso, erro, notificações).
+
+**Motivo:**
+- Melhorar a experiência do usuário (UX)
+- Fornecer feedback imediato para ações importantes
+- Tornar a interação com o sistema mais intuitiva
+
+--- 
+
+### 🔹 Gamificação
+
+Sistema de pontos e ranking baseado em ações do usuário.
+
+**Motivo:**
+- Incentivar uso do sistema
+- Explorar funcionalidades adicionais de engajamento
 
 ---
 
