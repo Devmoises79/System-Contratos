@@ -85,7 +85,7 @@ O sistema foi estruturado com foco em organização de código, separação de r
 
 - **Admin Empresa**
   - Aprovar contrato
-  - Solicitar alterações
+  - Solicitar alterações (com justificativa)
 
 - **Analista**
   - Acompanhar status
