@@ -1,197 +1,216 @@
 # 📄 System-Contratos
 
-Sistema web para gerenciamento corporativo de contratos, empresas e usuários.
+Sistema web para gerenciamento corporativo de contratos, empresas e usuários, com foco em regras de negócio, controle de acesso e segurança.
 
 ![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
 ![Python](https://img.shields.io/badge/python-3.8+-blue)
 ![Flask](https://img.shields.io/badge/flask-2.0+-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## ✨ Características
+---
 
-- ✅ **Multi-empresa** - Suporte completo a múltiplas empresas
-- ✅ **RBAC** - Controle de acesso baseado em perfis (Admin Sistema, Admin Empresa, Gestor, Analista, Assistente)
-- ✅ **Fluxo de Aprovação** - Workflow completo de contratos
-- ✅ **Segurança** - Bloqueio de IP, CSRF, senhas com hash
-- ✅ **Logging** - Sistema completo de auditoria
-- ✅ **PDF** - Geração de contratos em PDF
-- ✅ **Dashboard** - Estatísticas e gráficos
-- ✅ **Responsivo** - Interface adaptável a todos dispositivos
+## 📊 Visão Geral
 
-## 🚀 Tecnologias
+Aplicação backend desenvolvida com Flask que implementa o ciclo completo de contratos, incluindo criação, análise, aprovação e acompanhamento.
+
+O sistema foi estruturado com foco em organização de código, separação de responsabilidades e aplicação de regras de negócio reais.
+
+---
+
+## ✨ Funcionalidades
+
+- **Multi-empresa** (isolamento de dados por organização)
+- **RBAC (Role-Based Access Control)** com múltiplos perfis
+- **Workflow de contratos** com estados, transições e revisões com justificativa
+- **Gerenciamento completo de contratos** (criação, edição, análise e aprovação)
+- **Sistema de autenticação e autorização**
+- **Auditoria e logging**
+- **Geração de contratos em PDF**
+- **Dashboards e métricas**
+- **Sistema de notificações**
+- **Gamificação (pontos, ranking, níveis)**
+
+---
+
+## 🔐 Segurança
+
+- Hash de senha (PBKDF2)
+- Proteção contra CSRF
+- Sanitização de inputs
+- Bloqueio de IP por tentativas inválidas
+- Controle de sessão com expiração
+- Logs de auditoria
+
+---
+
+## 🧠 Regras de Negócio
+
+O sistema implementa um fluxo completo de contratos:
+
+
+Rascunho → Em Análise → Aguardando Aprovação → Ativo
+↑ ↓ ↓
+└───────────┴───────────────┘ (Revisão)
+
+
+Ações disponíveis:
+
+- Criar contrato
+- Editar contrato
+- Enviar para análise
+- Enviar para aprovação
+- Aprovar / devolver
+- Revisar contrato
+
+---
+
+## 📌 Controle de Alterações (Auditoria de Edição)
+
+O sistema implementa rastreabilidade nas solicitações de alteração de contratos.
+
+Sempre que uma edição é solicitada (por Gestor, Admin ou Analista), o sistema registra:
+
+- Justificativa da solicitação
+- Usuário responsável pela ação
+- Data e horário da solicitação
+
+Essas informações são exibidas no fluxo do contrato, garantindo transparência e controle sobre mudanças.
+
+---
+
+## ⚙️ Tecnologias
 
 ### Backend
-- **Python 3.8+**
-- **Flask** - Framework web
-- **MySQL** - Banco de dados relacional
-- **Werkzeug** - Segurança e utilitários
-- **ReportLab/WeasyPrint** - Geração de PDF
+- Python 3.8+
+- Flask
+- MySQL
+- Werkzeug
 
 ### Frontend
-- **Bootstrap 5** - Framework CSS
-- **JavaScript** - Interatividade
-- **Font Awesome** - Ícones
-- **Jinja2** - Templates
+- Bootstrap 5
+- JavaScript
+- Jinja2
 
-### Desenvolvimento
-- **Pytest** - Testes automatizados
-- **Logging** - Sistema de logs
-- **Git** - Controle de versão
+### Documentos
+- ReportLab / WeasyPrint
 
-## 📋 Pré-requisitos
+### Testes & Qualidade
+- Pytest
+- Logging estruturado
 
-- Python 3.8 ou superior
-- MySQL 5.7 ou superior
-- pip (gerenciador de pacotes Python)
+---
 
-## 🔧 Instalação
+## 📁 Estrutura do Projeto
 
-1. **Clone o repositório**
+```bash
+System-Contratos/
+├── admin/ # Módulos administrativos
+├── auth/ # Autenticação e autorização
+├── core/ # Banco, logging, utilitários
+├── models/ # Modelos de domínio
+├── templates/ # Interface (views)
+├── static/ # Arquivos estáticos
+├── tests/ # Testes automatizados
+├── app.py # Aplicação principal
+```
+
+---
+
+## 🚀 Instalação
 
 ```bash
 git clone https://github.com/Devmoises79/System-Contratos.git
 cd System-Contratos
-```
 
-# Crie um ambiente virtual
-
-```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-```
-
 # ou
-
-```bash
-venv\Scripts\activate  # Windows
-Instale as dependências
+venv\Scripts\activate     # Windows
 ```
 
+- Dependências:
 ```bash
 pip install -r requirements.txt
-Configure o banco de dados
 ```
+
+- Configuração do banco:
 
 ```bash
-# Crie o banco de dados MySQL
 mysql -u root -p
-CREATE DATABASE validapy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-EXIT;
 
-# Execute as migrations
-python scripts/migrate.py
-Configure o arquivo config.py
+CREATE DATABASE validapy 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
 ```
 
+- Script:
 
-# Execute a aplicação
+```bash
+python scripts/migrate.py
+```
+
+# ▶️ Execução
 
 ```bash
 python app.py
 ```
 
 # 🧪 Testes
-Execute os testes automatizados:
 
 ```bash
-# Instalar dependências de teste
-pip install pytest pytest-cov
-
-
-# Executar todos os 
-
 pytest tests/ -v
-
-# Executar com cobertura
 pytest tests/ --cov=. --cov-report=html
-
-# Executar testes específicos
 pytest tests/test_models.py -v
-``` 
-
-# 📁 Estrutura do Projeto
-
-```text
-System-Contratos/
-├── admin/                 # Módulo de administração
-├── auth/                  # Autenticação e autorização
-├── core/                  # Utilitários centrais
-│   ├── database.py       # Conexão com banco
-│   ├── logging_config.py # Sistema de logs
-│   └── utils.py          # Funções auxiliares
-├── models/                # Modelos de dados
-├── static/                # Arquivos estáticos
-├── templates/             # Templates HTML
-├── tests/                 # Testes automatizados
-├── utils/                 # Utilitários
-├── app.py                 # Aplicação principal
-├── config.py              # Configurações (não versionado)
-└── requirements.txt       # Dependências
 ```
 
+# 👥 Perfis de Acesso
 
-# 🔐 Perfis de Acesso
-
-text
-Perfil	Descrição	Permissões
-Admin Sistema	Controle total	Gerenciar empresas, usuários, logs, IPs
-Admin Empresa	Gestão da empresa	Gerenciar usuários, configurações, estatísticas
-Gestor	Aprovação	Aprovar contratos, visualizar relatórios
-Analista	Análise	Visualizar dados, exportar relatórios
+```text
+Perfil	Descrição	Permissões principais
+Admin Sistema	Controle total	Gerenciar empresas, usuários, logs e configurações globais
+Admin Empresa	Gestão da empresa	Gerenciar usuários, contratos e configurações da empresa
+Gestor	Gestão e aprovação	Gerenciar contratos, aprovar e solicitar ajustes
+Analista	Análise	Criar, editar e analisar contratos
 Assistente	Operacional	Criar e editar contratos
 ```
 
-# 📊 Fluxo de Contratos
+# 📈 Observações de Engenharia
 
-text
-Rascunho → Em Análise → Aguardando Aprovação → Ativo
-    ↑          ↓              ↓
-    └──────────┴──────────────┘ (Revisão)
+Este projeto demonstra:
+
+- Implementação prática de RBAC
+- Estruturação de sistema multiempresa
+- Organização modular em Flask
+- Implementação de fluxo de negócio (além de CRUD)
+- Aplicação de boas práticas básicas de segurança
+- Uso de métricas e dashboards
+- Controle de alterações com rastreabilidade
+
+# 🚧 Próximos Passos (Possíveis decisões)
+
+- API REST completa
+- Testes de integração
+- Cache com Redis
+- WebSockets para notificações em tempo real
+
+# 🤝 Contribuição
+
+Contribuições são bem-vindas:
+
+```bash
+git checkout -b feature/minha-feature
+git commit -m "feat: minha feature"
+git push origin feature/minha-feature
 ```
-
-# 🛡️ Segurança
-
-- ✅ Senhas com hash (PBKDF2)
-
-- ✅ Proteção CSRF
-
-- ✅ Bloqueio de IP por tentativas
-
-- ✅ Sessões com timeout
-
-- ✅ Sanitização de inputs
-
-- ✅ Logs de auditoria
-
-# 📝 TODO
-- Implementar testes de integração
-
-- Adicionar API REST completa
-
-- Melhorar geração de PDF com WeasyPrint
-
-- Adicionar WebSockets para notificações
-
-- Implementar cache com Redis
-
-- Adicionar dashboard de métricas em tempo real
-
-#🤝 Contribuição
-Contribuições são bem-vindas! 
-
-* Fork o projeto
-
-* Crie sua branch. Ex.: (git checkout -b feature/suaFeature)
-
-* Commit suas mudanças. Ex.: e(git commit -m 'Add some ExFeature')
-
-* Push para a branch. Ex.: (git push origin feature/ExFeature)
-
-* Abra um Pull Request
+Abra um Pull Request 🚀
 
 # 📄 Licença
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
 
-📧 Contato
-@Devmoises79 - GitHub
-Linkedin: https://www.linkedin.com/in/moisés-aniceto-71042a251/
+- MIT License
+
+# 📫 Contato
+LinkedIn: https://www.linkedin.com/in/moisés-aniceto-71042a251
+
+# ⚠️ Observação
+
+Projeto em desenvolvimento contínuo, utilizado como base prática para aprofundamento em backend, arquitetura de sistemas e implementação de regras de negócio.
