@@ -25,7 +25,7 @@ O sistema foi estruturado com foco em organização de código, separação de r
 - **Gerenciamento completo de contratos** (criação, edição, análise e aprovação)
 - **Sistema de autenticação e autorização**
 - **Auditoria e logging**
-- **Geração de contratos em PDF**
+- **Geração de contratos em PDF (em arquivo)**
 - **Dashboards e métricas**
 - **Sistema de notificações**
 - **Efeitos sonoros**
