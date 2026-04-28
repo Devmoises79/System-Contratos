@@ -268,7 +268,7 @@ Abra um Pull Request 🚀
 - MIT License
 
 # 📫 Contato
-LinkedIn: https://www.linkedin.com/in/moisés-aniceto-71042a251
+- LinkedIn: https://www.linkedin.com/in/moisés-aniceto-71042a251
 
 # ⚠️ Observação
 
