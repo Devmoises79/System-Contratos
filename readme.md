@@ -223,16 +223,15 @@ pytest tests/ --cov=. --cov-report=html
 pytest tests/test_models.py -v
 ```
 
-# 👥 Perfis de Acesso
+## 👥 Perfis de Acesso
 
-```text
-Perfil	Descrição	Permissões principais
-Admin Sistema	Controle total	Gerenciar empresas, usuários, logs e configurações globais
-Admin Empresa	Gestão da empresa	Gerenciar usuários, contratos e configurações da empresa
-Gestor	Gestão e aprovação	Gerenciar contratos, aprovar e solicitar ajustes
-Analista	Análise	Criar, editar e analisar contratos
-Assistente	Operacional	Criar e editar contratos
-```
+| Perfil         | Descrição            | Permissões principais                                              |
+|---------------|--------------------|--------------------------------------------------------------------|
+| Admin Sistema | Controle total     | Gerenciar empresas, usuários, logs e configurações globais        |
+| Admin Empresa | Gestão da empresa  | Gerenciar usuários, contratos e configurações da empresa          |
+| Gestor        | Gestão e aprovação | Gerenciar contratos, aprovar e solicitar ajustes                  |
+| Analista      | Análise            | Criar, editar e analisar contratos                               |
+| Assistente    | Operacional        | Criar e editar contratos                                         |
 
 # 📈 Observações de Engenharia
 
