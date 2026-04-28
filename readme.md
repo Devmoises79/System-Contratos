@@ -45,22 +45,46 @@ O sistema foi estruturado com foco em organização de código, separação de r
 
 ## 🧠 Regras de Negócio
 
-O sistema implementa um fluxo completo de contratos:
+# 📌 Descrição dos Estados
 
-```text
-Rascunho → Em Análise → Aguardando Aprovação → Ativo
-↑ ↓ ↓
-└───────────┴───────────────┘ (Revisão)
-```
+- **Rascunho**
+  - Contrato em criação ou edição
+  - Pode ser alterado pelo criador (Assistente/Analista)
 
-Ações disponíveis:
+- **Em Análise**
+  - Contrato enviado para validação técnica
+  - Analista pode revisar, editar ou devolver para ajustes
 
-- Criar contrato
-- Editar contrato
-- Enviar para análise
-- Enviar para aprovação
-- Aprovar / devolver
-- Revisar contrato
+- **Aguardando Aprovação**
+  - Contrato validado e enviado para decisão
+  - Gestor pode aprovar ou solicitar alterações
+
+- **Ativo**
+  - Contrato aprovado e finalizado
+  - Disponível para consulta e download (PDF)
+
+---
+
+### 🔁 Regras de Transição
+
+- Um contrato só pode avançar para o próximo estado se cumprir as regras de permissão
+- Contratos podem ser **devolvidos para revisão em qualquer etapa intermediária**
+- Toda solicitação de alteração exige **justificativa obrigatória**
+- O sistema registra:
+  - usuário responsável  
+  - data e horário  
+  - motivo da alteração  
+
+---
+
+### 🎯 Objetivo do Fluxo
+
+Garantir:
+
+- Controle sobre o ciclo de vida do contrato
+- Separação de responsabilidades (RBAC)
+- Rastreabilidade de alterações
+- Redução de erros e inconsistências
 
 ---
 
