@@ -28,6 +28,7 @@ O sistema foi estruturado com foco em organização de código, separação de r
 - **Geração de contratos em PDF**
 - **Dashboards e métricas**
 - **Sistema de notificações**
+- **Efeitos sonoros**
 - **Gamificação (pontos, ranking, níveis)**
 
 ---
