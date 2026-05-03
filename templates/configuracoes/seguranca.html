@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Segurança - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-shield-alt me-2"></i> Segurança
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="card-branco">
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Senha atual</label>
+                    <input type="password" name="senha_atual" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nova senha</label>
+                    <input type="password" name="nova_senha" class="form-control" required minlength="8">
+                    <small class="text-muted">Mínimo de 8 caracteres</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Confirmar nova senha</label>
+                    <input type="password" name="confirmar_senha" class="form-control" required>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Dicas de segurança:
+                    <ul class="mb-0 mt-2">
+                        <li>Use pelo menos 8 caracteres</li>
+                        <li>Inclua letras maiúsculas e minúsculas</li>
+                        <li>Adicione números e caracteres especiais</li>
+                        <li>Não use senhas óbvias como "123456" ou "senha"</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn-roxo">
+                        <i class="fas fa-save me-2"></i> Alterar Senha
+                    </button>
+                    <a href="{{ url_for('configuracoes.index') }}" class="btn-outline-roxo ms-2">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .form-control {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 14px;
+    }
+    .form-control:focus {
+        border-color: #6B46C1;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 26px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .alert-info {
+        border-radius: 16px;
+        background: #e0f2fe;
+        border: none;
+        color: #075985;
+    }
+</style>
+{% endblock %}

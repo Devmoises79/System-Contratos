@@ -1,140 +1,156 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-gradient-company">
-                <div class="card-body">
-                    <h3 class="mb-0"><i class="bi bi-building"></i> Métricas da Empresa</h3>
-                    <p class="mb-0 opacity-75">Visão geral do desempenho da equipe</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-people-fill fs-1 text-primary"></i>
-                    <h2 class="mb-0 mt-2">{{ stats_empresa.total_usuarios or 0 }}</h2>
-                    <small class="text-muted">Colaboradores</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-file-text-fill fs-1 text-info"></i>
-                    <h2 class="mb-0 mt-2">{{ stats_empresa.total_contratos or 0 }}</h2>
-                    <small class="text-muted">Total de Contratos</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
-                    <h2 class="mb-0 mt-2">{{ stats_empresa.contratos_ativos or 0 }}</h2>
-                    <small class="text-muted">Contratos Ativos</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-star-fill fs-1 text-warning"></i>
-                    <h2 class="mb-0 mt-2">{{ stats_empresa.taxa_acerto_geral or 0 }}%</h2>
-                    <small class="text-muted">Taxa de Acerto Geral</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Distribuição por Perfil -->
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Distribuição por Perfil</h5>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fw-semibold mb-0">Contratos por Mês</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="perfilChart" height="250"></canvas>
+                    {% if contratos_por_mes and contratos_por_mes|length > 0 %}
+                    <canvas id="graficoContratos" style="max-height: 280px; width: 100%;"></canvas>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-chart-bar"></i> Nenhum contrato encontrado para exibir no gráfico.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Contratos por Mês</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="contratosChart" height="250"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mensagem de incentivo -->
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        <strong>Dica:</strong> Acompanhe as métricas para identificar pontos de melhoria no processo.
-        O objetivo é crescer juntos! 🚀
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Gráfico de Perfis
-const perfis = {{ distribuicao|tojson }};
-const perfilCtx = document.getElementById('perfilChart').getContext('2d');
-new Chart(perfilCtx, {
-    type: 'pie',
-    data: {
-        labels: perfis.map(p => p.perfil),
-        datasets: [{
-            data: perfis.map(p => p.total),
-            backgroundColor: ['#667eea', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'bottom' }
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    {% if contratos_por_mes and contratos_por_mes|length > 0 %}
+    // Dados reais do banco de dados
+    const dados = {{ contratos_por_mes | tojson | safe }};
+    
+    console.log('Dados recebidos:', dados);
+    
+    // Extrair labels (meses) e valores
+    const labels = dados.map(item => item.mes);
+    const valores = dados.map(item => item.total);
+    
+    // Configurar o gráfico
+    const ctx = document.getElementById('graficoContratos').getContext('2d');
+    
+    // Destruir gráfico existente se houver
+    if (window.contratosChart) {
+        window.contratosChart.destroy();
     }
-});
-
-// Gráfico de Contratos por Mês
-const contratos = {{ contratos_mes|tojson }};
-const contratosCtx = document.getElementById('contratosChart').getContext('2d');
-new Chart(contratosCtx, {
-    type: 'bar',
-    data: {
-        labels: contratos.map(c => c.mes),
-        datasets: [{
-            label: 'Contratos',
-            data: contratos.map(c => c.total),
-            backgroundColor: '#667eea',
-            borderRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' }
+    
+    window.contratosChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Quantidade de Contratos',
+                data: valores,
+                backgroundColor: '#3498db',
+                borderColor: '#2980b9',
+                borderWidth: 2,
+                borderRadius: 5,
+                barPercentage: 0.7,
+                categoryPercentage: 0.8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Contratos: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Quantidade de Contratos',
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: '#e0e0e0'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Mês/Ano',
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        rotation: 45,
+                        autoSkip: true,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 10,
+                    bottom: 10
+                }
+            }
         }
-    }
+    });
+    {% endif %}
 });
 </script>
 
 <style>
-.bg-gradient-company {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    color: white;
-}
+    #graficoContratos {
+        max-height: 280px;
+        width: 100% !important;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .alert-info {
+        background-color: #e3f2fd;
+        border-color: #90caf9;
+        color: #1565c0;
+    }
 </style>
 {% endblock %}

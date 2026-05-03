@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Preferências - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-bell me-2"></i> Preferências
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="card-branco">
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Notificações</h6>
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: #f8f9fa;">
+                        <div>
+                            <i class="fas fa-volume-up me-2" style="color: #6B46C1;"></i>
+                            <strong>Som de notificação</strong>
+                            <p class="text-muted small mb-0">Tocar um som quando chegar uma nova notificação</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="som_ativado" 
+                                   id="somSwitch" {% if som_ativado %}checked{% endif %}
+                                   style="width: 50px; height: 25px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: #f8f9fa;">
+                        <div>
+                            <i class="fas fa-envelope me-2" style="color: #10b981;"></i>
+                            <strong>Notificações por e-mail</strong>
+                            <p class="text-muted small mb-0">Receber alertas importantes por e-mail</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="email_notif" 
+                                   id="emailSwitch" {% if email_notif %}checked{% endif %}
+                                   style="width: 50px; height: 25px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn-roxo">
+                        <i class="fas fa-save me-2"></i> Salvar Preferências
+                    </button>
+                    <a href="{{ url_for('configuracoes.index') }}" class="btn-outline-roxo ms-2">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .form-check-input:checked {
+        background-color: #6B46C1;
+        border-color: #6B46C1;
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 26px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Contrato - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-file-contract me-2"></i> Detalhes do Contrato
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    <!-- Header com Número do Contrato -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-branco">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div>
+                        <h4 class="mb-1 fw-bold">{{ contrato.numero_contrato }}</h4>
+                        <p class="text-muted mb-0 small">ID: #{{ contrato.id }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('admin_empresa.listar_contratos') }}" class="btn-outline-roxo me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Voltar
+                        </a>
+                        <a href="{{ url_for('admin_empresa.editar_contrato', id=contrato.id) }}" class="btn-roxo">
+                            <i class="fas fa-edit me-1"></i> Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Status Card -->
+        <div class="col-md-4">
+            <div class="card-branco h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-info-circle me-2"></i> Status
+                    </h6>
+                    <div class="text-center py-3">
+                        {% if contrato.status == 'ativo' %}
+                            <span class="badge-ativo" style="font-size: 1rem; padding: 8px 24px;">
+                                <i class="fas fa-check-circle me-2"></i> Ativo
+                            </span>
+                        {% elif contrato.status == 'em_analise' %}
+                            <span class="badge-analise" style="font-size: 1rem; padding: 8px 24px;">
+                                <i class="fas fa-clock me-2"></i> Em Análise
+                            </span>
+                        {% elif contrato.status == 'aguardando_aprovacao' %}
+                            <span class="badge-warning-custom" style="font-size: 1rem; padding: 8px 24px;">
+                                <i class="fas fa-hourglass-half me-2"></i> Aguardando Aprovação
+                            </span>
+                        {% elif contrato.status == 'rascunho' %}
+                            <span class="badge-rascunho" style="font-size: 1rem; padding: 8px 24px;">
+                                <i class="fas fa-pencil-alt me-2"></i> Rascunho
+                            </span>
+                        {% elif contrato.status == 'encerrado' %}
+                            <span class="badge-encerrado" style="font-size: 1rem; padding: 8px 24px;">
+                                <i class="fas fa-flag-checkered me-2"></i> Encerrado
+                            </span>
+                        {% elif contrato.status == 'cancelado' %}
+                            <span class="badge-cancelado" style="font-size: 1rem; padding: 8px 24px;">
+                                <i class="fas fa-ban me-2"></i> Cancelado
+                            </span>
+                        {% else %}
+                            <span class="badge-pendente" style="font-size: 1rem; padding: 8px 24px;">
+                                {{ contrato.status }}
+                            </span>
+                        {% endif %}
+                        <p class="text-muted mt-3 mb-0 small">
+                            <i class="fas fa-clock me-1"></i> Atualizado em: {{ contrato.data_atualizacao.strftime('%d/%m/%Y %H:%M') if contrato.data_atualizacao else '-' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Valores Card -->
+        <div class="col-md-4">
+            <div class="card-preto h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3 opacity-75">
+                        <i class="fas fa-dollar-sign me-2"></i> Valores
+                    </h6>
+                    <div class="text-center py-3">
+                        <h2 class="display-5 fw-bold">R$ {{ "%.2f"|format(contrato.valor or 0) }}</h2>
+                        <p class="mt-2 mb-0 opacity-75">
+                            <i class="fas fa-calendar-alt me-1"></i> Prazo: {{ contrato.prazo_dias or 0 }} dias
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Datas Card -->
+        <div class="col-md-4">
+            <div class="card-branco h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-calendar me-2"></i> Datas
+                    </h6>
+                    <div class="py-2">
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted">Data Início:</span>
+                            <strong>{{ contrato.data_inicio.strftime('%d/%m/%Y') if contrato.data_inicio else '-' }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-top">
+                            <span class="text-muted">Data Fim:</span>
+                            <strong>{{ contrato.data_fim.strftime('%d/%m/%Y') if contrato.data_fim else '-' }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-top">
+                            <span class="text-muted">Criação:</span>
+                            <small>{{ contrato.data_criacao.strftime('%d/%m/%Y %H:%M') if contrato.data_criacao else '-' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informações de Auditoria (Quem criou e quem editou) -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-6">
+            <div class="card-branco">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-user-plus me-2"></i> Criado por
+                    </h6>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-3" style="background: #f3e8ff;">
+                            <i class="fas fa-user-circle fa-2x" style="color: #6B46C1;"></i>
+                        </div>
+                        <div>
+                            <strong class="d-block">{{ contrato.get_criador_nome() }}</strong>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i> 
+                                {{ contrato.data_criacao.strftime('%d/%m/%Y às %H:%M') if contrato.data_criacao else '-' }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card-branco">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-user-edit me-2"></i> Última edição por
+                    </h6>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-3" style="background: #fff3e0;">
+                            <i class="fas fa-user-edit fa-2x" style="color: #ed8936;"></i>
+                        </div>
+                        <div>
+                            <strong class="d-block">{{ contrato.get_atualizador_nome() or 'Não informado' }}</strong>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i> 
+                                {{ contrato.data_atualizacao.strftime('%d/%m/%Y às %H:%M') if contrato.data_atualizacao else '-' }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contratante e Contratada -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-6">
+            <div class="card-branco h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-user-tie me-2"></i> Contratante
+                    </h6>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-building mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Nome</small>
+                                    <strong>{{ contrato.contratante_nome or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-id-card mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">CNPJ</small>
+                                    <strong>{{ contrato.contratante_cnpj or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-envelope mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Email</small>
+                                    <strong>{{ contrato.contratante_email or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-phone mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Telefone</small>
+                                    <strong>{{ contrato.contratante_telefone or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card-branco h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-building me-2"></i> Contratada
+                    </h6>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-building mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Nome</small>
+                                    <strong>{{ contrato.contratada_nome or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-id-card mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">CNPJ</small>
+                                    <strong>{{ contrato.contratada_cnpj or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-envelope mt-1" style="color: #6B46C1; width: 24px;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Email</small>
+                                    <strong>{{ contrato.contratada_email or '-' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Descrição -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card-branco">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-align-left me-2"></i> Descrição do Serviço
+                    </h6>
+                    <div class="p-3" style="background: #f8f9fa; border-radius: 16px;">
+                        <p class="mb-0" style="white-space: pre-wrap; line-height: 1.6;">
+                            {{ contrato.descricao or 'Nenhuma descrição fornecida.' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: none;
+    }
+    .card-preto {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: none;
+        border-radius: 20px;
+        color: white;
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 8px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 6px 22px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .badge-ativo {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+    .badge-analise {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+    .badge-warning-custom {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+    .badge-rascunho {
+        background: linear-gradient(135deg, #868e96, #6c757d);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+    .badge-encerrado {
+        background: linear-gradient(135deg, #4a5568, #2d3748);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+    .badge-cancelado {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+    .badge-pendente {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border-radius: 40px;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+    }
+</style>
+{% endblock %}

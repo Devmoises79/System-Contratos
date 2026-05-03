@@ -11,10 +11,11 @@ from datetime import datetime
 import secrets
 from werkzeug.utils import secure_filename
 
-admin_sistema_bp = Blueprint('admin_sistema', __name__, url_prefix='/admin/sistema')
+# Criar o blueprint com nome correto (sem pontos)
+sistema_bp = Blueprint('admin_sistema', __name__, url_prefix='/admin/sistema')
 
 
-@admin_sistema_bp.route('/')
+@sistema_bp.route('/')
 @admin_sistema_required
 def dashboard():
     """Dashboard do admin do sistema"""
@@ -75,7 +76,7 @@ def dashboard():
                          feedbacks=feedbacks)
 
 
-@admin_sistema_bp.route('/ips')
+@sistema_bp.route('/ips')
 @admin_sistema_required
 def ips_bloqueados():
     """Lista IPs bloqueados"""
@@ -85,7 +86,7 @@ def ips_bloqueados():
     return render_template('admin/sistema/ips.html', ips=ips, ip_stats=ip_stats)
 
 
-@admin_sistema_bp.route('/ips/desbloquear', methods=['POST'])
+@sistema_bp.route('/ips/desbloquear', methods=['POST'])
 @admin_sistema_required
 def desbloquear_ip():
     """Desbloqueia um IP manualmente"""
@@ -96,7 +97,7 @@ def desbloquear_ip():
     return jsonify({'sucesso': False, 'mensagem': 'IP não informado'}), 400
 
 
-@admin_sistema_bp.route('/logs')
+@sistema_bp.route('/logs')
 @admin_sistema_required
 def logs():
     """Visualiza logs do sistema"""
@@ -172,7 +173,7 @@ def logs():
                          })
 
 
-@admin_sistema_bp.route('/empresas')
+@sistema_bp.route('/empresas')
 @admin_sistema_required
 def empresas():
     """Lista todas as empresas"""
@@ -187,7 +188,7 @@ def empresas():
     return render_template('admin/sistema/empresas.html', empresas=empresas)
 
 
-@admin_sistema_bp.route('/empresa/nova', methods=['POST'])
+@sistema_bp.route('/empresa/nova', methods=['POST'])
 @admin_sistema_required
 def nova_empresa():
     """Cria uma nova empresa"""
@@ -243,7 +244,7 @@ def nova_empresa():
     return redirect(url_for('admin_sistema.empresas'))
 
 
-@admin_sistema_bp.route('/empresa/<int:id>')
+@sistema_bp.route('/empresa/<int:id>')
 @admin_sistema_required
 def empresa_detalhe(id):
     """Detalhe de uma empresa"""
@@ -263,7 +264,7 @@ def empresa_detalhe(id):
                          stats=stats)
 
 
-@admin_sistema_bp.route('/feedbacks')
+@sistema_bp.route('/feedbacks')
 @admin_sistema_required
 def feedbacks():
     """Lista feedbacks dos usuários"""
@@ -307,11 +308,8 @@ def feedbacks():
         evolucao_labels.append(f"{meses[mes]}/{ano}")
         evolucao_dados.append(item['total'])
     
-    # Lista de empresas para filtro
-    empresas = db.fetch_all("SELECT id, nome FROM empresas ORDER BY nome")
-    
     # Feedbacks com joins
-    query = """
+    feedbacks = db.fetch_all("""
         SELECT f.*, 
                u.nome as usuario_nome, 
                u.email as usuario_email,
@@ -321,19 +319,17 @@ def feedbacks():
         JOIN empresas e ON f.empresa_id = e.id
         ORDER BY f.data_criacao DESC
         LIMIT 500
-    """
-    feedbacks = db.fetch_all(query)
+    """)
     
     return render_template('admin/sistema/feedbacks.html',
                          stats=stats,
                          feedbacks=feedbacks,
-                         empresas=empresas,
                          distribuicao_notas=distribuicao,
                          evolucao_labels=evolucao_labels,
                          evolucao_dados=evolucao_dados)
 
 
-@admin_sistema_bp.route('/estatisticas')
+@sistema_bp.route('/estatisticas')
 @admin_sistema_required
 def estatisticas_api():
     """API de estatísticas para gráficos"""

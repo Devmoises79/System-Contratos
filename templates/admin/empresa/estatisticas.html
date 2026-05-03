@@ -1,229 +1,363 @@
-<!-- templates/admin/empresa/estatisticas.html -->
 {% extends "base.html" %}
 
-{% block title %}Estatísticas - ValidaPy{% endblock %}
-
 {% block content %}
-<div class="fade-in">
-    <!-- Cabeçalho -->
-    <div class="d-flex align-items-center mb-4">
-        <a href="{{ url_for('admin_empresa.dashboard') }}" style="color: var(--cinza-texto); text-decoration: none; margin-right: 1rem;">
-            <i class="bi bi-arrow-left fs-4"></i>
-        </a>
-        <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Estatísticas Detalhadas</h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Análise completa dos contratos da empresa</p>
-        </div>
-    </div>
-
-    <!-- Cards Principais -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-file-text" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">TOTAL</span>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📈 Estatísticas da Empresa</h3>
                 </div>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ stats.total }}</div>
-                <small style="color: var(--cinza-texto); opacity: 0.6;">contratos registrados</small>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--amarelo-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-coin" style="font-size: 1.5rem; color: var(--amarelo-escuro);"></i>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">VALOR TOTAL</span>
-                </div>
-                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.total_valor) }}</div>
-                <small style="color: var(--cinza-texto); opacity: 0.6;">soma de todos os contratos</small>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-bar-chart" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">VALOR MÉDIO</span>
-                </div>
-                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.media) }}</div>
-                <small style="color: var(--cinza-texto); opacity: 0.6;">por contrato</small>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--vermelho-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-check-circle" style="font-size: 1.5rem; color: var(--vermelho-principal);"></i>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">ATIVOS</span>
-                </div>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ por_status|selectattr('status', 'equalto', 'ativo')|map(attribute='quantidade')|first|default(0) }}</div>
-                <small style="color: var(--cinza-texto); opacity: 0.6;">contratos em andamento</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráficos -->
-    <div class="row g-4 mb-4">
-        <!-- Contratos por Status -->
-        <div class="col-md-6">
-            <div class="card-custom p-4">
-                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Contratos por Status</h5>
-                
-                {% for item in por_status %}
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span style="font-weight: 500;">{{ item.status|capitalize }}</span>
-                        <span style="color: var(--cinza-texto); opacity: 0.7;">{{ item.quantidade }} contratos</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div style="flex: 1; background: var(--cinza-claro); height: 8px; border-radius: 4px;">
-                            <div style="width: {{ (item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%; height: 8px; 
-                                      background: {% if item.status == 'ativo' %}var(--azul-principal){% elif item.status == 'rascunho' %}var(--amarelo-escuro){% elif item.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
-                                      border-radius: 4px;"></div>
-                        </div>
-                        <span style="font-weight: 600;">R$ {{ "%.2f"|format(item.valor_total) }}</span>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Evolução Mensal -->
-        <div class="col-md-6">
-            <div class="card-custom p-4">
-                <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Evolução Mensal</h5>
-                
-                {% set max_valor = stats.por_mes|map(attribute='valor_total')|max|default(10000) %}
-                
-                <div class="position-relative" style="height: 250px;">
-                    <div class="d-flex justify-content-around align-items-end h-100">
-                        {% for mes in stats.por_mes[:6] %}
-                        <div class="d-flex flex-column align-items-center" style="width: 60px;">
-                            <div style="height: {{ (mes.valor_total / max_valor * 180) if max_valor > 0 else 0 }}px; width: 40px; 
-                                      background: linear-gradient(180deg, var(--azul-principal), var(--azul-escuro)); 
-                                      border-radius: 8px 8px 0 0;"></div>
-                            <span style="margin-top: 8px; font-weight: 600;">{{ mes.mes }}</span>
-                            <small style="color: var(--cinza-texto); opacity: 0.6;">{{ mes.quantidade }}</small>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabela Detalhada por Status -->
-    <div class="card-custom p-4">
-        <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Detalhamento por Status</h5>
-        
-        <div class="table-responsive">
-            <table class="table" style="border-collapse: separate; border-spacing: 0 8px;">
-                <thead>
-                    <tr>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Quantidade</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor Total</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Percentual</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor Médio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in por_status %}
-                    <tr style="background: var(--branco-fundo); border-radius: 12px;">
-                        <td style="padding: 1rem 0.5rem;">
-                            <span style="background: {% if item.status == 'ativo' %}var(--azul-claro){% elif item.status == 'rascunho' %}var(--amarelo-claro){% elif item.status == 'encerrado' %}var(--cinza-claro){% else %}var(--vermelho-claro){% endif %}; 
-                                         color: {% if item.status == 'ativo' %}var(--azul-principal){% elif item.status == 'rascunho' %}var(--amarelo-escuro){% elif item.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
-                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                {{ item.status|capitalize }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 600;">{{ item.quantidade }}</td>
-                        <td style="padding: 1rem 0.5rem;">R$ {{ "%.2f"|format(item.valor_total) }}</td>
-                        <td style="padding: 1rem 0.5rem;">
-                            <div class="d-flex align-items-center gap-2">
-                                <div style="width: 80px; background: var(--cinza-claro); height: 6px; border-radius: 3px;">
-                                    <div style="width: {{ (item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%; height: 6px; 
-                                              background: {% if item.status == 'ativo' %}var(--azul-principal){% elif item.status == 'rascunho' %}var(--amarelo-escuro){% elif item.status == 'encerrado' %}var(--cinza-texto){% else %}var(--vermelho-principal){% endif %}; 
-                                              border-radius: 3px;"></div>
+                <div class="card-body">
+                    <!-- Cards de estatísticas -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total de Contratos</h5>
+                                    <h2 class="card-text">{{ stats.total_contratos }}</h2>
                                 </div>
-                                <span>{{ "%.1f"|format(item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%</span>
                             </div>
-                        </td>
-                        <td style="padding: 1rem 0.5rem;">R$ {{ "%.2f"|format(item.valor_total / item.quantidade) if item.quantidade > 0 else 0 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot style="border-top: 2px solid var(--cinza-claro);">
-                    <tr>
-                        <td style="padding: 1rem 0.5rem; font-weight: 700;">Total</td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 700;">{{ stats.total }}</td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 700;">R$ {{ "%.2f"|format(stats.total_valor) }}</td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 700;">100%</td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 700;">R$ {{ "%.2f"|format(stats.media) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Valor Total</h5>
+                                    <h2 class="card-text">R$ {{ "%.2f"|format(stats.valor_total) }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total de Usuários</h5>
+                                    <h2 class="card-text">{{ stats.total_usuarios }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- Cards de Resumo -->
-    <div class="row g-4 mt-2">
-        <div class="col-md-4">
-            <div class="card-custom p-4" style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); color: white;">
-                <i class="bi bi-pie-chart" style="font-size: 2rem; opacity: 0.8; margin-bottom: 1rem;"></i>
-                <h6 style="color: white; opacity: 0.9; margin-bottom: 0.5rem;">Distribuição</h6>
-                <p style="opacity: 0.8; margin-bottom: 1rem;">Como seus contratos estão distribuídos</p>
-                {% for item in por_status %}
-                <div class="d-flex justify-content-between mb-1">
-                    <span style="opacity: 0.9;">{{ item.status|capitalize }}</span>
-                    <span style="font-weight: 600;">{{ "%.1f"|format(item.quantidade / stats.total * 100) if stats.total > 0 else 0 }}%</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+                    <!-- Gráfico de Contratos por Mês -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>📊 Contratos por Mês</h4>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoContratos" style="width: 100%; max-height: 280px; min-height: 200px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="col-md-4">
-            <div class="card-custom p-4" style="background: linear-gradient(135deg, var(--amarelo-principal), var(--amarelo-escuro)); color: white;">
-                <i class="bi bi-coin" style="font-size: 2rem; opacity: 0.8; margin-bottom: 1rem;"></i>
-                <h6 style="color: white; opacity: 0.9; margin-bottom: 0.5rem;">Financeiro</h6>
-                <p style="opacity: 0.8; margin-bottom: 1rem;">Resumo financeiro dos contratos</p>
-                <div class="d-flex justify-content-between mb-1">
-                    <span style="opacity: 0.9;">Maior contrato</span>
-                    <span style="font-weight: 600;">R$ {{ "%.2f"|format(por_status|map(attribute='valor_total')|max) }}</span>
+                    <!-- Gráfico de Contratos por Status -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>📊 Contratos por Status</h4>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoStatus" style="width: 100%; max-height: 280px; min-height: 200px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-between">
-                    <span style="opacity: 0.9;">Menor contrato</span>
-                    <span style="font-weight: 600;">R$ {{ "%.2f"|format(por_status|map(attribute='valor_total')|min) }}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card-custom p-4" style="background: linear-gradient(135deg, var(--vermelho-principal), var(--vermelho-escuro)); color: white;">
-                <i class="bi bi-calendar" style="font-size: 2rem; opacity: 0.8; margin-bottom: 1rem;"></i>
-                <h6 style="color: white; opacity: 0.9; margin-bottom: 0.5rem;">Período</h6>
-                <p style="opacity: 0.8; margin-bottom: 1rem;">Contratos no último mês</p>
-                {% if stats.por_mes %}
-                <div class="d-flex justify-content-between mb-1">
-                    <span style="opacity: 0.9;">{{ stats.por_mes[0].mes }}</span>
-                    <span style="font-weight: 600;">{{ stats.por_mes[0].quantidade }} contratos</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <span style="opacity: 0.9;">Valor</span>
-                    <span style="font-weight: 600;">R$ {{ "%.2f"|format(stats.por_mes[0].valor_total) }}</span>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Função principal para inicializar todos os gráficos
+function inicializarGraficos() {
+    console.log('🚀 Inicializando gráficos...');
+    
+    // ==================== GRÁFICO 1: Contratos por Mês ====================
+    const canvasMes = document.getElementById('graficoContratos');
+    if (canvasMes) {
+        try {
+            // Receber dados do backend
+            const dadosMes = {{ contratos_por_mes | tojson | safe }};
+            console.log('📊 Dados recebidos (por mês):', dadosMes);
+            
+            // Filtrar apenas meses com contratos (total > 0)
+            let dadosFiltrados = [];
+            if (dadosMes && dadosMes.length > 0) {
+                dadosFiltrados = dadosMes.filter(item => item.total > 0);
+            }
+            
+            // Se não houver dados reais, usar dados mockados para teste
+            if (dadosFiltrados.length === 0) {
+                console.warn('⚠️ Nenhum dado real encontrado, usando dados de exemplo');
+                dadosFiltrados = [
+                    { mes: 'Mai/2025', total: 1 },
+                    { mes: 'Jun/2025', total: 1 }
+                ];
+            }
+            
+            // Extrair labels e valores
+            const labels = dadosFiltrados.map(item => item.mes);
+            const valores = dadosFiltrados.map(item => item.total);
+            
+            console.log('📊 Labels:', labels);
+            console.log('📊 Valores:', valores);
+            
+            // Destruir gráfico existente se houver
+            if (window.graficoMes) {
+                window.graficoMes.destroy();
+            }
+            
+            // Criar novo gráfico
+            const ctx = canvasMes.getContext('2d');
+            window.graficoMes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade de Contratos',
+                        data: valores,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 12, weight: 'bold' },
+                                usePointStyle: true,
+                                boxWidth: 10
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 11 },
+                            callbacks: {
+                                label: function(context) {
+                                    return `📄 Contratos: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0,
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return value + ' contrato(s)';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Quantidade de Contratos',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            grid: {
+                                color: '#e0e0e0',
+                                drawBorder: true
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Mês/Ano',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            ticks: {
+                                font: { size: 11, weight: 'bold' },
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 10,
+                            top: 10,
+                            bottom: 20
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Gráfico de contratos por mês criado com sucesso!');
+            
+        } catch (error) {
+            console.error('❌ Erro ao criar gráfico de meses:', error);
+            canvasMes.parentElement.innerHTML += '<div class="alert alert-danger mt-2">Erro ao carregar gráfico de contratos por mês</div>';
+        }
+    } else {
+        console.error('❌ Canvas graficoContratos não encontrado!');
+    }
+    
+    // ==================== GRÁFICO 2: Contratos por Status ====================
+    const canvasStatus = document.getElementById('graficoStatus');
+    if (canvasStatus) {
+        try {
+            // Receber dados do backend
+            const dadosStatus = {{ contratos_por_status | tojson | safe }};
+            console.log('📊 Dados recebidos (por status):', dadosStatus);
+            
+            // Filtrar apenas status com contratos (total > 0)
+            let dadosStatusFiltrados = [];
+            if (dadosStatus && dadosStatus.length > 0) {
+                dadosStatusFiltrados = dadosStatus.filter(item => item.total > 0);
+            }
+            
+            // Mapeamento de status para nomes amigáveis
+            const statusMap = {
+                'rascunho': '📝 Rascunho',
+                'em_analise': '🔍 Em Análise',
+                'aguardando_aprovacao': '⏳ Aguardando Aprovação',
+                'ativo': '✅ Ativo',
+                'encerrado': '🔒 Encerrado',
+                'cancelado': '❌ Cancelado'
+            };
+            
+            // Cores para cada status
+            const coresStatus = {
+                'rascunho': '#95a5a6',
+                'em_analise': '#3498db',
+                'aguardando_aprovacao': '#f39c12',
+                'ativo': '#2ecc71',
+                'encerrado': '#e74c3c',
+                'cancelado': '#e84393'
+            };
+            
+            let labelsStatus = [];
+            let valoresStatus = [];
+            let cores = [];
+            
+            if (dadosStatusFiltrados.length > 0) {
+                labelsStatus = dadosStatusFiltrados.map(item => statusMap[item.status] || item.status);
+                valoresStatus = dadosStatusFiltrados.map(item => item.total);
+                cores = dadosStatusFiltrados.map(item => coresStatus[item.status] || '#3498db');
+            } else {
+                // Dados mockados para teste
+                console.warn('⚠️ Nenhum dado real de status encontrado, usando dados de exemplo');
+                labelsStatus = ['📝 Rascunho', '🔍 Em Análise'];
+                valoresStatus = [1, 1];
+                cores = ['#95a5a6', '#3498db'];
+            }
+            
+            console.log('📊 Labels Status:', labelsStatus);
+            console.log('📊 Valores Status:', valoresStatus);
+            
+            // Destruir gráfico existente se houver
+            if (window.graficoStatus) {
+                window.graficoStatus.destroy();
+            }
+            
+            // Criar novo gráfico de pizza
+            const ctx = canvasStatus.getContext('2d');
+            window.graficoStatus = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labelsStatus,
+                    datasets: [{
+                        data: valoresStatus,
+                        backgroundColor: cores,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11 },
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = valoresStatus.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.raw} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Gráfico de status criado com sucesso!');
+            
+        } catch (error) {
+            console.error('❌ Erro ao criar gráfico de status:', error);
+            canvasStatus.parentElement.innerHTML += '<div class="alert alert-danger mt-2">Erro ao carregar gráfico de status</div>';
+        }
+    } else {
+        console.error('❌ Canvas graficoStatus não encontrado!');
+    }
+}
+
+// Aguardar o DOM carregar completamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Pequeno delay para garantir que tudo esteja carregado
+    setTimeout(inicializarGraficos, 100);
+});
+
+// Recarregar gráficos quando a janela for redimensionada
+window.addEventListener('resize', function() {
+    if (window.graficoMes) {
+        window.graficoMes.resize();
+    }
+    if (window.graficoStatus) {
+        window.graficoStatus.resize();
+    }
+});
+</script>
+
+<style>
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .card-header h3, .card-header h4 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+    .bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .bg-success {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #333 !important;
+    }
+    .bg-info {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #333 !important;
+    }
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+</style>
 {% endblock %}

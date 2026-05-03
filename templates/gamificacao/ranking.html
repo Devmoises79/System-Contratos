@@ -2,144 +2,49 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Header -->
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
-            <div class="card border-0 shadow-sm bg-gradient-primary text-white">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h3 class="mb-0"><i class="bi bi-trophy-fill"></i> Ranking da Empresa</h3>
-                            <p class="mb-0 opacity-75">Reconhecendo quem mais contribuiu positivamente</p>
-                        </div>
-                        <div class="col-auto text-center">
-                            <div class="bg-white rounded-circle p-3 d-inline-block">
-                                <span class="text-primary fs-4 fw-bold">{{ posicao_usuario }}ª</span>
-                            </div>
-                            <small class="d-block mt-1">Sua posição</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mensagem de incentivo -->
-    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        <strong>Sobre o ranking:</strong> Este é um espaço de celebração, não de pressão. 
-        Cada pessoa tem seu ritmo e suas conquistas são únicas. O importante é sua evolução pessoal!
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <!-- Tabela de Ranking -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white">
-            <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Top Colaboradores</h5>
-            <small>Colaboradores que mais se destacaram</small>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 80px">#</th>
-                            <th>Colaborador</th>
-                            <th>Perfil</th>
-                            <th class="text-center">Conquistas</th>
-                            <th class="text-end">Pontos</th>
-                            <th>Nível</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pessoa in ranking %}
-                        <tr class="{% if pessoa.id == session.usuario.id %}table-primary{% endif %}">
-                            <td>
-                                {% if loop.index == 1 %}🥇
-                                {% elif loop.index == 2 %}🥈
-                                {% elif loop.index == 3 %}🥉
-                                {% else %}{{ loop.index }}ª{% endif %}
-                            </td>
-                            <td>
-                                <strong>{{ pessoa.nome }}</strong>
-                                {% if pessoa.id == session.usuario.id %}
-                                    <span class="badge bg-primary ms-2">Você</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if pessoa.perfil == 'analista' %}
-                                    <span class="badge bg-info">Analista</span>
-                                {% elif pessoa.perfil == 'assistente' %}
-                                    <span class="badge bg-primary">Assistente</span>
-                                {% elif pessoa.perfil == 'gestor' %}
-                                    <span class="badge bg-warning">Gestor</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ pessoa.perfil }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <i class="bi bi-award-fill text-warning"></i> {{ pessoa.total_conquistas }}
-                            </td>
-                            <td class="text-end fw-bold">{{ pessoa.pontos_totais }}</td>
-                            <td>
-                                <span class="badge" style="background-color: {{ pessoa.cor_nivel or '#6c757d' }}20; color: {{ pessoa.cor_nivel or '#6c757d' }};">
-                                    {{ pessoa.icone_nivel or '🌱' }} {{ pessoa.titulo_nivel or 'Aprendiz' }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-4">
-                                <i class="bi bi-emoji-smile fs-1 text-muted"></i>
-                                <p class="mt-2">Ninguém ainda possui conquistas. Seja o primeiro! 🚀</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dicas para ganhar pontos -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Como ganhar pontos?</h5>
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-bar-chart-steps me-2"></i> Ranking da Empresa</h4>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="display-6">🎯</div>
-                            <strong>Qualidade</strong>
-                            <small class="d-block text-muted">Contratos aprovados sem correção</small>
-                        </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="display-6">⚡</div>
-                            <strong>Agilidade</strong>
-                            <small class="d-block text-muted">Entregas rápidas e consistentes</small>
-                        </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="display-6">🤝</div>
-                            <strong>Colaboração</strong>
-                            <small class="d-block text-muted">Ajudar colegas e compartilhar conhecimento</small>
-                        </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="display-6">📅</div>
-                            <strong>Consistência</strong>
-                            <small class="d-block text-muted">Trabalhar regularmente no sistema</small>
-                        </div>
+                    {% if ranking and ranking|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Usuário</th>
+                                    <th>Perfil</th>
+                                    <th>Pontos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in ranking %}
+                                <tr>
+                                    <td>
+                                        {% if usuario.posicao == 1 %}🥇
+                                        {% elif usuario.posicao == 2 %}🥈
+                                        {% elif usuario.posicao == 3 %}🥉
+                                        {% else %}{{ usuario.posicao }}º{% endif %}
+                                    </td>
+                                    <td>{{ usuario.nome }}</td>
+                                    <td><span class="badge bg-info">{{ usuario.perfil|title }}</span></td>
+                                    <td><strong>{{ usuario.pontos }}</strong> pts</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        Nenhum ponto registrado ainda.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-</style>
 {% endblock %}

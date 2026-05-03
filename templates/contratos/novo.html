@@ -1,98 +1,211 @@
 {% extends "base.html" %}
 
-{% block title %}Novo Contrato - ValidaPy{% endblock %}
+{% block title %}Novo Contrato - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-file-contract me-2"></i> Novo Contrato
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2">Novo Contrato</h1>
-        <a href="{{ url_for('listar_contratos') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
-        </a>
+<div class="container-fluid px-0">
+    
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h4 class="mb-0" style="color: var(--preto);">
+                        <i class="fas fa-file-signature me-2" style="color: var(--roxo-primary);"></i>
+                        Criar Novo Contrato
+                    </h4>
+                    <small class="text-muted">Preencha os dados abaixo para cadastrar um novo contrato</small>
+                </div>
+                <a href="{{ url_for('listar_contratos') }}" class="btn btn-outline-secondary" style="border-radius: 40px;">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar
+                </a>
+            </div>
+        </div>
     </div>
-
-    <div class="card">
-        <div class="card-body">
-            <form method="POST" id="formContrato">
-                <!-- Dados do Contratante -->
-                <h5 class="mb-3">Dados do Contratante</h5>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="contratante_nome" class="form-label">Nome *</label>
-                        <input type="text" class="form-control" id="contratante_nome" name="contratante_nome" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="contratante_cnpj" class="form-label">CNPJ</label>
-                        <input type="text" class="form-control" id="contratante_cnpj" name="contratante_cnpj" placeholder="00.000.000/0000-00">
-                    </div>
+    
+    <!-- Formulário -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-body p-4" style="background: var(--branco);">
+                    <form method="POST" id="formContrato">
+                        
+                        <!-- Seção: Dados do Contratante -->
+                        <div class="mb-3">
+                            <i class="fas fa-user-tie me-2" style="color: var(--roxo-primary);"></i>
+                            <span class="fw-bold" style="color: var(--preto);">Dados do Contratante</span>
+                            <hr class="mt-2 mb-0" style="border-color: var(--cinza-borda);">
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="contratante_nome" class="form-label fw-semibold" style="color: var(--preto-claro);">
+                                    Nome <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="contratante_nome" 
+                                       name="contratante_nome" 
+                                       placeholder="Nome da empresa ou pessoa"
+                                       required
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contratante_cnpj" class="form-label fw-semibold" style="color: var(--preto-claro);">CNPJ</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="contratante_cnpj" 
+                                       name="contratante_cnpj" 
+                                       placeholder="00.000.000/0000-00"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contratante_email" class="form-label fw-semibold" style="color: var(--preto-claro);">E-mail</label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="contratante_email" 
+                                       name="contratante_email" 
+                                       placeholder="contato@empresa.com"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contratante_telefone" class="form-label fw-semibold" style="color: var(--preto-claro);">Telefone</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="contratante_telefone" 
+                                       name="contratante_telefone" 
+                                       placeholder="(00) 00000-0000"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                        </div>
+                        
+                        <!-- Seção: Dados da Contratada -->
+                        <div class="mb-3 mt-4">
+                            <i class="fas fa-building me-2" style="color: var(--roxo-primary);"></i>
+                            <span class="fw-bold" style="color: var(--preto);">Dados da Contratada</span>
+                            <hr class="mt-2 mb-0" style="border-color: var(--cinza-borda);">
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="contratada_nome" class="form-label fw-semibold" style="color: var(--preto-claro);">
+                                    Nome <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="contratada_nome" 
+                                       name="contratada_nome" 
+                                       placeholder="Nome da empresa contratada"
+                                       required
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contratada_cnpj" class="form-label fw-semibold" style="color: var(--preto-claro);">CNPJ</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="contratada_cnpj" 
+                                       name="contratada_cnpj" 
+                                       placeholder="00.000.000/0000-00"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contratada_email" class="form-label fw-semibold" style="color: var(--preto-claro);">E-mail</label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="contratada_email" 
+                                       name="contratada_email" 
+                                       placeholder="contato@empresa.com"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                        </div>
+                        
+                        <!-- Seção: Valores e Prazos -->
+                        <div class="mb-3 mt-4">
+                            <i class="fas fa-chart-line me-2" style="color: var(--roxo-primary);"></i>
+                            <span class="fw-bold" style="color: var(--preto);">Valores e Prazos</span>
+                            <hr class="mt-2 mb-0" style="border-color: var(--cinza-borda);">
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="valor" class="form-label fw-semibold" style="color: var(--preto-claro);">
+                                    Valor <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: white; border: 1px solid var(--cinza-borda); border-right: none; border-radius: 10px 0 0 10px;">R$</span>
+                                    <input type="number" 
+                                           step="0.01" 
+                                           class="form-control" 
+                                           id="valor" 
+                                           name="valor" 
+                                           placeholder="0,00"
+                                           required
+                                           style="border-radius: 0 10px 10px 0; border: 1px solid var(--cinza-borda);">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="data_inicio" class="form-label fw-semibold" style="color: var(--preto-claro);">Data de Início</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="data_inicio" 
+                                       name="data_inicio"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="data_fim" class="form-label fw-semibold" style="color: var(--preto-claro);">Data de Término</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="data_fim" 
+                                       name="data_fim"
+                                       style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px;">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="prazo_dias" class="form-label fw-semibold" style="color: var(--preto-claro);">Prazo (dias)</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="prazo_dias" 
+                                       name="prazo_dias" 
+                                       readonly 
+                                       style="background: var(--cinza); border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px; color: var(--roxo-primary); font-weight: 600;">
+                                <small class="text-muted">Calculado automaticamente</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Seção: Descrição -->
+                        <div class="mb-3 mt-4">
+                            <i class="fas fa-file-alt me-2" style="color: var(--roxo-primary);"></i>
+                            <span class="fw-bold" style="color: var(--preto);">Descrição do Serviço</span>
+                            <hr class="mt-2 mb-0" style="border-color: var(--cinza-borda);">
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <textarea class="form-control" 
+                                          id="descricao" 
+                                          name="descricao" 
+                                          rows="5" 
+                                          placeholder="Descreva os serviços, produtos ou escopo do contrato..."
+                                          style="border-radius: 10px; border: 1px solid var(--cinza-borda); padding: 10px 15px; resize: vertical;"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Botões -->
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: 1px solid var(--cinza-borda);">
+                            <a href="{{ url_for('listar_contratos') }}" class="btn px-4" style="border: 1px solid var(--cinza-borda); border-radius: 40px; color: var(--preto-claro); background: white; transition: all 0.3s ease;">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn px-4" style="background: linear-gradient(135deg, var(--roxo-primary), var(--roxo-dark)); border: none; border-radius: 40px; color: white; transition: all 0.3s ease;">
+                                <i class="fas fa-save me-1"></i> Criar Contrato
+                            </button>
+                        </div>
+                        
+                    </form>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="contratante_email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="contratante_email" name="contratante_email">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="contratante_telefone" class="form-label">Telefone</label>
-                        <input type="text" class="form-control" id="contratante_telefone" name="contratante_telefone" placeholder="(00) 00000-0000">
-                    </div>
-                </div>
-
-                <!-- Dados da Contratada -->
-                <h5 class="mb-3 mt-4">Dados da Contratada</h5>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="contratada_nome" class="form-label">Nome *</label>
-                        <input type="text" class="form-control" id="contratada_nome" name="contratada_nome" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="contratada_cnpj" class="form-label">CNPJ</label>
-                        <input type="text" class="form-control" id="contratada_cnpj" name="contratada_cnpj" placeholder="00.000.000/0000-00">
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="contratada_email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="contratada_email" name="contratada_email">
-                    </div>
-                </div>
-
-                <!-- Valores e Prazos -->
-                <h5 class="mb-3 mt-4">Valores e Prazos</h5>
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="valor" class="form-label">Valor (R$) *</label>
-                        <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="prazo_dias" class="form-label">Prazo (dias) *</label>
-                        <input type="number" class="form-control" id="prazo_dias" name="prazo_dias" readonly style="background-color: #f8f9fa;">
-                        <small class="text-muted">Calculado automaticamente</small>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="data_inicio" class="form-label">Data de Início</label>
-                        <input type="date" class="form-control" id="data_inicio" name="data_inicio">
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="data_fim" class="form-label">Data de Término</label>
-                        <input type="date" class="form-control" id="data_fim" name="data_fim">
-                        <small class="text-muted">Os dias serão calculados automaticamente</small>
-                    </div>
-                </div>
-
-                <!-- Descrição -->
-                <h5 class="mb-3 mt-4">Descrição</h5>
-                <div class="mb-3">
-                    <label for="descricao" class="form-label">Descrição do Serviço</label>
-                    <textarea class="form-control" id="descricao" name="descricao" rows="5"></textarea>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{{ url_for('listar_contratos') }}" class="btn btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">Criar Contrato</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -124,51 +237,151 @@
             }
         } else {
             prazoDias.value = '';
-            prazoDias.style.backgroundColor = '#f8f9fa';
-            prazoDias.style.color = '#212529';
+            prazoDias.style.backgroundColor = 'var(--cinza)';
+            prazoDias.style.color = 'var(--roxo-primary)';
         }
     }
 
     // Calcular quando a data de início mudar
-    dataInicio.addEventListener('change', function() {
-        if (dataInicio.value && dataFim.value) {
-            calcularDias();
-        } else if (dataInicio.value && !dataFim.value) {
-            const inicio = new Date(dataInicio.value);
-            const sugestao = new Date(inicio);
-            sugestao.setDate(inicio.getDate() + 30);
-            dataFim.value = sugestao.toISOString().split('T')[0];
-            calcularDias();
-        }
-    });
+    if (dataInicio) {
+        dataInicio.addEventListener('change', function() {
+            if (dataInicio.value && dataFim.value) {
+                calcularDias();
+            } else if (dataInicio.value && !dataFim.value) {
+                const inicio = new Date(dataInicio.value);
+                const sugestao = new Date(inicio);
+                sugestao.setDate(inicio.getDate() + 30);
+                dataFim.value = sugestao.toISOString().split('T')[0];
+                calcularDias();
+            }
+        });
+    }
 
     // Calcular quando a data de término mudar
-    dataFim.addEventListener('change', function() {
-        if (dataInicio.value && dataFim.value) {
-            calcularDias();
-        }
-    });
+    if (dataFim) {
+        dataFim.addEventListener('change', function() {
+            if (dataInicio.value && dataFim.value) {
+                calcularDias();
+            }
+        });
+    }
 
     // Formatação automática de CNPJ
-    document.getElementById('contratante_cnpj')?.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length <= 14) {
-            value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-            value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-            value = value.replace(/(\d{4})(\d)/, '$1-$2');
-            e.target.value = value;
+    const cnpjInputs = ['contratante_cnpj', 'contratada_cnpj'];
+    cnpjInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 14) {
+                    if (value.length > 2) value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                    if (value.length > 5) value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                    if (value.length > 8) value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                    if (value.length > 12) value = value.replace(/(\d{4})(\d)/, '$1-$2');
+                    e.target.value = value;
+                }
+            });
         }
     });
 
     // Formatação automática de Telefone
-    document.getElementById('contratante_telefone')?.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length <= 11) {
-            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
-            value = value.replace(/(\d{5})(\d)/, '$1-$2');
-            e.target.value = value;
-        }
+    const telefoneInput = document.getElementById('contratante_telefone');
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                if (value.length > 2) value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+                if (value.length > 7) value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                e.target.value = value;
+            }
+        });
+    }
+    
+    // Validação de campos obrigatórios
+    const form = document.getElementById('formContrato');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const contratanteNome = document.getElementById('contratante_nome')?.value.trim();
+            const contratadaNome = document.getElementById('contratada_nome')?.value.trim();
+            const valor = document.getElementById('valor')?.value;
+            
+            if (!contratanteNome) {
+                e.preventDefault();
+                alert('Por favor, informe o nome do contratante.');
+                document.getElementById('contratante_nome')?.focus();
+                return false;
+            }
+            
+            if (!contratadaNome) {
+                e.preventDefault();
+                alert('Por favor, informe o nome da contratada.');
+                document.getElementById('contratada_nome')?.focus();
+                return false;
+            }
+            
+            if (!valor || parseFloat(valor) <= 0) {
+                e.preventDefault();
+                alert('Por favor, informe um valor válido maior que zero.');
+                document.getElementById('valor')?.focus();
+                return false;
+            }
+            
+            return true;
+        });
+    }
+    
+    // Efeito hover nos botões
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            if (this.style.background === 'linear-gradient(135deg, var(--roxo-primary), var(--roxo-dark))' || 
+                this.classList.contains('btn-primary') ||
+                this.innerText.includes('Criar')) {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 12px rgba(107, 70, 193, 0.3)';
+            }
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
     });
 </script>
+
+<style>
+    .form-control:focus {
+        border-color: var(--roxo-primary) !important;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1) !important;
+        outline: none;
+    }
+    
+    .input-group-text {
+        background: var(--branco);
+        border: 1px solid var(--cinza-borda);
+        border-right: none;
+        color: var(--preto-claro);
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background: var(--cinza);
+        border-color: var(--cinza-borda);
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+    }
+    
+    .text-danger {
+        color: #e53e3e !important;
+    }
+    
+    .text-muted {
+        color: #718096 !important;
+        font-size: 0.75rem;
+    }
+</style>
 {% endblock %}

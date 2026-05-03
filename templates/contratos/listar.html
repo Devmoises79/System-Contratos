@@ -1,228 +1,349 @@
 {% extends "base.html" %}
 
-{% block title %}Contratos - ValidaPy{% endblock %}
+{% block title %}Contratos - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-file-signature me-2"></i> Contratos
+{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Cabeçalho -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">
-                <i class="bi bi-file-text me-2" style="color: var(--azul-principal);"></i>
-                Contratos
-            </h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7;">Gerencie todos os contratos da empresa</p>
-        </div>
-        
-        {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa'] %}
-        <a href="{{ url_for('contrato_novo') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-2"></i>
-            Novo Contrato
-        </a>
-        {% endif %}
-    </div>
-
-    <!-- Filtros -->
-    <div class="card-custom p-4 mb-4">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
-                        <i class="bi bi-search" style="color: var(--azul-principal);"></i>
-                    </span>
-                    <input type="text" class="form-control border-start-0" id="searchInput" 
-                           style="border-color: var(--cinza-claro);"
-                           placeholder="Buscar por número, contratante ou contratada...">
+<div class="container-fluid px-0">
+    
+    <!-- Filtros - SEM BOTÃO, ATUALIZA AUTOMÁTICO -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label small text-muted mb-1">
+                                <i class="fas fa-search me-1"></i> Buscar
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="buscaInput"
+                                   placeholder="Número, contratante ou contratada..."
+                                   value="{{ request.args.get('busca', '') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted mb-1">
+                                <i class="fas fa-filter me-1"></i> Status
+                            </label>
+                            <select id="statusSelect" class="form-select">
+                                <option value="">Todos os status</option>
+                                <option value="rascunho">📝 Rascunho</option>
+                                <option value="em_analise">⏳ Em Análise</option>
+                                <option value="aguardando_aprovacao">⏰ Aguardando Aprovação</option>
+                                <option value="ativo">✅ Ativo</option>
+                                <option value="encerrado">🏁 Encerrado</option>
+                                <option value="cancelado">❌ Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button id="limparFiltros" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-eraser me-1"></i> Limpar
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-muted small text-end">
+                                <i class="fas fa-magic me-1"></i> Filtro instantâneo
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="col-md-3">
-                <select id="statusFilter" class="form-select" style="border-color: var(--cinza-claro);">
-                    <option value="">Todos os status</option>
-                    <option value="rascunho">Rascunho</option>
-                    <option value="em_analise">Em Análise</option>
-                    <option value="aguardando_aprovacao">Aguardando Aprovação</option>
-                    <option value="ativo">Ativo</option>
-                    <option value="encerrado">Encerrado</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <button class="btn w-100" style="background: var(--azul-claro); color: var(--azul-principal);" onclick="filterTable()">
-                    <i class="bi bi-funnel me-2"></i>Filtrar
-                </button>
-            </div>
-            
-            <div class="col-md-3">
-                <button class="btn w-100" style="background: var(--cinza-claro); color: var(--cinza-texto);" onclick="clearFilters()">
-                    <i class="bi bi-eraser me-2"></i>Limpar Filtros
-                </button>
+        </div>
+    </div>
+    
+    <!-- Cabeçalho da Lista -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2" style="color: #6B46C1;"></i> 
+                        Lista de Contratos
+                    </h5>
+                    <small class="text-muted" id="totalContratos">Carregando...</small>
+                </div>
+                <a href="{{ url_for('contrato_novo') }}" class="btn btn-outline-primary" style="border-radius: 40px;">
+                    <i class="fas fa-plus me-1"></i> Novo Contrato
+                </a>
             </div>
         </div>
     </div>
-
+    
     <!-- Tabela de Contratos -->
-    <div class="card-custom p-0 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table" style="border-collapse: separate; border-spacing: 0 8px; margin: 0;">
-                <thead style="background: var(--branco-fundo);">
-                    <tr>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Nº Contrato</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratante</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratada</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Data</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="contratosTable">
-                    {% for contrato in contratos %}
-                    <tr class="contrato-row" 
-                        data-numero="{{ contrato.numero_contrato|lower }}"
-                        data-contratante="{{ contrato.contratante_nome|lower }}"
-                        data-contratada="{{ contrato.contratada_nome|lower }}"
-                        data-status="{{ contrato.status }}"
-                        style="background: white; border-radius: 12px;">
-                        
-                        <td style="padding: 1rem;">
-                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
-                                {{ contrato.numero_contrato }}
-                            </a>
-                        </td>
-                        
-                        <td style="padding: 1rem;">{{ contrato.contratante_nome }}</td>
-                        <td style="padding: 1rem;">{{ contrato.contratada_nome }}</td>
-                        
-                        <td style="padding: 1rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
-                        
-                        <td style="padding: 1rem;">
-                            {% if contrato.status == 'ativo' %}
-                            <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                <i class="bi bi-check-circle me-1"></i>Ativo
-                            </span>
-                            {% elif contrato.status == 'rascunho' and contrato.solicitado_aprovacao %}
-                            <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                <i class="bi bi-hourglass-split me-1"></i>Aguardando
-                            </span>
-                            {% elif contrato.status == 'rascunho' %}
-                            <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                <i class="bi bi-pencil me-1"></i>Rascunho
-                            </span>
-                            {% elif contrato.status == 'em_analise' %}
-                            <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                <i class="bi bi-search me-1"></i>Em Análise
-                            </span>
-                            {% elif contrato.status == 'encerrado' %}
-                            <span style="background: var(--cinza-claro); color: var(--cinza-texto); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                <i class="bi bi-archive me-1"></i>Encerrado
-                            {% else %}
-                            <span style="background: var(--vermelho-claro); color: var(--vermelho-principal); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                {{ contrato.status|capitalize }}
-                            </span>
-                            {% endif %}
-                        </td>
-                        
-                        <td style="padding: 1rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
-                        
-                        <td style="padding: 1rem;">
-                            <div class="d-flex gap-2">
-                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="btn btn-sm btn-outline-primary" title="Visualizar">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                
-                                {% if contrato.status == 'rascunho' and not contrato.solicitado_aprovacao %}
-                                    {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa'] %}
-                                        {% if session.usuario.perfil != 'assistente' or contrato.criado_por == session.usuario.id %}
-                                        <a href="{{ url_for('editar_contrato', id=contrato.id) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        {% endif %}
-                                    {% endif %}
-                                {% endif %}
-                                
-                                <!-- Botão Enviar para Análise (Assistente) -->
-                                {% if session.usuario.perfil == 'assistente' and contrato.status == 'rascunho' and not contrato.solicitado_aprovacao and contrato.criado_por == session.usuario.id %}
-                                <form action="{{ url_for('enviar_para_analista', id=contrato.id) }}" method="POST" style="display: inline;">
-                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-sm btn-warning" title="Enviar para Análise">
-                                        <i class="bi bi-send-check"></i>
-                                    </button>
-                                </form>
-                                {% endif %}
-                                
-                                <!-- Botão Enviar para Gestor (Analista) -->
-                                {% if session.usuario.perfil == 'analista' and contrato.status == 'em_analise' %}
-                                <form action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" method="POST" style="display: inline;">
-                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Enviar para Gestor">
-                                        <i class="bi bi-check2-circle"></i>
-                                    </button>
-                                </form>
-                                {% endif %}
-                                
-                                <!-- Botão Aprovar (Gestor) -->
-                                {% if session.usuario.perfil in ['gestor', 'admin_empresa', 'admin_sistema'] and contrato.status == 'aguardando_aprovacao' %}
-                                <form action="{{ url_for('aprovar_contrato', id=contrato.id) }}" method="POST" style="display: inline;">
-                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Aprovar">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5" style="color: var(--cinza-texto); opacity: 0.7;">
-                            <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
-                            Nenhum contrato encontrado
-                            {% if session.usuario.perfil in ['assistente', 'analista', 'gestor', 'admin_empresa'] %}
-                            <br>
-                            <a href="{{ url_for('contrato_novo') }}" style="color: var(--azul-principal);">Criar primeiro contrato</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card" style="background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead style="background: linear-gradient(135deg, #6B46C1, #553C9A); color: white;">
+                                <tr>
+                                    <th style="padding: 14px 20px;">Nº Contrato</th>
+                                    <th style="padding: 14px 20px;">Contratante</th>
+                                    <th style="padding: 14px 20px;">Contratada</th>
+                                    <th style="padding: 14px 20px;">Valor</th>
+                                    <th style="padding: 14px 20px;">Status</th>
+                                    <th style="padding: 14px 20px;">Data</th>
+                                    <th style="padding: 14px 20px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaContratos">
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Carregando contratos...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function filterTable() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const statusValue = document.getElementById('statusFilter').value;
-    const rows = document.querySelectorAll('.contrato-row');
-
-    rows.forEach(row => {
-        const numero = row.dataset.numero;
-        const contratante = row.dataset.contratante;
-        const contratada = row.dataset.contratada;
-        const status = row.dataset.status;
-
-        const matchesSearch = numero.includes(searchTerm) || 
-                             contratante.includes(searchTerm) || 
-                             contratada.includes(searchTerm);
-        const matchesStatus = !statusValue || status === statusValue;
-
-        if (matchesSearch && matchesStatus) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+    // Filtro dinâmico - Atualiza a tabela via AJAX
+    (function() {
+        const buscaInput = document.getElementById('buscaInput');
+        const statusSelect = document.getElementById('statusSelect');
+        const limparBtn = document.getElementById('limparFiltros');
+        const tabelaBody = document.getElementById('tabelaContratos');
+        const totalSpan = document.getElementById('totalContratos');
+        
+        let timeoutId;
+        
+        // Função para carregar contratos via AJAX
+        function carregarContratos() {
+            const busca = buscaInput ? buscaInput.value : '';
+            const status = statusSelect ? statusSelect.value : '';
+            
+            // Mostrar loading
+            tabelaBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="text-muted mt-2">Carregando contratos...</p>
+                    </td>
+                </tr>
+            `;
+            
+            // Fazer requisição AJAX
+            fetch(`/contratos/filtrar?busca=${encodeURIComponent(busca)}&status=${encodeURIComponent(status)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    atualizarTabela(data.contratos);
+                    if (totalSpan) {
+                        totalSpan.textContent = `${data.total} contrato(s) encontrado(s)`;
+                    }
+                } else {
+                    mostrarErro(data.error || 'Erro ao carregar contratos');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                mostrarErro('Erro de conexão com o servidor');
+            });
         }
-    });
-}
-
-function clearFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('statusFilter').value = '';
-    filterTable();
-}
-
-document.getElementById('searchInput').addEventListener('keyup', filterTable);
-document.getElementById('statusFilter').addEventListener('change', filterTable);
+        
+        // Função para atualizar a tabela
+        function atualizarTabela(contratos) {
+            if (!contratos || contratos.length === 0) {
+                tabelaBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x mb-3" style="color: #CBD5E0;"></i>
+                            <p class="text-muted mb-3">Nenhum contrato encontrado</p>
+                            <a href="{{ url_for('contrato_novo') }}" class="btn btn-primary btn-sm" onclick="event.preventDefault(); window.location.href='{{ url_for('contrato_novo') }}'">
+                                <i class="fas fa-plus me-1"></i> Criar primeiro contrato
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            for (const contrato of contratos) {
+                // Badge de status
+                let statusBadge = '';
+                switch(contrato.status) {
+                    case 'ativo':
+                        statusBadge = '<span class="badge bg-success"> Ativo</span>';
+                        break;
+                    case 'em_analise':
+                        statusBadge = '<span class="badge bg-warning text-dark"> Em Análise</span>';
+                        break;
+                    case 'rascunho':
+                        statusBadge = '<span class="badge bg-secondary"> Rascunho</span>';
+                        break;
+                    case 'aguardando_aprovacao':
+                        statusBadge = '<span class="badge bg-info"> Aguardando</span>';
+                        break;
+                    case 'encerrado':
+                        statusBadge = '<span class="badge bg-secondary"> Encerrado</span>';
+                        break;
+                    case 'cancelado':
+                        statusBadge = '<span class="badge bg-danger"> Cancelado</span>';
+                        break;
+                    default:
+                        statusBadge = `<span class="badge bg-secondary">${escapeHtml(contrato.status)}</span>`;
+                }
+                
+                html += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 12px 20px;">
+                            <strong>${escapeHtml(contrato.numero_contrato)}</strong><br>
+                            <small class="text-muted">ID: ${contrato.id}</small>
+                        </td>
+                        <td style="padding: 12px 20px;">
+                            ${escapeHtml(contrato.contratante_nome?.substring(0, 30) || '-')}<br>
+                            <small class="text-muted">${escapeHtml(contrato.contratante_cnpj || '-')}</small>
+                        </td>
+                        <td style="padding: 12px 20px;">
+                            ${escapeHtml(contrato.contratada_nome?.substring(0, 30) || '-')}<br>
+                            <small class="text-muted">${escapeHtml(contrato.contratada_cnpj || '-')}</small>
+                        </td>
+                        <td style="padding: 12px 20px;">R$ ${parseFloat(contrato.valor).toFixed(2)}</td>
+                        <td style="padding: 12px 20px;">${statusBadge}</td>
+                        <td style="padding: 12px 20px;"><small>${contrato.data_criacao || '-'}</small></td>
+                        <td style="padding: 12px 20px;">
+                            <div class="d-flex gap-2">
+                                <a href="/contratos/${contrato.id}" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            tabelaBody.innerHTML = html;
+        }
+        
+        function mostrarErro(mensagem) {
+            tabelaBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                        <p class="text-muted">${escapeHtml(mensagem)}</p>
+                        <button onclick="carregarContratos()" class="btn btn-primary btn-sm">Tentar novamente</button>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Sincronizar selects com a URL atual
+        function sincronizarComURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const busca = urlParams.get('busca');
+            
+            if (status && statusSelect) {
+                statusSelect.value = status;
+            }
+            if (busca && buscaInput) {
+                buscaInput.value = busca;
+            }
+        }
+        
+        // Eventos - Filtro automático SEM RELOAD
+        if (buscaInput) {
+            buscaInput.addEventListener('input', function() {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(carregarContratos, 500);
+            });
+        }
+        
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                carregarContratos();
+            });
+        }
+        
+        if (limparBtn) {
+            limparBtn.addEventListener('click', function() {
+                if (buscaInput) buscaInput.value = '';
+                if (statusSelect) statusSelect.value = '';
+                carregarContratos();
+            });
+        }
+        
+        // Sincronizar e carregar ao iniciar
+        sincronizarComURL();
+        carregarContratos();
+    })();
 </script>
+
+<style>
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 15px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #6B46C1;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+        outline: none;
+    }
+    
+    .btn-outline-primary {
+        border: 1px solid #6B46C1;
+        color: #6B46C1;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-secondary {
+        border: 1px solid #cbd5e0;
+        color: #4a5568;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background: #f7fafc;
+        transform: translateY(-2px);
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        border-radius: 8px;
+    }
+    
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+</style>
 {% endblock %}

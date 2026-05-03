@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from core.database import Database
 from core.logging_config import logger
 import uuid
+
 
 class Contrato:
     """Modelo de Contrato com fluxo de aprovação completo"""
@@ -11,7 +12,8 @@ class Contrato:
         'em_analise': 'Em Análise',
         'aguardando_aprovacao': 'Aguardando Aprovação',
         'ativo': 'Ativo',
-        'encerrado': 'Encerrado'
+        'encerrado': 'Encerrado',
+        'cancelado': 'Cancelado'
     }
     
     def __init__(self, id=None, empresa_id=None, numero_contrato=None, 
@@ -22,7 +24,7 @@ class Contrato:
                  atualizado_por=None, aprovado_por=None, data_aprovacao=None,
                  solicitado_aprovacao=False, data_solicitacao=None,
                  pdf_path=None, data_criacao=None, data_atualizacao=None,
-                 motivo_revisao=None, motivo_rejeicao=None):
+                 motivo_revisao=None, motivo_rejeicao=None, **kwargs):
         self.id = id
         self.empresa_id = empresa_id
         self.numero_contrato = numero_contrato
@@ -57,24 +59,32 @@ class Contrato:
         codigo = str(uuid.uuid4())[:6].upper()
         return f"CT-{data}-{codigo}"
     
+    def get_status_display(self):
+        return self.STATUS.get(self.status, self.status)
+    
     def get_criador_nome(self):
         if not self.criado_por:
             return 'Sistema'
-        db = Database()
-        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.criado_por,))
+        result = Database.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.criado_por,))
         return result['nome'] if result else 'Usuário não encontrado'
+    
+    def get_atualizador_nome(self):
+        if not self.atualizado_por:
+            return None
+        result = Database.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.atualizado_por,))
+        return result['nome'] if result else None
     
     def get_aprovador_nome(self):
         if not self.aprovado_por:
             return None
-        db = Database()
-        result = db.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.aprovado_por,))
+        result = Database.fetch_one("SELECT nome FROM usuarios WHERE id = %s", (self.aprovado_por,))
         return result['nome'] if result else None
     
     def get_info_auditoria(self):
         return {
             'criado_por_nome': self.get_criador_nome(),
             'criado_em': self.data_criacao.strftime('%d/%m/%Y %H:%M') if self.data_criacao else None,
+            'atualizado_por_nome': self.get_atualizador_nome(),
             'atualizado_em': self.data_atualizacao.strftime('%d/%m/%Y %H:%M') if self.data_atualizacao else None,
             'aprovado_por_nome': self.get_aprovador_nome(),
             'aprovado_em': self.data_aprovacao.strftime('%d/%m/%Y %H:%M') if self.data_aprovacao else None
@@ -92,7 +102,6 @@ class Contrato:
         return None
     
     def save(self):
-        db = Database()
         if self.id:
             query = """
                 UPDATE contratos SET
@@ -111,9 +120,10 @@ class Contrato:
                 self.contratada_email, self.valor, self.prazo_dias, self.data_inicio,
                 self.data_fim, self.descricao, self.status, self.pdf_path,
                 self.atualizado_por, self.solicitado_aprovacao, self.data_solicitacao,
-                self.motivo_revisao, self.motivo_rejeicao, self.id
+                self.motivo_revisao, self.motivo_rejeicao,
+                self.id
             )
-            db.execute(query, params)
+            Database.execute(query, params)
             return self.id
         else:
             if not self.numero_contrato:
@@ -132,25 +142,25 @@ class Contrato:
                 self.contratada_email, self.valor, self.prazo_dias, self.data_inicio, self.data_fim,
                 self.descricao, self.status, self.criado_por, self.pdf_path, self.solicitado_aprovacao
             )
-            self.id = db.execute_return_id(query, params)
+            self.id = Database.execute_return_id(query, params)
             return self.id
     
     def enviar_para_analista(self, usuario_id):
-        db = Database()
         query = """
             UPDATE contratos 
             SET status = 'em_analise',
+                solicitado_aprovacao = FALSE,
                 atualizado_por = %s,
                 data_atualizacao = NOW()
             WHERE id = %s
         """
-        db.execute(query, (usuario_id, self.id))
+        Database.execute(query, (usuario_id, self.id))
         self.status = 'em_analise'
+        self.solicitado_aprovacao = False
         self.atualizado_por = usuario_id
         return True
     
     def enviar_para_gestor(self, usuario_id):
-        db = Database()
         query = """
             UPDATE contratos 
             SET solicitado_aprovacao = TRUE,
@@ -160,7 +170,7 @@ class Contrato:
                 data_atualizacao = NOW()
             WHERE id = %s
         """
-        db.execute(query, (usuario_id, self.id))
+        Database.execute(query, (usuario_id, self.id))
         self.solicitado_aprovacao = True
         self.status = 'aguardando_aprovacao'
         self.data_solicitacao = datetime.now()
@@ -168,7 +178,6 @@ class Contrato:
         return True
     
     def devolver_para_analista(self, usuario_id, motivo=None):
-        db = Database()
         query = """
             UPDATE contratos 
             SET status = 'em_analise',
@@ -178,14 +187,14 @@ class Contrato:
                 data_atualizacao = NOW()
             WHERE id = %s
         """
-        db.execute(query, (motivo, usuario_id, self.id))
+        Database.execute(query, (motivo, usuario_id, self.id))
         self.status = 'em_analise'
         self.solicitado_aprovacao = False
+        self.motivo_rejeicao = motivo
         self.atualizado_por = usuario_id
         return True
     
     def devolver_para_assistente(self, usuario_id, motivo=None):
-        db = Database()
         query = """
             UPDATE contratos 
             SET status = 'rascunho',
@@ -195,14 +204,14 @@ class Contrato:
                 data_atualizacao = NOW()
             WHERE id = %s
         """
-        db.execute(query, (motivo, usuario_id, self.id))
+        Database.execute(query, (motivo, usuario_id, self.id))
         self.status = 'rascunho'
         self.solicitado_aprovacao = False
+        self.motivo_revisao = motivo
         self.atualizado_por = usuario_id
         return True
     
     def aprovar(self, usuario_id):
-        db = Database()
         query = """
             UPDATE contratos 
             SET status = 'ativo', 
@@ -213,12 +222,25 @@ class Contrato:
                 data_atualizacao = NOW()
             WHERE id = %s
         """
-        db.execute(query, (usuario_id, self.id))
+        Database.execute(query, (usuario_id, self.id))
         self.status = 'ativo'
         self.aprovado_por = usuario_id
         self.data_aprovacao = datetime.now()
         self.solicitado_aprovacao = False
         self.data_solicitacao = None
+        return True
+    
+    def cancelar(self, usuario_id, motivo=None):
+        query = """
+            UPDATE contratos 
+            SET status = 'cancelado',
+                atualizado_por = %s,
+                data_atualizacao = NOW()
+            WHERE id = %s
+        """
+        Database.execute(query, (usuario_id, self.id))
+        self.status = 'cancelado'
+        self.atualizado_por = usuario_id
         return True
     
     def encerrar(self):
@@ -229,16 +251,25 @@ class Contrato:
             else:
                 data_fim = self.data_fim
             if hoje > data_fim:
-                db = Database()
-                db.execute("UPDATE contratos SET status = 'encerrado' WHERE id = %s", (self.id,))
+                Database.execute("UPDATE contratos SET status = 'encerrado' WHERE id = %s", (self.id,))
                 self.status = 'encerrado'
                 return True
         return False
     
+    def pode_editar(self, usuario_perfil, usuario_id):
+        if usuario_perfil in ['admin_sistema', 'admin_empresa']:
+            return True
+        if usuario_perfil == 'gestor' and self.status in ['rascunho', 'em_analise']:
+            return True
+        if usuario_perfil == 'analista' and self.status in ['rascunho', 'em_analise']:
+            return True
+        if usuario_perfil == 'assistente' and self.status == 'rascunho' and self.criado_por == usuario_id:
+            return True
+        return False
+    
     @staticmethod
     def verificar_vencimentos():
-        db = Database()
-        contratos = db.fetch_all("SELECT id, data_fim, status FROM contratos WHERE status = 'ativo'")
+        contratos = Database.fetch_all("SELECT id, data_fim, status FROM contratos WHERE status = 'ativo'")
         encerrados = 0
         for c in contratos:
             if c['data_fim']:
@@ -248,112 +279,160 @@ class Contrato:
                 else:
                     data_fim = c['data_fim']
                 if hoje > data_fim:
-                    db.execute("UPDATE contratos SET status = 'encerrado' WHERE id = %s", (c['id'],))
+                    Database.execute("UPDATE contratos SET status = 'encerrado' WHERE id = %s", (c['id'],))
                     encerrados += 1
         return encerrados
     
     @staticmethod
     def get_by_id(contrato_id):
-        db = Database()
-        result = db.fetch_one("SELECT * FROM contratos WHERE id = %s", (contrato_id,))
+        result = Database.fetch_one("SELECT * FROM contratos WHERE id = %s", (contrato_id,))
         return Contrato(**result) if result else None
     
     @staticmethod
-    def listar_por_empresa(empresa_id, status=None):
-        db = Database()
-        query = "SELECT * FROM contratos WHERE empresa_id = %s"
-        params = [empresa_id]
-        if status:
-            query += " AND status = %s"
-            params.append(status)
-        query += " ORDER BY data_criacao DESC"
-        results = db.fetch_all(query, params)
-        contratos = []
-        for row in results:
-            try:
-                contratos.append(Contrato(**row))
-            except Exception as e:
-                logger.error(f"Erro ao criar contrato: {e}")
-                continue
-        return contratos
-    
-    @staticmethod
-    def listar_por_criador(usuario_id):
-        db = Database()
-        query = "SELECT * FROM contratos WHERE criado_por = %s ORDER BY data_criacao DESC"
-        results = db.fetch_all(query, (usuario_id,))
+    def listar_todos():
+        results = Database.fetch_all("SELECT * FROM contratos ORDER BY data_criacao DESC")
         return [Contrato(**row) for row in results] if results else []
     
     @staticmethod
+    def listar_por_empresa(empresa_id, status=None):
+        """Lista contratos de uma empresa específica"""
+        try:
+            empresa_id = int(empresa_id) if empresa_id else None
+            
+            if not empresa_id:
+                logger.warning("listar_por_empresa chamado sem empresa_id")
+                return []
+            
+            if status:
+                query = """
+                    SELECT * FROM contratos 
+                    WHERE empresa_id = %s AND status = %s 
+                    ORDER BY id DESC
+                """
+                results = Database.fetch_all(query, (empresa_id, status))
+            else:
+                query = """
+                    SELECT * FROM contratos 
+                    WHERE empresa_id = %s 
+                    ORDER BY id DESC
+                """
+                results = Database.fetch_all(query, (empresa_id,))
+            
+            if not results:
+                return []
+            
+            contratos = []
+            for row in results:
+                try:
+                    contratos.append(Contrato(**row))
+                except Exception as e:
+                    logger.error(f"Erro ao criar contrato: {e}")
+                    continue
+            
+            return contratos
+            
+        except Exception as e:
+            logger.error(f"Erro em listar_por_empresa: {e}")
+            return []
+    
+    @staticmethod
+    def listar_por_criador(usuario_id):
+        """Lista contratos criados por um usuário específico"""
+        try:
+            results = Database.fetch_all(
+                "SELECT * FROM contratos WHERE criado_por = %s ORDER BY data_criacao DESC",
+                (usuario_id,)
+            )
+            return [Contrato(**row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Erro ao listar contratos por criador {usuario_id}: {e}")
+            return []
+    
+    @staticmethod
     def listar_pendentes_aprovacao(empresa_id=None):
-        db = Database()
         if empresa_id:
-            query = "SELECT * FROM contratos WHERE status = 'aguardando_aprovacao' AND empresa_id = %s ORDER BY data_solicitacao DESC"
-            results = db.fetch_all(query, (empresa_id,))
+            results = Database.fetch_all("SELECT * FROM contratos WHERE status = 'aguardando_aprovacao' AND empresa_id = %s ORDER BY data_solicitacao DESC", (empresa_id,))
         else:
-            query = "SELECT * FROM contratos WHERE status = 'aguardando_aprovacao' ORDER BY data_solicitacao DESC"
-            results = db.fetch_all(query)
+            results = Database.fetch_all("SELECT * FROM contratos WHERE status = 'aguardando_aprovacao' ORDER BY data_solicitacao DESC")
         return [Contrato(**row) for row in results] if results else []
     
     @staticmethod
     def listar_em_analise(empresa_id=None):
-        db = Database()
         if empresa_id:
-            query = "SELECT * FROM contratos WHERE status = 'em_analise' AND empresa_id = %s ORDER BY data_atualizacao DESC"
-            results = db.fetch_all(query, (empresa_id,))
+            results = Database.fetch_all("SELECT * FROM contratos WHERE status = 'em_analise' AND empresa_id = %s ORDER BY data_atualizacao DESC", (empresa_id,))
         else:
-            query = "SELECT * FROM contratos WHERE status = 'em_analise' ORDER BY data_atualizacao DESC"
-            results = db.fetch_all(query)
+            results = Database.fetch_all("SELECT * FROM contratos WHERE status = 'em_analise' ORDER BY data_atualizacao DESC")
+        return [Contrato(**row) for row in results] if results else []
+    
+    @staticmethod
+    def listar_ativos(empresa_id=None):
+        if empresa_id:
+            results = Database.fetch_all("SELECT * FROM contratos WHERE status = 'ativo' AND empresa_id = %s ORDER BY data_inicio DESC", (empresa_id,))
+        else:
+            results = Database.fetch_all("SELECT * FROM contratos WHERE status = 'ativo' ORDER BY data_inicio DESC")
         return [Contrato(**row) for row in results] if results else []
     
     @staticmethod
     def estatisticas(empresa_id):
-        db = Database()
-        total = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
-        total = total['total'] if total else 0
-        
-        ativos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'ativo'", (empresa_id,))
-        ativos = ativos['total'] if ativos else 0
-        
-        rascunhos = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'rascunho'", (empresa_id,))
-        rascunhos = rascunhos['total'] if rascunhos else 0
-        
-        em_analise = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'em_analise'", (empresa_id,))
-        em_analise = em_analise['total'] if em_analise else 0
-        
-        aguardando = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'aguardando_aprovacao'", (empresa_id,))
-        aguardando = aguardando['total'] if aguardando else 0
-        
-        encerrados = db.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'encerrado'", (empresa_id,))
-        encerrados = encerrados['total'] if encerrados else 0
-        
-        valor_total = db.fetch_one("SELECT SUM(valor) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
-        valor_total = float(valor_total['total']) if valor_total and valor_total['total'] else 0
-        
-        media = valor_total / total if total > 0 else 0
-        
-        por_mes = db.fetch_all("""
-            SELECT DATE_FORMAT(data_criacao, '%%m/%%Y') as mes,
-                   COUNT(*) as quantidade,
-                   SUM(valor) as valor_total
-            FROM contratos
-            WHERE empresa_id = %s
-            GROUP BY DATE_FORMAT(data_criacao, '%%m/%%Y')
-            ORDER BY MIN(data_criacao) DESC
-            LIMIT 6
-        """, (empresa_id,))
-        
-        return {
-            'total': total,
-            'ativos': ativos,
-            'rascunhos': rascunhos,
-            'em_analise': em_analise,
-            'aguardando': aguardando,
-            'encerrados': encerrados,
-            'total_valor': valor_total,
-            'media': media,
-            'por_mes': por_mes
-        }
+        """Calcula estatísticas da empresa"""
+        try:
+            total_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
+            total = total_result['total'] if total_result else 0
+            
+            ativos_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'ativo'", (empresa_id,))
+            ativos = ativos_result['total'] if ativos_result else 0
+            
+            valor_total_result = Database.fetch_one("SELECT COALESCE(SUM(valor), 0) as total FROM contratos WHERE empresa_id = %s", (empresa_id,))
+            valor_total = float(valor_total_result['total']) if valor_total_result and valor_total_result['total'] else 0.0
+            
+            valor_total_ativos_result = Database.fetch_one("SELECT COALESCE(SUM(valor), 0) as total FROM contratos WHERE empresa_id = %s AND status = 'ativo'", (empresa_id,))
+            valor_total_ativos = float(valor_total_ativos_result['total']) if valor_total_ativos_result and valor_total_ativos_result['total'] else 0.0
+            
+            ticket_medio = valor_total_ativos / ativos if ativos > 0 else 0.0
+            
+            rascunhos_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'rascunho'", (empresa_id,))
+            rascunhos = rascunhos_result['total'] if rascunhos_result else 0
+            
+            em_analise_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'em_analise'", (empresa_id,))
+            em_analise = em_analise_result['total'] if em_analise_result else 0
+            
+            aguardando_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'aguardando_aprovacao'", (empresa_id,))
+            aguardando = aguardando_result['total'] if aguardando_result else 0
+            
+            encerrados_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'encerrado'", (empresa_id,))
+            encerrados = encerrados_result['total'] if encerrados_result else 0
+            
+            cancelados_result = Database.fetch_one("SELECT COUNT(*) as total FROM contratos WHERE empresa_id = %s AND status = 'cancelado'", (empresa_id,))
+            cancelados = cancelados_result['total'] if cancelados_result else 0
+            
+            return {
+                'total': total,
+                'ativos': ativos,
+                'rascunhos': rascunhos,
+                'em_analise': em_analise,
+                'aguardando': aguardando,
+                'encerrados': encerrados,
+                'cancelados': cancelados,
+                'total_valor': valor_total,
+                'total_valor_ativos': valor_total_ativos,
+                'media': ticket_medio,
+                'por_mes': []
+            }
+        except Exception as e:
+            logger.error(f"Erro ao calcular estatísticas: {e}")
+            return {
+                'total': 0,
+                'ativos': 0,
+                'rascunhos': 0,
+                'em_analise': 0,
+                'aguardando': 0,
+                'encerrados': 0,
+                'cancelados': 0,
+                'total_valor': 0.0,
+                'total_valor_ativos': 0.0,
+                'media': 0.0,
+                'por_mes': []
+            }
     
     def __repr__(self):
-        return f"<Contrato {self.id}: {self.numero_contrato}>"
+        return f"<Contrato {self.id}: {self.numero_contrato} ({self.status})>"

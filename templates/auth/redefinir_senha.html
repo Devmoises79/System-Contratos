@@ -1,125 +1,136 @@
-<!-- templates/auth/redefinir_senha.html -->
 {% extends "base.html" %}
 
 {% block title %}Redefinir Senha - ValidaPy{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
-    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="card-custom p-4 p-lg-5 fade-in">
-            <div class="text-center mb-4">
-                <div class="logo-container mx-auto mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--azul-principal), var(--verde-principal));">
-                    <span class="logo-text" style="font-size: 1.8rem;">V</span>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-success text-white text-center rounded-top-4">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        Redefinir Senha
+                    </h4>
                 </div>
-                <h2 class="fw-bold mb-2" style="color: var(--cinza-texto);">Redefinir Senha</h2>
-                <p class="text-muted small">Escolha uma nova senha segura</p>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-person-circle me-2"></i>
+                        Olá, <strong>{{ usuario.nome }}</strong>!
+                        <hr class="my-2">
+                        <small>Crie uma nova senha forte para sua conta.</small>
+                    </div>
+                    
+                    <form method="POST" id="formRedefinir">
+                        <div class="mb-3">
+                            <label for="nova_senha" class="form-label">
+                                <i class="bi bi-key"></i> Nova Senha
+                            </label>
+                            <input type="password" 
+                                   class="form-control form-control-lg" 
+                                   id="nova_senha" 
+                                   name="nova_senha" 
+                                   required
+                                   minlength="8">
+                            <div class="form-text">
+                                <small>
+                                    <i class="bi bi-info-circle"></i>
+                                    Mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e símbolos
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirmar_senha" class="form-label">
+                                <i class="bi bi-key-fill"></i> Confirmar Senha
+                            </label>
+                            <input type="password" 
+                                   class="form-control form-control-lg" 
+                                   id="confirmar_senha" 
+                                   name="confirmar_senha" 
+                                   required>
+                        </div>
+                        
+                        <div id="senha-feedback" class="mb-3"></div>
+                        
+                        <button type="submit" class="btn btn-success btn-lg w-100" id="submit-btn">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Redefinir Senha
+                        </button>
+                    </form>
+                </div>
             </div>
-
-            <form method="POST">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                
-                <div class="mb-3">
-                    <label class="form-label fw-medium mb-2">Nova Senha</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bi bi-lock" style="color: var(--vermelho-principal);"></i>
-                        </span>
-                        <input type="password" class="form-control border-start-0" name="senha" 
-                               id="senha" required>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-medium mb-2">Confirmar Senha</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bi bi-lock-fill" style="color: var(--verde-principal);"></i>
-                        </span>
-                        <input type="password" class="form-control border-start-0" name="confirmar_senha" 
-                               id="confirmar_senha" required>
-                    </div>
-                </div>
-
-                <div class="password-requirements mb-4 p-3" style="background: var(--branco-fundo); border-radius: 12px;">
-                    <h6 class="fw-semibold mb-2 small">Requisitos de segurança:</h6>
-                    <div class="row g-1 small">
-                        <div class="col-md-6" id="req-length">
-                            <i class="bi bi-circle me-1"></i> Mínimo 8 caracteres
-                        </div>
-                        <div class="col-md-6" id="req-upper">
-                            <i class="bi bi-circle me-1"></i> 1 letra maiúscula
-                        </div>
-                        <div class="col-md-6" id="req-lower">
-                            <i class="bi bi-circle me-1"></i> 1 letra minúscula
-                        </div>
-                        <div class="col-md-6" id="req-number">
-                            <i class="bi bi-circle me-1"></i> 1 número
-                        </div>
-                        <div class="col-md-6" id="req-special">
-                            <i class="bi bi-circle me-1"></i> 1 caractere especial
-                        </div>
-                        <div class="col-md-6" id="req-match">
-                            <i class="bi bi-circle me-1"></i> Senhas coincidem
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                    <i class="bi bi-check-circle me-2"></i>
-                    Redefinir Senha
-                </button>
-
-                <div class="text-center">
-                    <a href="{{ url_for('login') }}" class="small text-decoration-none" style="color: var(--azul-principal);">
-                        <i class="bi bi-arrow-left me-1"></i>
-                        Voltar para o login
-                    </a>
-                </div>
-            </form>
         </div>
     </div>
 </div>
 
 <script>
-    const senhaInput = document.getElementById('senha');
-    const confirmarInput = document.getElementById('confirmar_senha');
+const novaSenha = document.getElementById('nova_senha');
+const confirmarSenha = document.getElementById('confirmar_senha');
+const feedback = document.getElementById('senha-feedback');
+const submitBtn = document.getElementById('submit-btn');
+
+function validarSenha() {
+    const senha = novaSenha.value;
+    const confirmacao = confirmarSenha.value;
     
-    function updateRequirements() {
-        const senha = senhaInput.value;
-        const confirmar = confirmarInput.value;
-        
-        const temLength = senha.length >= 8;
-        const temUpper = /[A-Z]/.test(senha);
-        const temLower = /[a-z]/.test(senha);
-        const temNumber = /[0-9]/.test(senha);
-        const temSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
-        const temMatch = senha && confirmar && senha === confirmar;
-        
-        updateRequirement('length', temLength);
-        updateRequirement('upper', temUpper);
-        updateRequirement('lower', temLower);
-        updateRequirement('number', temNumber);
-        updateRequirement('special', temSpecial);
-        updateRequirement('match', temMatch);
+    let validacoes = {
+        length: senha.length >= 8,
+        uppercase: /[A-Z]/.test(senha),
+        lowercase: /[a-z]/.test(senha),
+        number: /[0-9]/.test(senha),
+        special: /[!@#$%^&*(),.?":{}|<>_\-+=;\[\]]/.test(senha),
+        match: senha === confirmacao && senha !== ''
+    };
+    
+    const todasValidas = Object.values(validacoes).every(v => v === true);
+    
+    if (senha === '') {
+        feedback.innerHTML = '';
+        submitBtn.disabled = false;
+        return;
     }
     
-    function updateRequirement(req, met) {
-        const element = document.getElementById(`req-${req}`);
-        if (!element) return;
-        
-        const icon = element.querySelector('i');
-        if (met) {
-            icon.className = 'bi bi-check-circle-fill text-success me-1';
-            element.classList.add('text-success');
-            element.classList.remove('text-muted');
-        } else {
-            icon.className = 'bi bi-circle me-1';
-            element.classList.remove('text-success');
-            element.classList.add('text-muted');
-        }
+    let html = '<div class="alert alert-info small">';
+    html += '<strong>📋 Requisitos da senha:</strong><ul class="mb-0 mt-2">';
+    html += `<li class="${validacoes.length ? 'text-success' : 'text-danger'}">
+                ${validacoes.length ? '✅' : '❌'} Mínimo 8 caracteres</li>`;
+    html += `<li class="${validacoes.uppercase ? 'text-success' : 'text-danger'}">
+                ${validacoes.uppercase ? '✅' : '❌'} Letra maiúscula (A-Z)</li>`;
+    html += `<li class="${validacoes.lowercase ? 'text-success' : 'text-danger'}">
+                ${validacoes.lowercase ? '✅' : '❌'} Letra minúscula (a-z)</li>`;
+    html += `<li class="${validacoes.number ? 'text-success' : 'text-danger'}">
+                ${validacoes.number ? '✅' : '❌'} Número (0-9)</li>`;
+    html += `<li class="${validacoes.special ? 'text-success' : 'text-danger'}">
+                ${validacoes.special ? '✅' : '❌'} Caractere especial (!@#$%...)</li>`;
+    
+    if (confirmacao !== '') {
+        html += `<li class="${validacoes.match ? 'text-success' : 'text-danger'} mt-2">
+                    ${validacoes.match ? '✅' : '❌'} As senhas coincidem</li>`;
     }
     
-    senhaInput.addEventListener('input', updateRequirements);
-    confirmarInput.addEventListener('input', updateRequirements);
+    html += '</ul></div>';
+    
+    feedback.innerHTML = html;
+    
+    // Habilita/desabilita botão baseado na validação
+    if (confirmacao !== '') {
+        submitBtn.disabled = !todasValidas;
+    } else {
+        submitBtn.disabled = false;
+    }
+}
+
+novaSenha.addEventListener('input', validarSenha);
+confirmarSenha.addEventListener('input', validarSenha);
 </script>
+
+<style>
+.text-success {
+    color: #198754 !important;
+}
+.text-danger {
+    color: #dc3545 !important;
+}
+</style>
 {% endblock %}

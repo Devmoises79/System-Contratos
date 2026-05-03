@@ -1,206 +1,197 @@
-<!-- templates/admin/empresa/usuarios.html -->
 {% extends "base.html" %}
 
-{% block title %}Gerenciar Usuários - ValidaPy{% endblock %}
-
 {% block content %}
-<div class="fade-in">
-    <!-- Cabeçalho -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Usuários da Empresa</h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie os usuários e permissões</p>
-        </div>
-        <a href="{{ url_for('admin_empresa.usuario_novo') }}" 
-           class="btn" style="background: var(--azul-principal); color: white; padding: 0.6rem 1.5rem; border-radius: 12px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="bi bi-person-plus"></i>
-            Novo Usuário
-        </a>
-    </div>
-
-    <!-- Cards de Estatísticas -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">TOTAL</span>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ usuarios|length }}</div>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">ATIVOS</span>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--azul-principal); line-height: 1;">{{ usuarios|selectattr('ativo', 'equalto', true)|list|length }}</div>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">INATIVOS</span>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--vermelho-principal); line-height: 1;">{{ usuarios|selectattr('ativo', 'equalto', false)|list|length }}</div>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card-custom p-4">
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; display: block; margin-bottom: 0.5rem;">ADMINS</span>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--amarelo-escuro); line-height: 1;">{{ usuarios|selectattr('perfil', 'equalto', 'admin_empresa')|list|length }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filtros -->
-    <div class="card-custom p-4 mb-4">
-        <div class="row g-3">
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--cinza-claro);">
-                        <i class="bi bi-search" style="color: var(--azul-principal);"></i>
-                    </span>
-                    <input type="text" class="form-control border-start-0" id="searchInput" 
-                           style="border-color: var(--cinza-claro);"
-                           placeholder="Buscar por nome ou email...">
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-custom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-2">
+                            <i class="fas fa-users me-2"></i>
+                            Usuários
+                        </h1>
+                        <p class="text-muted mb-0">
+                            Gerencie os usuários da sua empresa
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('admin_empresa.novo_usuario') }}" class="btn btn-primary-custom">
+                            <i class="fas fa-plus"></i> Novo Usuário
+                        </a>
+                    </div>
                 </div>
             </div>
-            
-            <div class="col-md-3">
-                <select id="perfilFilter" class="form-select" style="border-color: var(--cinza-claro);">
-                    <option value="">Todos os perfis</option>
-                    <option value="admin_empresa">Admin Empresa</option>
-                    <option value="gestor">Gestor</option>
-                    <option value="assistente">Assistente</option>
-                    <option value="analista">Analista</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <select id="statusFilter" class="form-select" style="border-color: var(--cinza-claro);">
-                    <option value="">Todos</option>
-                    <option value="ativo">Ativos</option>
-                    <option value="inativo">Inativos</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <button class="btn w-100" style="background: var(--azul-claro); color: var(--azul-principal);" onclick="filterTable()">
-                    Filtrar
-                </button>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-custom">
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-primary btn-sm active" data-filter="all">
+                        Todos
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" data-filter="active">
+                        Ativos
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" data-filter="inactive">
+                        Inativos
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Tabela de Usuários -->
-    <div class="card-custom p-0 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table" style="border-collapse: separate; border-spacing: 0 8px; margin: 0;">
-                <thead style="background: var(--branco-fundo);">
-                    <tr>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Usuário</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Perfil</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Cargo</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contato</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Último Acesso</th>
-                        <th style="padding: 1rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="usuariosTable">
-                    {% for usuario in usuarios %}
-                    <tr class="usuario-row" data-nome="{{ usuario.nome|lower }}" data-email="{{ usuario.email|lower }}"
-                        data-perfil="{{ usuario.perfil }}" data-status="{{ 'ativo' if usuario.ativo else 'inativo' }}"
-                        style="background: white; border-radius: 12px;">
-                        <td style="padding: 1rem;">
-                            <div class="d-flex align-items-center">
-                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; margin-right: 12px;">
-                                    {{ usuario.nome[:1] }}{{ usuario.nome.split()[-1][:1] if usuario.nome.split()|length > 1 else '' }}
-                                </div>
-                                <div>
-                                    <div style="font-weight: 600;">{{ usuario.nome }}</div>
-                                    <small style="color: var(--cinza-texto); opacity: 0.6;">{{ usuario.email }}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="padding: 1rem;">
-                            <span style="background: {% if usuario.perfil == 'admin_empresa' %}var(--azul-claro){% elif usuario.perfil == 'gestor' %}var(--amarelo-claro){% elif usuario.perfil == 'assistente' %}var(--verde-claro){% else %}var(--cinza-claro){% endif %}; 
-                                         color: {% if usuario.perfil == 'admin_empresa' %}var(--azul-principal){% elif usuario.perfil == 'gestor' %}var(--amarelo-escuro){% elif usuario.perfil == 'assistente' %}var(--verde-principal){% else %}var(--cinza-texto){% endif %}; 
-                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                {{ usuario.perfil|replace('_', ' ')|title }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem;">{{ usuario.cargo or '-' }}</td>
-                        <td style="padding: 1rem;">
-                            {% if usuario.telefone or usuario.celular %}
-                                <div><i class="bi bi-telephone" style="color: var(--azul-principal);"></i> {{ usuario.telefone or usuario.celular }}</div>
+    
+    <!-- Users Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card-custom">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="tabelaUsuarios">
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Perfil</th>
+                                <th>Status</th>
+                                <th>Último Login</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if usuarios and usuarios|length > 0 %}
+                                {% for usuario in usuarios %}
+                                <tr data-status="{% if usuario.ativo %}active{% else %}inactive{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar-sm me-2">
+                                                {{ usuario.nome[0]|upper if usuario.nome else 'U' }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ usuario.nome }}</strong>
+                                                {% if usuario.id == session.usuario_id %}
+                                                    <span class="badge bg-info ms-2">Você</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ usuario.email }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ usuario.get_perfil_display() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if usuario.ativo %}
+                                            <span class="badge bg-success">Ativo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ usuario.ultimo_login.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_login else '-' }}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('admin_empresa.editar_usuario', usuario_id=usuario.id) }}" 
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if usuario.id != session.usuario_id %}
+                                                <a href="{{ url_for('admin_empresa.ativar_usuario', usuario_id=usuario.id) }}" 
+                                                   class="btn btn-sm btn-outline-warning"
+                                                   title="{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}">
+                                                    {% if usuario.ativo %}
+                                                        <i class="fas fa-ban"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-check"></i>
+                                                    {% endif %}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
                             {% else %}
-                                -
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <i class="fas fa-users-slash fa-3x text-muted mb-3 d-block"></i>
+                                        <h5 class="text-muted">Nenhum usuário encontrado</h5>
+                                        <p class="text-muted">Clique em "Novo Usuário" para adicionar</p>
+                                        <a href="{{ url_for('admin_empresa.novo_usuario') }}" class="btn btn-primary mt-2">
+                                            <i class="fas fa-plus"></i> Adicionar Usuário
+                                        </a>
+                                    </td>
+                                </tr>
                             {% endif %}
-                        </td>
-                        <td style="padding: 1rem;">
-                            <span style="background: {% if usuario.ativo %}var(--azul-claro){% else %}var(--cinza-claro){% endif %}; 
-                                         color: {% if usuario.ativo %}var(--azul-principal){% else %}var(--cinza-texto){% endif %}; 
-                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                {{ 'Ativo' if usuario.ativo else 'Inativo' }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem; color: var(--cinza-texto); opacity: 0.7;">
-                            {{ usuario.ultimo_login.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_login else 'Nunca' }}
-                        </td>
-                        <td style="padding: 1rem;">
-                            <div class="d-flex gap-2">
-                                <a href="{{ url_for('admin_empresa.usuario_editar', id=usuario.id) }}" 
-                                   style="color: var(--azul-principal); text-decoration: none;" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{{ url_for('admin_empresa.usuario_toggle_status', id=usuario.id) }}" 
-                                   style="color: {% if usuario.ativo %}var(--amarelo-escuro){% else %}var(--azul-principal){% endif %}; text-decoration: none;" 
-                                   title="{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}">
-                                    <i class="bi {% if usuario.ativo %}bi-pause-circle{% else %}bi-play-circle{% endif %}"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        
-        {% if not usuarios %}
-        <div class="text-center py-5" style="color: var(--cinza-texto); opacity: 0.7;">
-            <i class="bi bi-people" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
-            <p>Nenhum usuário cadastrado</p>
-            <a href="{{ url_for('admin_empresa.usuario_novo') }}" style="color: var(--azul-principal);">Criar primeiro usuário</a>
-        </div>
-        {% endif %}
     </div>
 </div>
 
-<script>
-    function filterTable() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const perfilValue = document.getElementById('perfilFilter').value;
-        const statusValue = document.getElementById('statusFilter').value;
-        const rows = document.querySelectorAll('.usuario-row');
-
-        rows.forEach(row => {
-            const nome = row.dataset.nome;
-            const email = row.dataset.email;
-            const perfil = row.dataset.perfil;
-            const status = row.dataset.status;
-
-            const matchesSearch = nome.includes(searchTerm) || email.includes(searchTerm);
-            const matchesPerfil = !perfilValue || perfil === perfilValue;
-            const matchesStatus = !statusValue || status === statusValue;
-
-            if (matchesSearch && matchesPerfil && matchesStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
+<style>
+    .user-avatar-sm {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
     }
+    
+    .btn-group {
+        gap: 5px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-outline-primary.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-color: #667eea;
+    }
+</style>
 
-    document.getElementById('searchInput').addEventListener('keyup', filterTable);
-    document.getElementById('perfilFilter').addEventListener('change', filterTable);
-    document.getElementById('statusFilter').addEventListener('change', filterTable);
+<script>
+    // Filtro de usuários por status
+    document.querySelectorAll('[data-filter]').forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            
+            // Remover active de todos os botões
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Filtrar linhas da tabela
+            const rows = document.querySelectorAll('#tabelaUsuarios tbody tr');
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else {
+                    const status = row.getAttribute('data-status');
+                    if (status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

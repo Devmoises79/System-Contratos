@@ -1,0 +1,87 @@
+/* static/css/notificacoes.css */
+/* Estilos para notificações em tempo real */
+
+/* Container de toasts */
+.toast-container-custom {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1100;
+}
+
+/* Animações */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); background-color: #ef4444; }
+}
+
+/* Badge de notificações */
+.notificacao-badge {
+    transition: all 0.3s ease;
+}
+
+/* Estilo para o dropdown de notificações */
+.notificacoes-dropdown {
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Item de notificação */
+.notificacao-item {
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.notificacao-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notificacao-item.nao-lida {
+    background-color: #f0f8ff;
+    border-left: 3px solid #007bff;
+}
+
+/* Indicador de status SSE */
+#sse-status {
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+.sse-connected {
+    color: #10b981;
+}
+
+.sse-disconnected {
+    color: #ef4444;
+}
+
+/* Toast customizado */
+.toast-custom {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+    .toast-container-custom {
+        left: 10px;
+        right: 10px;
+    }
+    
+    .toast-container-custom .toast {
+        min-width: auto;
+        width: 100%;
+    }
+}

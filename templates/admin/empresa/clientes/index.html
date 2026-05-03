@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-users me-2"></i> Clientes
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    <!-- Filtros -->
+    <div class="card-branco mb-4">
+        <div class="card-body p-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="searchInput" 
+                               placeholder="Buscar por nome, documento ou email...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterStatus">
+                        <option value="todos" {% if filtro_ativo != 'inativos' %}selected{% endif %}>Ativos</option>
+                        <option value="inativos" {% if filtro_ativo == 'inativos' %}selected{% endif %}>Inativos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('admin_clientes.novo') }}" class="btn-roxo w-100">
+                        <i class="fas fa-plus-circle me-1"></i> Novo Cliente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de Clientes -->
+    <div class="card-branco">
+        <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-list me-2" style="color: #6B46C1;"></i>
+                {{ titulo }}
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom mb-0" id="clientesTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Documento</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Contratos</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if clientes and clientes|length > 0 %}
+                            {% for cliente in clientes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ cliente.nome }}</strong>
+                                 </br>
+                                <td>{{ cliente.documento or '-' }}</br>
+                                <td>{{ cliente.email or '-' }}</br>
+                                <td>{{ cliente.telefone or '-' }}</br>
+                                <td>
+                                    <span class="badge-analise">
+                                        {{ cliente.get_contratos_count() }} contratos
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">R$ {{ "%.2f"|format(cliente.get_valor_total_contratos()) }}</small>
+                                 </br>
+                                <td>
+                                    {% if cliente.ativo %}
+                                        <span class="badge-ativo"><i class="fas fa-check-circle me-1"></i> Ativo</span>
+                                    {% else %}
+                                        <span class="badge-cancelado"><i class="fas fa-ban me-1"></i> Inativo</span>
+                                    {% endif %}
+                                 </br>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('admin_clientes.detalhe', id=cliente.id) }}" 
+                                           class="btn btn-sm" 
+                                           style="background: #f3e8ff; color: #6B46C1; border-radius: 8px; padding: 6px 12px;">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('admin_clientes.editar', id=cliente.id) }}" 
+                                           class="btn btn-sm" 
+                                           style="background: #fff3e0; color: #ed8936; border-radius: 8px; padding: 6px 12px;">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if cliente.ativo %}
+                                            <a href="{{ url_for('admin_clientes.desativar', id=cliente.id) }}" 
+                                               class="btn btn-sm" 
+                                               style="background: #fee2e2; color: #ef4444; border-radius: 8px; padding: 6px 12px;"
+                                               onclick="return confirm('Desativar este cliente?')">
+                                                <i class="fas fa-ban"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ url_for('admin_clientes.ativar', id=cliente.id) }}" 
+                                               class="btn btn-sm" 
+                                               style="background: #e8f5e9; color: #10b981; border-radius: 8px; padding: 6px 12px;">
+                                                <i class="fas fa-check-circle"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                 </br>
+                               </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3" style="color: #CBD5E0;"></i>
+                                    <p class="text-muted mb-0">Nenhum cliente cadastrado</p>
+                                    <a href="{{ url_for('admin_clientes.novo') }}" class="btn-outline-roxo mt-3">
+                                        <i class="fas fa-plus-circle me-1"></i> Criar primeiro cliente
+                                    </a>
+                                 </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 18px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .badge-ativo {
+        background: linear-gradient(135deg, #10b981, #059669);
+        padding: 4px 10px;
+        border-radius: 40px;
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-analise {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        padding: 4px 10px;
+        border-radius: 40px;
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-cancelado {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        padding: 4px 10px;
+        border-radius: 40px;
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+</style>
+
+<script>
+    // Filtro de busca
+    const searchInput = document.getElementById('searchInput');
+    const filterStatus = document.getElementById('filterStatus');
+    const tableRows = document.querySelectorAll('#clientesTable tbody tr');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusFilter = filterStatus.value;
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const statusCell = row.cells[5]?.textContent.toLowerCase() || '';
+            const statusMatch = statusFilter === 'todos' || 
+                               (statusFilter === 'inativos' && statusCell.includes('inativo')) ||
+                               (statusFilter === 'todos' && !statusCell.includes('inativo'));
+            const searchMatch = searchTerm === '' || text.includes(searchTerm);
+            
+            row.style.display = (statusMatch && searchMatch) ? '' : 'none';
+        });
+    }
+    
+    if (searchInput) searchInput.addEventListener('keyup', filterTable);
+    if (filterStatus) filterStatus.addEventListener('change', function() {
+        window.location.href = filterStatus.value === 'inativos' ? '?ativo=inativos' : '?ativo=ativos';
+    });
+</script>
+{% endblock %}

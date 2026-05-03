@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Preferências de Notificações - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-cog me-2"></i> Preferências de Notificações
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card-branco">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-bell me-2" style="color: #6B46C1;"></i>
+                        Configurações de Alerta
+                    </h5>
+                    
+                    <form method="POST">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center p-3" 
+                                 style="background: #f8f9fa; border-radius: 16px;">
+                                <div>
+                                    <i class="fas fa-volume-up me-2" style="color: #6B46C1;"></i>
+                                    <strong>Som de notificação</strong>
+                                    <p class="text-muted small mb-0">Tocar um som quando chegar uma nova notificação</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="somSwitch" 
+                                           name="som_ativado" {% if som_ativado %}checked{% endif %}
+                                           style="cursor: pointer; width: 50px; height: 25px;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-3 mt-4">
+                            <a href="{{ url_for('notificacoes') }}" class="btn-outline-roxo">
+                                <i class="fas fa-arrow-left me-1"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn-roxo">
+                                <i class="fas fa-save me-1"></i> Salvar preferências
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card-branco mt-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-question-circle me-2" style="color: #6B46C1;"></i>
+                        Sobre as notificações
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Notificações de contratos aprovados
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-warning me-2"></i>
+                            Alertas de contratos próximos do vencimento
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-user-plus text-info me-2"></i>
+                            Novos usuários cadastrados na empresa
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-file-signature text-primary me-2"></i>
+                            Atualizações de status de contratos
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 26px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .form-check-input:checked {
+        background-color: #6B46C1;
+        border-color: #6B46C1;
+    }
+</style>
+
+<script>
+    // Salvar preferência de som no localStorage também
+    const somSwitch = document.getElementById('somSwitch');
+    if (somSwitch) {
+        // Carregar preferência do localStorage
+        const somSalvo = localStorage.getItem('som_notificacao');
+        if (somSalvo !== null) {
+            somSwitch.checked = somSalvo === 'true';
+        }
+        
+        // Salvar no localStorage quando mudar
+        somSwitch.addEventListener('change', function() {
+            localStorage.setItem('som_notificacao', this.checked);
+        });
+    }
+</script>
+{% endblock %}

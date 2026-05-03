@@ -1,112 +1,466 @@
-<!-- templates/dashboard/assistente.html -->
 {% extends "base.html" %}
 
-{% block title %}Dashboard Assistente - ValidaPy{% endblock %}
+{% block title %}Dashboard Assistente - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-user-check me-2"></i> Dashboard do Assistente
+{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Cabeçalho -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Dashboard do Assistente</h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Gerencie seus contratos e atividades</p>
-        </div>
-        <span style="background: var(--amarelo-claro); color: var(--amarelo-escuro); padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.9rem; font-weight: 500;">
-            <i class="bi bi-person-workspace me-1"></i>
-            Assistente
-        </span>
-    </div>
-
-    <!-- Ações Rápidas -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <a href="{{ url_for('contrato_novo') }}" style="text-decoration: none;">
-                <div class="card-custom p-4 text-center" style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-escuro)); color: white; cursor: pointer;">
-                    <i class="bi bi-plus-circle" style="font-size: 2.5rem;"></i>
-                    <h5 style="font-weight: 600; margin: 1rem 0 0.5rem;">Novo Contrato</h5>
-                    <p style="opacity: 0.9; margin: 0;">Criar um novo contrato rapidamente</p>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-check-circle" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">MEUS CONTRATOS</span>
-                </div>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ contratos|length }}</div>
-                <p style="color: var(--cinza-texto); opacity: 0.7; margin-top: 0.5rem;">contratos criados por você</p>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--amarelo-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-clock" style="font-size: 1.5rem; color: var(--amarelo-escuro);"></i>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">PENDENTES</span>
-                </div>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">
-                    {{ contratos|selectattr('status', 'equalto', 'rascunho')|list|length }}
-                </div>
-                <p style="color: var(--cinza-texto); opacity: 0.7; margin-top: 0.5rem;">aguardando aprovação</p>
-            </div>
+<div class="container-fluid px-0">
+    
+    <!-- Seção: Minhas Métricas -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3 section-title">
+                <i class="fas fa-chart-line me-2"></i> Minhas Métricas
+            </h5>
         </div>
     </div>
-
-    <!-- Meus Últimos Contratos -->
-    <div class="card-custom p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin: 0;">Meus Últimos Contratos</h5>
-            <a href="{{ url_for('listar_contratos') }}" style="color: var(--azul-principal); text-decoration: none;">
-                Ver todos <i class="bi bi-arrow-right ms-1"></i>
-            </a>
+    
+    <!-- Cards de Métricas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card-roxo card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Meus Contratos</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.total_contratos|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-file-signature fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="opacity-50">Total criados por mim</small>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <div class="table-responsive">
-            <table class="table" style="border-collapse: separate; border-spacing: 0 8px;">
-                <thead>
-                    <tr>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Nº Contrato</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratante</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Status</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Data</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for contrato in contratos %}
-                    <tr style="background: var(--branco-fundo); border-radius: 12px;">
-                        <td style="padding: 1rem 0.5rem;">
-                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
-                                {{ contrato.numero_contrato }}
-                            </a>
-                        </td>
-                        <td style="padding: 1rem 0.5rem;">{{ contrato.contratante_nome }}</td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
-                        <td style="padding: 1rem 0.5rem;">
-                            <span style="background: {% if contrato.status == 'ativo' %}var(--azul-claro){% elif contrato.status == 'rascunho' %}var(--amarelo-claro){% else %}var(--cinza-claro){% endif %}; 
-                                         color: {% if contrato.status == 'ativo' %}var(--azul-principal){% elif contrato.status == 'rascunho' %}var(--amarelo-escuro){% else %}var(--cinza-texto){% endif %}; 
-                                         padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.8rem;">
-                                {{ contrato.status|capitalize }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem 0.5rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4" style="color: var(--cinza-texto); opacity: 0.7;">
-                            Você ainda não criou nenhum contrato.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card-preto card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Em Análise</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.em_analise|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="opacity-50">Aguardando análise</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card-roxo card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Aprovados</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.aprovados|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="opacity-50">Contratos aprovados</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card-preto card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Taxa de Aprovação</h6>
+                            <h2 class="mb-0 fw-bold" style="color: #10b981;">
+                                {{ stats.taxa_aprovacao|default(0) }}%
+                            </h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="opacity-50">Aprovados / Total</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card de Valor Total -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-detalhe card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 text-muted">Valor Total dos Meus Contratos</h6>
+                            <h2 class="mb-0 fw-bold" style="color: #6B46C1;">
+                                R$ {{ "%.2f"|format(stats.total_valor|default(0)) }}
+                            </h2>
+                        </div>
+                        <div class="icon-box-small" style="background: rgba(107, 70, 193, 0.15);">
+                            <i class="fas fa-dollar-sign fa-2x" style="color: #6B46C1;"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-3 mb-0 small">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Soma de todos os meus contratos
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contratos por Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3 section-title">
+                <i class="fas fa-chart-pie me-2"></i> Meus Contratos por Status
+            </h5>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-2 col-6 mb-3">
+            <div class="card-status card-hover text-center" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+                <div class="card-body p-3">
+                    <i class="fas fa-clock fa-2x mb-2 opacity-75"></i>
+                    <h3 class="mb-0 fw-bold">{{ stats.em_analise|default(0) }}</h3>
+                    <small class="opacity-75">Em Análise</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6 mb-3">
+            <div class="card-status card-hover text-center" style="background: linear-gradient(135deg, #10B981, #059669);">
+                <div class="card-body p-3">
+                    <i class="fas fa-check-circle fa-2x mb-2 opacity-75"></i>
+                    <h3 class="mb-0 fw-bold">{{ stats.aprovados|default(0) }}</h3>
+                    <small class="opacity-75">Aprovados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6 mb-3">
+            <div class="card-status card-hover text-center" style="background: linear-gradient(135deg, #6B7280, #4B5563);">
+                <div class="card-body p-3">
+                    <i class="fas fa-pencil-alt fa-2x mb-2 opacity-75"></i>
+                    <h3 class="mb-0 fw-bold">{{ stats.rascunhos|default(0) }}</h3>
+                    <small class="opacity-75">Rascunhos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6 mb-3">
+            <div class="card-status card-hover text-center" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
+                <div class="card-body p-3">
+                    <i class="fas fa-ban fa-2x mb-2 opacity-75"></i>
+                    <h3 class="mb-0 fw-bold">{{ stats.cancelados|default(0) }}</h3>
+                    <small class="opacity-75">Cancelados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6 mb-3">
+            <div class="card-status card-hover text-center" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                <div class="card-body p-3">
+                    <i class="fas fa-hourglass-half fa-2x mb-2 opacity-75"></i>
+                    <h3 class="mb-0 fw-bold">{{ stats.aguardando|default(0) }}</h3>
+                    <small class="opacity-75">Aguardando</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6 mb-3">
+            <div class="card-status card-hover text-center" style="background: linear-gradient(135deg, #4A5568, #2D3748);">
+                <div class="card-body p-3">
+                    <i class="fas fa-flag-checkered fa-2x mb-2 opacity-75"></i>
+                    <h3 class="mb-0 fw-bold">{{ stats.encerrados|default(0) }}</h3>
+                    <small class="opacity-75">Encerrados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meus Contratos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-tabela">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-file-signature me-2" style="color: #6B46C1;"></i>
+                            Meus Contratos
+                            <span class="badge-rascunho ms-2" style="font-size: 11px;">{{ stats.total_contratos|default(0) }}</span>
+                        </h5>
+                        <a href="{{ url_for('contrato_novo') }}" class="btn-outline-roxo btn-sm">
+                            <i class="fas fa-plus me-1"></i> Novo Contrato
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nº Contrato</th>
+                                    <th>Contratante</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if contratos and contratos|length > 0 %}
+                                    {% for contrato in contratos[:10] %}
+                                    <tr class="table-row-hover">
+                                        <td>
+                                            <strong>{{ contrato.numero_contrato }}</strong>
+                                            <br>
+                                            <small class="text-muted">ID: {{ contrato.id }}</small>
+                                         </br>
+                                        <td>{{ contrato.contratante_nome|truncate(35) if contrato.contratante_nome else '-' }}</br>
+                                        <td>R$ {{ "%.2f"|format(contrato.valor or 0) }}</br>
+                                        <td>
+                                            {% if contrato.status == 'ativo' %}
+                                                <span class="badge-ativo"><i class="fas fa-check-circle me-1"></i> Ativo</span>
+                                            {% elif contrato.status == 'em_analise' %}
+                                                <span class="badge-analise"><i class="fas fa-clock me-1"></i> Em Análise</span>
+                                            {% elif contrato.status == 'rascunho' %}
+                                                <span class="badge-rascunho"><i class="fas fa-pencil-alt me-1"></i> Rascunho</span>
+                                            {% elif contrato.status == 'aguardando_aprovacao' %}
+                                                <span class="badge-aguardando"><i class="fas fa-hourglass-half me-1"></i> Aguardando</span>
+                                            {% elif contrato.status == 'encerrado' %}
+                                                <span class="badge-encerrado"><i class="fas fa-flag-checkered me-1"></i> Encerrado</span>
+                                            {% elif contrato.status == 'cancelado' %}
+                                                <span class="badge-cancelado"><i class="fas fa-ban me-1"></i> Cancelado</span>
+                                            {% else %}
+                                                <span class="badge-pendente">{{ contrato.status }}</span>
+                                            {% endif %}
+                                         </br>
+                                        <td>{{ contrato.data_criacao.strftime('%d/%m/%Y') if contrato.data_criacao else '-' }}</br>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" 
+                                                   class="btn-action btn-view" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if contrato.status == 'rascunho' %}
+                                                <a href="{{ url_for('editar_contrato', id=contrato.id) }}" 
+                                                   class="btn-action btn-edit" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST" action="{{ url_for('enviar_para_analista', id=contrato.id) }}" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Enviar este contrato para análise?')">
+                                                    <button type="submit" class="btn-action btn-send" title="Enviar para Análise">
+                                                        <i class="fas fa-paper-plane"></i>
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                         </br>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-inbox fa-3x mb-3" style="color: #CBD5E0;"></i>
+                                            <p class="text-muted mb-3">Nenhum contrato encontrado</p>
+                                            <a href="{{ url_for('contrato_novo') }}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-plus me-1"></i> Criar meu primeiro contrato
+                                            </a>
+                                         </br>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Atalhos Rápidos -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('contrato_novo') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-file-contract fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Novo Contrato</h5>
+                    <p class="text-muted small">Criar novo contrato</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('metricas_pessoais') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-chart-bar fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Minhas Métricas</h5>
+                    <p class="text-muted small">Ver meu desempenho</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('listar_contratos') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-list fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Todos os Contratos</h5>
+                    <p class="text-muted small">Listar meus contratos</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Cards Roxo e Preto */
+    .card-roxo { background: linear-gradient(135deg, #6B46C1, #553C9A); color: white; border-radius: 20px; }
+    .card-preto { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border-radius: 20px; }
+    .card-detalhe { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    .card-tabela { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    .card-atalho { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease; }
+    .card-atalho:hover { transform: translateY(-5px); background: linear-gradient(135deg, #fff, #faf5ff); }
+    
+    .card-hover { transition: all 0.3s ease; cursor: pointer; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 35px rgba(0,0,0,0.15); }
+    
+    .icon-box, .icon-box-small, .icon-wrapper-atalho { transition: all 0.3s ease; }
+    .card-hover:hover .icon-box i,
+    .card-hover:hover .icon-wrapper-atalho i { transform: scale(1.15); }
+    
+    .icon-wrapper-atalho {
+        width: 60px;
+        height: 60px;
+        background: #f3e8ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .card-atalho:hover .icon-wrapper-atalho { background: #6B46C1; }
+    .card-atalho:hover .icon-wrapper-atalho i { color: white !important; }
+    
+    .section-title { position: relative; display: inline-block; transition: all 0.3s ease; }
+    .section-title:hover { transform: translateX(8px); color: #6B46C1; }
+    
+    .table-custom thead { background: linear-gradient(135deg, #6B46C1, #553C9A); color: white; }
+    .table-custom thead th { padding: 14px 20px; font-weight: 600; font-size: 13px; border: none; }
+    .table-custom tbody td { padding: 12px 20px; vertical-align: middle; border-bottom: 1px solid #e2e8f0; }
+    .table-row-hover:hover { background: #faf5ff; }
+    
+    /* Card Status */
+    .card-status {
+        border: none;
+        border-radius: 16px;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .card-status:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 35px rgba(0,0,0,0.15);
+    }
+    
+    /* Botões de Ação */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-view { background: #f3e8ff; color: #6B46C1; }
+    .btn-view:hover { background: #6B46C1; color: white; transform: translateY(-2px); }
+    .btn-edit { background: #fef3c7; color: #f59e0b; }
+    .btn-edit:hover { background: #f59e0b; color: white; transform: translateY(-2px); }
+    .btn-send { background: #e0f2fe; color: #3b82f6; }
+    .btn-send:hover { background: #3b82f6; color: white; transform: translateY(-2px); }
+    
+    /* Badges */
+    .badge-ativo, .badge-analise, .badge-aguardando, .badge-rascunho, 
+    .badge-encerrado, .badge-cancelado, .badge-pendente {
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-ativo { background: linear-gradient(135deg, #10b981, #059669); }
+    .badge-analise { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .badge-aguardando { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .badge-rascunho { background: linear-gradient(135deg, #868e96, #6c757d); }
+    .badge-encerrado { background: linear-gradient(135deg, #4a5568, #2d3748); }
+    .badge-cancelado { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .badge-pendente { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    
+    /* Botão Outline Roxo */
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 6px 16px;
+        font-weight: 600;
+        font-size: 12px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-outline-roxo:hover { background: linear-gradient(135deg, #6B46C1, #553C9A); color: white; transform: translateY(-2px); }
+    .btn-outline-roxo.btn-sm { padding: 4px 12px; font-size: 11px; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Contador animado
+        const counters = document.querySelectorAll('.counter-number');
+        counters.forEach(counter => {
+            let targetText = counter.innerText;
+            let target = parseInt(targetText);
+            
+            if (!isNaN(target) && target > 0) {
+                let current = 0;
+                let increment = target / 50;
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        counter.innerText = Math.ceil(current);
+                        setTimeout(updateCounter, 20);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCounter();
+            }
+        });
+    });
+</script>
 {% endblock %}

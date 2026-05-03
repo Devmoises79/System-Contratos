@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Aparência - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-palette me-2"></i> Aparência
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="card-branco">
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Tema do Sistema</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="theme-option {% if tema_atual == 'claro' %}selected{% endif %}" 
+                                 onclick="document.getElementById('tema_claro').checked = true;">
+                                <div class="theme-preview theme-claro">
+                                    <div class="theme-header"></div>
+                                    <div class="theme-body">
+                                        <div class="theme-card"></div>
+                                        <div class="theme-card"></div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <input type="radio" name="tema" value="claro" id="tema_claro" 
+                                           {% if tema_atual == 'claro' %}checked{% endif %}>
+                                    <label for="tema_claro" class="ms-1">Claro</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="theme-option {% if tema_atual == 'escuro' %}selected{% endif %}" 
+                                 onclick="document.getElementById('tema_escuro').checked = true;">
+                                <div class="theme-preview theme-escuro">
+                                    <div class="theme-header"></div>
+                                    <div class="theme-body">
+                                        <div class="theme-card"></div>
+                                        <div class="theme-card"></div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <input type="radio" name="tema" value="escuro" id="tema_escuro" 
+                                           {% if tema_atual == 'escuro' %}checked{% endif %}>
+                                    <label for="tema_escuro" class="ms-1">Escuro</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="theme-option {% if tema_atual == 'roxo' %}selected{% endif %}" 
+                                 onclick="document.getElementById('tema_roxo').checked = true;">
+                                <div class="theme-preview theme-roxo">
+                                    <div class="theme-header"></div>
+                                    <div class="theme-body">
+                                        <div class="theme-card"></div>
+                                        <div class="theme-card"></div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <input type="radio" name="tema" value="roxo" id="tema_roxo" 
+                                           {% if tema_atual == 'roxo' %}checked{% endif %}>
+                                    <label for="tema_roxo" class="ms-1">Roxo</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn-roxo">
+                        <i class="fas fa-save me-2"></i> Salvar Aparência
+                    </button>
+                    <a href="{{ url_for('configuracoes.index') }}" class="btn-outline-roxo ms-2">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .theme-option {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .theme-option.selected .theme-preview {
+        border: 3px solid #6B46C1;
+        transform: scale(1.02);
+    }
+    .theme-preview {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .theme-preview:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .theme-claro .theme-header {
+        background: #6B46C1;
+        height: 20px;
+    }
+    .theme-claro .theme-body {
+        background: #f5f7fb;
+        padding: 8px;
+    }
+    .theme-claro .theme-card {
+        background: white;
+        height: 30px;
+        margin: 4px 0;
+        border-radius: 8px;
+    }
+    .theme-escuro .theme-header {
+        background: #1a1a2e;
+        height: 20px;
+    }
+    .theme-escuro .theme-body {
+        background: #1e1e2e;
+        padding: 8px;
+    }
+    .theme-escuro .theme-card {
+        background: #2d2d3a;
+        height: 30px;
+        margin: 4px 0;
+        border-radius: 8px;
+    }
+    .theme-roxo .theme-header {
+        background: #6B46C1;
+        height: 20px;
+    }
+    .theme-roxo .theme-body {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 8px;
+    }
+    .theme-roxo .theme-card {
+        background: rgba(255,255,255,0.2);
+        height: 30px;
+        margin: 4px 0;
+        border-radius: 8px;
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 26px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

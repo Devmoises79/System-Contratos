@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Teste de Sons{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">🎵 Teste de Efeitos Sonoros</h1>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <button class="btn btn-success w-100 py-3" onclick="sistemaNotificacoes.notificarSucesso('Teste de sucesso!')">
+                🔊 Sucesso
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-warning w-100 py-3" onclick="sistemaNotificacoes.notificarAlerta('Teste de alerta!')">
+                ⚠️ Alerta
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-info w-100 py-3" onclick="sistemaNotificacoes.notificarInfo('Teste de notificação padrão!')">
+                🔔 Notificação
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

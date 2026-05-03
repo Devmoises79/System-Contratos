@@ -1,373 +1,275 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ValidaPy - {% block title %}Sistema de Contratos{% endblock %}</title>
+    <title>System Contratos - {% block title %}Sistema de Gestão de Contratos{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --roxo-primary: #6B46C1;
+            --roxo-dark: #553C9A;
+            --roxo-light: #9F7AEA;
+            --preto: #1A202C;
+            --branco: #FFFFFF;
+            --cinza: #F7FAFC;
+            --cinza-borda: #E2E8F0;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
-        :root {
-            --bg-primary: #f0f2f5;
-            --bg-white: #ffffff;
-            --text-primary: #1a1f36;
-            --text-secondary: #5a6e8a;
-            --text-muted: #8b9ab0;
-            --border-light: #e4e7ed;
-            --blue-primary: #3b82f6;
-            --blue-dark: #2563eb;
-            --blue-light: #eff6ff;
-            --green-primary: #10b981;
-            --green-light: #ecfdf5;
-            --red-primary: #ef4444;
-            --red-light: #fef2f2;
-            --yellow-primary: #f59e0b;
-            --yellow-light: #fffbeb;
-            --purple-primary: #8b5cf6;
-            --purple-light: #f5f3ff;
-            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-        }
-
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            padding-top: 72px;
+            background: linear-gradient(135deg, var(--roxo-primary) 0%, var(--roxo-dark) 100%);
+            min-height: 100vh;
         }
-
-        /* Navbar */
-        .navbar {
-            background: var(--bg-white);
-            border-bottom: 1px solid var(--border-light);
-            padding: 0.75rem 1.5rem;
+        
+        .flash-container {
             position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1030;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 320px;
         }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
+        
+        .alert-custom {
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            animation: slideInRight 0.3s ease;
+            border: none;
         }
-
-        .logo-icon {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, var(--blue-primary), var(--purple-primary));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-
-        .logo-text {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .logo-text span {
-            color: var(--blue-primary);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--blue-primary), var(--purple-primary));
-            border-radius: 50%;
+        
+        .auth-page {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 600;
+            background: linear-gradient(135deg, var(--roxo-primary) 0%, var(--roxo-dark) 100%);
         }
-
-        /* Sidebar */
+        
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        
         .sidebar {
-            position: fixed;
-            top: 72px;
-            left: 0;
             width: 280px;
-            height: calc(100vh - 72px);
-            background: var(--bg-white);
-            border-right: 1px solid var(--border-light);
+            background: var(--preto);
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
             overflow-y: auto;
-            padding: 1.5rem 1rem;
-            z-index: 1020;
         }
-
+        
         .sidebar::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
         }
-
+        
         .sidebar::-webkit-scrollbar-track {
-            background: var(--border-light);
+            background: rgba(255,255,255,0.1);
         }
-
+        
         .sidebar::-webkit-scrollbar-thumb {
-            background: var(--blue-primary);
-            border-radius: 4px;
+            background: var(--roxo-primary);
+            border-radius: 10px;
         }
-
-        .nav-section {
-            margin-bottom: 1.75rem;
+        
+        .sidebar-brand {
+            padding: 28px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-
-        .nav-section-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 0.75rem;
-            padding-left: 0.75rem;
+        
+        .sidebar-brand i {
+            font-size: 42px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--roxo-primary), var(--roxo-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
-
-        .nav-link-custom {
+        
+        .sidebar-brand h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+        }
+        
+        .sidebar-brand p {
+            font-size: 12px;
+            opacity: 0.6;
+            margin: 5px 0 0;
+            color: white;
+        }
+        
+        .sidebar-notificacao-sino {
+            padding: 12px 16px;
+            margin: 8px 12px;
+            background: rgba(107, 70, 193, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sidebar-notificacao-sino:hover {
+            background: rgba(107, 70, 193, 0.35);
+        }
+        
+        .sidebar-notificacao-sino-left {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0.6rem 0.75rem;
-            border-radius: 10px;
-            color: var(--text-secondary);
+        }
+        
+        .sidebar-notificacao-sino-left i {
+            font-size: 18px;
+            color: white;
+        }
+        
+        .sidebar-notificacao-sino-left span {
+            font-size: 13px;
+            color: white;
+        }
+        
+        .notificacao-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-menu {
+            padding: 16px 12px;
+        }
+        
+        .sidebar-menu .menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
+            margin: 4px 0;
+            border-radius: 12px;
         }
-
-        .nav-link-custom i, 
-        .nav-link-custom .bi {
-            width: 20px;
-            font-size: 1rem;
-            color: var(--text-muted);
+        
+        .sidebar-menu .menu-item:hover {
+            background: rgba(107, 70, 193, 0.2);
+            color: white;
         }
-
-        .nav-link-custom:hover {
-            background: var(--blue-light);
-            color: var(--blue-primary);
+        
+        .sidebar-menu .menu-item.active {
+            background: linear-gradient(135deg, var(--roxo-primary), var(--roxo-dark));
+            color: white;
         }
-
-        .nav-link-custom:hover i,
-        .nav-link-custom:hover .bi {
-            color: var(--blue-primary);
+        
+        .sidebar-menu .menu-item i {
+            width: 24px;
+            font-size: 18px;
         }
-
-        .nav-link-custom.active {
-            background: var(--blue-light);
-            color: var(--blue-primary);
-        }
-
-        .nav-link-custom.active i,
-        .nav-link-custom.active .bi {
-            color: var(--blue-primary);
-        }
-
-        /* Main Content */
+        
         .main-content {
+            flex: 1;
             margin-left: 280px;
-            padding: 1.5rem;
-            min-height: calc(100vh - 72px);
         }
-
-        /* Cards */
-        .card-dashboard {
-            background: var(--bg-white);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 1.25rem;
-            transition: all 0.2s ease;
-            box-shadow: var(--card-shadow);
+        
+        .top-navbar {
+            background: var(--branco);
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--cinza-borda);
         }
-
-        .card-dashboard:hover {
-            box-shadow: var(--card-shadow-hover);
-            border-color: transparent;
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--preto);
+            margin: 0;
         }
-
-        .card-stats {
-            background: var(--bg-white);
-            border-radius: 16px;
-            padding: 1.25rem;
-            border-left: 4px solid;
-            box-shadow: var(--card-shadow);
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
-
-        .card-stats.blue { border-left-color: var(--blue-primary); }
-        .card-stats.green { border-left-color: var(--green-primary); }
-        .card-stats.yellow { border-left-color: var(--yellow-primary); }
-        .card-stats.purple { border-left-color: var(--purple-primary); }
-        .card-stats.red { border-left-color: var(--red-primary); }
-
-        /* Badges */
-        .badge-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
+        
+        .user-name {
             font-weight: 500;
+            color: var(--preto);
+            padding: 8px 16px;
+            background: var(--cinza);
+            border-radius: 40px;
+            font-size: 14px;
         }
-
-        .badge-success { background: var(--green-light); color: var(--green-primary); }
-        .badge-warning { background: var(--yellow-light); color: var(--yellow-primary); }
-        .badge-danger { background: var(--red-light); color: var(--red-primary); }
-        .badge-info { background: var(--blue-light); color: var(--blue-primary); }
-
-        /* Botões */
-        .btn-primary-custom {
-            background: var(--blue-primary);
-            border: none;
-            border-radius: 10px;
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-            font-size: 0.875rem;
+        
+        .user-name i {
+            color: var(--roxo-primary);
+            margin-right: 8px;
+        }
+        
+        .logout-btn {
+            color: #E53E3E;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            background: rgba(229, 62, 62, 0.1);
+        }
+        
+        .logout-btn:hover {
+            background: #E53E3E;
             color: white;
-            transition: all 0.2s;
         }
-
-        .btn-primary-custom:hover {
-            background: var(--blue-dark);
-            transform: translateY(-1px);
+        
+        .content-area {
+            padding: 30px;
+            background: var(--cinza);
+            min-height: calc(100vh - 70px);
         }
-
-        .btn-outline-custom {
-            border: 1px solid var(--border-light);
-            background: var(--bg-white);
-            border-radius: 10px;
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .btn-outline-custom:hover {
-            border-color: var(--blue-primary);
-            color: var(--blue-primary);
-        }
-
-        /* Notificações */
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--red-primary);
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 600;
-            padding: 0.15rem 0.4rem;
-            border-radius: 20px;
-        }
-
-        .notification-dropdown {
-            width: 360px;
-            border-radius: 16px;
-            border: 1px solid var(--border-light);
-            box-shadow: var(--card-shadow-hover);
-        }
-
-        .notification-item {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-light);
-            transition: background 0.2s;
-        }
-
-        .notification-item:hover {
-            background: var(--blue-light);
-        }
-
-        .notification-item.unread {
-            background: #fafbff;
-        }
-
-        /* Gamificação */
-        .gamification-badge {
-            background: linear-gradient(135deg, var(--yellow-primary), #ea580c);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        /* Tabelas */
-        .table-custom {
-            width: 100%;
-        }
-
-        .table-custom thead th {
-            background: #f8fafc;
-            padding: 0.75rem 1rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .table-custom tbody td {
-            padding: 1rem;
-            font-size: 0.875rem;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        /* Page Header */
-        .page-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .page-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .page-header p {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-
-        /* Responsivo */
+        
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
-                transition: transform 0.3s;
+                z-index: 1050;
             }
             .sidebar.show {
                 transform: translateX(0);
             }
             .main-content {
                 margin-left: 0;
-                padding: 1rem;
             }
-            .notification-dropdown {
-                width: 320px;
+            .top-navbar {
+                padding: 12px 20px;
+            }
+            .content-area {
+                padding: 20px;
             }
         }
     </style>
@@ -375,318 +277,144 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-                {% if session.usuario %}
-                <button class="btn d-md-none p-0" type="button" onclick="toggleSidebar()" style="color: var(--text-secondary);">
-                    <i class="fas fa-bars fs-5"></i>
-                </button>
-                {% endif %}
-                
-                <a href="{{ url_for('dashboard') if session.usuario else url_for('login') }}" class="logo">
-                    <div class="logo-icon">V</div>
-                    <span class="logo-text">Valida<span>Py</span></span>
-                </a>
-            </div>
-
-            {% if session.usuario %}
-            <div class="d-flex align-items-center gap-3">
-                <!-- Gamificação Badge -->
-                <div class="gamification-badge d-none d-md-block">
-                    <i class="bi bi-trophy-fill me-1"></i>
-                    {{ gamificacao_titulo }} · {{ gamificacao_pontos }} pts
-                </div>
-
-                <!-- Notificações -->
-                <div class="dropdown">
-                    <button class="btn p-0 position-relative" type="button" data-bs-toggle="dropdown" style="color: var(--text-secondary);">
-                        <i class="bi bi-bell fs-5"></i>
-                        {% if total_notificacoes_nao_lidas > 0 %}
-                        <span class="notification-badge">{{ total_notificacoes_nao_lidas if total_notificacoes_nao_lidas < 100 else '99+' }}</span>
-                        {% endif %}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown p-0">
-                        <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Notificações</span>
-                            <a href="{{ url_for('notificacoes') }}" class="small text-decoration-none">Ver todas</a>
-                        </li>
-                        {% if ultimas_notificacoes %}
-                            {% for notif in ultimas_notificacoes %}
-                            <li>
-                                <a class="dropdown-item notification-item {% if not notif.lida %}unread{% endif %}" 
-                                   href="{{ notif.link or url_for('notificacoes') }}">
-                                    <div class="d-flex gap-2">
-                                        <i class="bi {{ notif.get_icone_por_tipo() }} mt-1" style="color: {{ notif.get_cor_por_tipo() }};"></i>
-                                        <div class="flex-grow-1">
-                                            <div class="fw-semibold small">{{ notif.titulo }}</div>
-                                            <div class="small text-secondary">{{ notif.mensagem|truncate(55) }}</div>
-                                            <div class="text-secondary" style="font-size: 0.6rem;">{{ notif.data_criacao.strftime('%d/%m/%Y %H:%M') }}</div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            {% endfor %}
-                        {% else %}
-                            <li class="text-center py-3 text-secondary small">
-                                <i class="bi bi-inbox"></i><br>Nenhuma notificação
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
-
-                <!-- Dropdown Usuário -->
-                <div class="dropdown">
-                    <button class="btn p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-                        <div class="user-avatar">
-                            {{ session.usuario.nome[:1] }}{{ session.usuario.nome.split()[-1][:1] if session.usuario.nome.split()|length > 1 else '' }}
-                        </div>
-                        <div class="d-none d-md-block text-start">
-                            <div class="fw-semibold small">{{ session.usuario.nome }}</div>
-                            <div class="text-secondary" style="font-size: 0.65rem;">{{ session.usuario.perfil|replace('_', ' ')|title }}</div>
-                        </div>
-                        <i class="fas fa-chevron-down small text-secondary"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('perfil') }}"><i class="fas fa-user me-2"></i> Meu Perfil</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('metricas_pessoais') }}"><i class="bi bi-graph-up me-2"></i> Minhas Métricas</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('gamificacao_perfil') }}"><i class="bi bi-trophy-fill me-2"></i> Minhas Conquistas</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('gamificacao_ranking') }}"><i class="bi bi-bar-chart-fill me-2"></i> Ranking da Empresa</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('metricas_empresa') }}"><i class="bi bi-building me-2"></i> Métricas da Empresa</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#feedback-modal"><i class="fas fa-star me-2 text-warning"></i> Feedback</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
-                    </ul>
-                </div>
-            </div>
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show alert-custom" role="alert">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
             {% endif %}
-        </div>
-    </nav>
-
-    <!-- Sidebar -->
-    {% if session.usuario %}
-    <div class="sidebar" id="sidebar">
-        <!-- PRINCIPAL -->
-        <div class="nav-section">
-            <div class="nav-section-title">PRINCIPAL</div>
-            <a href="{{ url_for('dashboard') }}" class="nav-link-custom {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-            <a href="{{ url_for('listar_contratos') }}" class="nav-link-custom {% if request.endpoint == 'listar_contratos' %}active{% endif %}">
-                <i class="fas fa-file-contract"></i> Contratos
-            </a>
-            {% if session.usuario.perfil in ['admin_empresa', 'gestor', 'assistente'] %}
-            <a href="{{ url_for('contrato_novo') }}" class="nav-link-custom">
-                <i class="fas fa-plus-circle"></i> Novo Contrato
-            </a>
-            {% endif %}
-        </div>
-
-        <!-- MÉTRICAS & GAMIFICAÇÃO -->
-        <div class="nav-section">
-            <div class="nav-section-title">MÉTRICAS & GAMIFICAÇÃO</div>
-            <a href="{{ url_for('metricas_pessoais') }}" class="nav-link-custom">
-                <i class="bi bi-graph-up"></i> Minhas Métricas
-            </a>
-            <a href="{{ url_for('metricas_empresa') }}" class="nav-link-custom">
-                <i class="bi bi-building"></i> Métricas da Empresa
-            </a>
-            <a href="{{ url_for('gamificacao_perfil') }}" class="nav-link-custom">
-                <i class="bi bi-trophy-fill"></i> Minhas Conquistas
-            </a>
-            <a href="{{ url_for('gamificacao_ranking') }}" class="nav-link-custom">
-                <i class="bi bi-bar-chart-fill"></i> Ranking da Empresa
-            </a>
-            <a href="{{ url_for('gamificacao_historico') }}" class="nav-link-custom">
-                <i class="bi bi-clock-history"></i> Histórico de Pontos
-            </a>
-        </div>
-
-        <!-- ADMIN SISTEMA -->
-        {% if session.usuario.perfil == 'admin_sistema' %}
-        <div class="nav-section">
-            <div class="nav-section-title">ADMINISTRAÇÃO</div>
-            <a href="{{ url_for('admin_sistema.empresas') }}" class="nav-link-custom"><i class="fas fa-building"></i> Empresas</a>
-            <a href="{{ url_for('admin_sistema.ips_bloqueados') }}" class="nav-link-custom"><i class="fas fa-shield-alt"></i> IPs Bloqueados</a>
-            <a href="{{ url_for('admin_sistema.logs') }}" class="nav-link-custom"><i class="fas fa-history"></i> Logs</a>
-            <a href="{{ url_for('admin_sistema.feedbacks') }}" class="nav-link-custom"><i class="fas fa-star"></i> Feedbacks</a>
-        </div>
-        {% endif %}
-
-        <!-- ADMIN EMPRESA -->
-        {% if session.usuario.perfil == 'admin_empresa' %}
-        <div class="nav-section">
-            <div class="nav-section-title">EMPRESA</div>
-            <a href="{{ url_for('admin_empresa.usuarios') }}" class="nav-link-custom"><i class="fas fa-users"></i> Usuários</a>
-            <a href="{{ url_for('admin_empresa.configuracoes') }}" class="nav-link-custom"><i class="fas fa-cog"></i> Configurações</a>
-            <a href="{{ url_for('admin_empresa.estatisticas') }}" class="nav-link-custom"><i class="fas fa-chart-bar"></i> Estatísticas</a>
-        </div>
-        {% endif %}
+        {% endwith %}
     </div>
-    {% endif %}
 
-    <!-- Main Content -->
-    <main class="{% if session.usuario %}main-content{% else %}main-content-full p-4{% endif %}">
-        
-        <!-- Flash Messages Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090; margin-top: 80px;">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="toast show mb-2" role="alert" data-bs-autohide="true" data-bs-delay="5000" style="background: white; border: 1px solid var(--border-light); border-radius: 12px;">
-                            <div class="d-flex">
-                                <div class="toast-body py-2 px-3">
-                                    <i class="bi 
-                                        {% if category == 'success' %}bi-check-circle-fill text-success
-                                        {% elif category == 'danger' %}bi-exclamation-triangle-fill text-danger
-                                        {% elif category == 'warning' %}bi-exclamation-circle-fill text-warning
-                                        {% else %}bi-info-circle-fill text-primary{% endif %} me-2"></i>
-                                    {{ message }}
-                                </div>
-                                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
-
-        <!-- Conteúdo -->
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Modal Feedback -->
-    {% if session.usuario and not session.get('feedback_enviado') %}
-    <div class="modal fade" id="feedback-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-star text-warning me-2"></i>Avalie o ValidaPy</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body px-4 pb-2">
-                    <p class="text-secondary small">Sua opinião nos ajuda a melhorar!</p>
-                    <form id="feedback-form">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                        <div class="mb-4 text-center">
-                            <label class="form-label fw-semibold mb-3">Nota</label>
-                            <div class="d-flex justify-content-center gap-2">
-                                {% for i in range(1, 6) %}
-                                <button type="button" onclick="setRating({{ i }})" class="star btn p-0" data-rating="{{ i }}" style="font-size: 2rem; color: #cbd5e1;">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                                {% endfor %}
-                            </div>
-                            <input type="hidden" name="nota" id="nota-feedback" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Recomendaria?</label>
-                            <div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="recomendaria" value="true" id="recomendaSim">
-                                    <label class="form-check-label" for="recomendaSim"><i class="fas fa-thumbs-up text-success me-1"></i> Sim</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="recomendaria" value="false" id="recomendaNao">
-                                    <label class="form-check-label" for="recomendaNao"><i class="fas fa-thumbs-down text-danger me-1"></i> Não</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Sugestões</label>
-                            <textarea class="form-control" name="sugestao" rows="3" placeholder="Compartilhe sua experiência..." style="border-radius: 12px;"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer border-0 pb-4 px-4">
-                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Agora não</button>
-                    <button type="button" class="btn btn-primary-custom" onclick="submitFeedback()">Enviar Feedback</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% set is_auth = request.endpoint in ['login', 'recuperar_senha', 'redefinir_senha'] %}
     
+    {% if is_auth %}
+        <div class="auth-page">
+    {% else %}
+        <div class="dashboard-wrapper">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-brand">
+                    <i class="fas fa-file-contract"></i>
+                    <h3>System Contratos</h3>
+                    <p>Gestão de Contratos</p>
+                </div>
+                
+                <div class="sidebar-notificacao-sino" onclick="window.location.href='{{ url_for('notificacoes') }}'">
+                    <div class="sidebar-notificacao-sino-left">
+                        <i class="fas fa-bell"></i>
+                        <span>Notificações</span>
+                    </div>
+                    <div class="notificacao-badge" id="notificacaoBadge" style="display: {% if notificacoes_nao_lidas > 0 %}inline-flex{% else %}none{% endif %};">
+                        {{ notificacoes_nao_lidas|default(0) }}
+                    </div>
+                </div>
+                
+                <div class="sidebar-menu">
+                    <a href="{{ url_for('dashboard') }}" class="menu-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_gestor' or request.endpoint == 'dashboard_analista' or request.endpoint == 'dashboard_assistente' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('listar_contratos') }}" class="menu-item {% if request.endpoint == 'listar_contratos' %}active{% endif %}">
+                        <i class="fas fa-file-signature"></i>
+                        <span>Contratos</span>
+                    </a>
+                    {% if session.get('usuario', {}).get('perfil') in ['admin_empresa', 'admin_sistema'] %}
+                    <a href="{{ url_for('admin_clientes.index') }}" class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>Clientes</span>
+                    </a>
+                    {% endif %}
+                    <a href="#" class="menu-item" onclick="return false;">
+                        <i class="fas fa-cog"></i>
+                        <span>Configurações</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div class="top-navbar">
+                    <button class="btn btn-link d-md-none" id="sidebarToggle" style="color: var(--roxo-primary);">
+                        <i class="fas fa-bars fa-lg"></i>
+                    </button>
+                    <h4 class="page-title">{% block page_title %}{% endblock %}</h4>
+                    <div class="user-info">
+                        <span class="user-name">
+                            <i class="fas fa-user-circle"></i>
+                            {{ session.get('usuario', {}).get('nome', 'Usuário') }}
+                        </span>
+                        <a href="{{ url_for('logout') }}" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="content-area">
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+    
+    {% if is_auth %}
+        </div>
+    {% else %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- ========== BIBLIOTECAS JS ========== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- ========== SCRIPT PRINCIPAL SIMPLIFICADO ========== -->
     <script>
-        // Inicializar toasts
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.toast').forEach(el => {
-                new bootstrap.Toast(el, { autohide: true, delay: 4000 }).show();
-            });
-        });
-
-        // Toggle sidebar mobile
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-        }
-
-        // Atualizar notificações AJAX
-        function atualizarNotificacoes() {
-            fetch('/notificacoes/nao-lidas/count')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.querySelector('.notification-badge');
-                    if (badge) {
-                        if (data.total > 0) {
-                            badge.textContent = data.total > 99 ? '99+' : data.total;
-                            badge.style.display = 'inline-block';
-                        } else {
-                            badge.style.display = 'none';
+            // Toggle da sidebar
+            const toggleBtn = document.getElementById('sidebarToggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    document.getElementById('sidebar').classList.toggle('show');
+                });
+            }
+            
+            // Auto-fechar alerts
+            setTimeout(function() {
+                document.querySelectorAll('.alert').forEach(function(alert) {
+                    setTimeout(function() {
+                        if (alert && alert.remove) {
+                            alert.remove();
                         }
+                    }, 5000);
+                });
+            }, 1000);
+            
+            // Badge de notificações
+            async function atualizarBadge() {
+                try {
+                    const response = await fetch('/notificacoes/nao-lidas/count');
+                    const data = await response.json();
+                    const badge = document.getElementById('notificacaoBadge');
+                    if (badge && data.total > 0) {
+                        badge.textContent = data.total > 99 ? '99+' : data.total;
+                        badge.style.display = 'inline-flex';
+                    } else if (badge) {
+                        badge.style.display = 'none';
                     }
-                })
-                .catch(error => console.error('Erro:', error));
-        }
-        setInterval(atualizarNotificacoes, 30000);
-
-        // Feedback
-        {% if session.usuario and not session.get('feedback_enviado') %}
-        const stars = document.querySelectorAll('.star');
-        const notaInput = document.getElementById('nota-feedback');
-
-        function setRating(rating) {
-            notaInput.value = rating;
-            stars.forEach((star, index) => {
-                star.style.color = index < rating ? '#f59e0b' : '#cbd5e1';
-            });
-        }
-
-        function submitFeedback() {
-            const formData = new FormData(document.getElementById('feedback-form'));
-            fetch('/feedback', {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.sucesso) {
-                    bootstrap.Modal.getInstance(document.getElementById('feedback-modal')).hide();
-                    const toast = document.createElement('div');
-                    toast.className = 'toast show mb-2';
-                    toast.style.cssText = 'background: white; border: 1px solid #e4e7ed; border-radius: 12px;';
-                    toast.innerHTML = `<div class="d-flex"><div class="toast-body py-2 px-3 text-success"><i class="bi bi-check-circle-fill me-2"></i>${data.mensagem}</div></div>`;
-                    document.querySelector('.toast-container').appendChild(toast);
-                    new bootstrap.Toast(toast).show();
-                    setTimeout(() => toast.remove(), 5000);
+                } catch(e) {
+                    console.log('Erro ao atualizar badge');
                 }
-            });
-        }
-        {% endif %}
-
-        // Prevenir resubmissão
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
-        }
+            }
+            
+            atualizarBadge();
+            setInterval(atualizarBadge, 30000);
+            
+            console.log('✅ Sistema carregado');
+        });
     </script>
-
-    {% block extra_js %}{% endblock %}
+    
+    {% block scripts %}{% endblock %}
 </body>
 </html>

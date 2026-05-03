@@ -1,153 +1,127 @@
 # auth/ip_blocker.py
+"""
+Sistema de bloqueio de IP para prevenir ataques de força bruta
+"""
+import time
+from collections import defaultdict
 from datetime import datetime, timedelta
-from flask import request
-from core.database import Database
+import logging
 from config import Config
 
+logger = logging.getLogger(__name__)
+
+
 class IPBlocker:
-    """Sistema de bloqueio de IPs após múltiplas tentativas"""
+    """Gerenciador de bloqueio de IP para tentativas de login"""
     
-    @staticmethod
-    def registrar_tentativa(ip_address, email=None, sucesso=False):
-        """Registra uma tentativa de login"""
-        db = Database()
-        query = """
-            INSERT INTO tentativas_login (ip_address, email_utilizado, sucesso)
-            VALUES (%s, %s, %s)
-        """
-        db.execute(query, (ip_address, email, sucesso))
+    _attempts = defaultdict(list)
+    _blocked_ips = {}
     
-    @staticmethod
-    def verificar_bloqueio(ip_address):
-        """Verifica se um IP está bloqueado"""
-        db = Database()
-        
-        query = """
-            SELECT * FROM ips_bloqueados 
-            WHERE ip_address = %s AND ativo = TRUE AND expira_em > NOW()
-        """
-        bloqueado = db.fetch_one(query, (ip_address,))
-        
-        if bloqueado:
-            agora = datetime.now()
-            expira = bloqueado['expira_em']
-            minutos_restantes = int((expira - agora).total_seconds() / 60)
-            return True, minutos_restantes
-        
-        return False, 0
+    @classmethod
+    def _get_max_attempts(cls):
+        return getattr(Config, 'MAX_TENTATIVAS_LOGIN', 5)
     
-    @staticmethod
-    def processar_tentativa_falha(ip_address, email=None):
-        """Processa uma tentativa falha e bloqueia se necessário"""
-        db = Database()
+    @classmethod
+    def _get_block_minutes(cls):
+        return getattr(Config, 'TEMPO_BLOQUEIO_MINUTOS', 30)
+    
+    @classmethod
+    def register_failed_attempt(cls, ip):
+        """Registra uma tentativa de login falha"""
+        if not ip:
+            return
         
-        # Registra a tentativa
-        IPBlocker.registrar_tentativa(ip_address, email, False)
+        now = time.time()
+        cls._attempts[ip].append(now)
         
-        # Conta tentativas nos últimos 30 minutos
-        query = """
-            SELECT COUNT(*) as tentativas FROM tentativas_login
-            WHERE ip_address = %s 
-            AND sucesso = FALSE
-            AND data_tentativa > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
-        """
-        result = db.fetch_one(query, (ip_address,))
-        tentativas = result['tentativas'] if result else 0
+        # Limpa tentativas antigas (> 1 hora)
+        one_hour_ago = now - 3600
+        cls._attempts[ip] = [t for t in cls._attempts[ip] if t > one_hour_ago]
         
-        # Se atingiu o limite, bloqueia
-        if tentativas >= Config.MAX_TENTATIVAS_LOGIN:
-            expira_em = datetime.now() + timedelta(minutes=Config.TEMPO_BLOQUEIO_MINUTOS)
-            
-            # Verifica se já existe registro
-            check = db.fetch_one(
-                "SELECT id FROM ips_bloqueados WHERE ip_address = %s", 
-                (ip_address,)
-            )
-            
-            if check:
-                query = """
-                    UPDATE ips_bloqueados 
-                    SET tentativas_falhas = tentativas_falhas + 1,
-                        expira_em = %s,
-                        ativo = TRUE
-                    WHERE ip_address = %s
-                """
-                db.execute(query, (expira_em, ip_address))
+        total = len(cls._attempts[ip])
+        max_attempts = cls._get_max_attempts()
+        
+        logger.warning(f"Tentativa falha para IP: {ip}. Total: {total}/{max_attempts}")
+        
+        # Verificar se deve bloquear
+        if total >= max_attempts:
+            block_until = datetime.now() + timedelta(minutes=cls._get_block_minutes())
+            cls._blocked_ips[ip] = block_until
+            logger.warning(f"IP {ip} BLOQUEADO até {block_until.strftime('%H:%M:%S')}")
+    
+    @classmethod
+    def is_blocked(cls, ip):
+        """Verifica se IP está bloqueado"""
+        if not ip:
+            return False
+        
+        # Verificar bloqueio ativo
+        if ip in cls._blocked_ips:
+            if datetime.now() < cls._blocked_ips[ip]:
+                return True
             else:
-                query = """
-                    INSERT INTO ips_bloqueados 
-                    (ip_address, tentativas_falhas, expira_em)
-                    VALUES (%s, 1, %s)
-                """
-                db.execute(query, (ip_address, expira_em))
-            
-            return True  # IP foi bloqueado
+                # Bloqueio expirado
+                del cls._blocked_ips[ip]
         
-        return False  # Ainda não bloqueado
-    
-    @staticmethod
-    def processar_tentativa_sucesso(ip_address):
-        """Processa uma tentativa bem-sucedida"""
-        # Registra tentativa com sucesso
-        IPBlocker.registrar_tentativa(ip_address, sucesso=True)
+        # Verificar tentativas no período
+        now = time.time()
+        attempts = cls._attempts.get(ip, [])
+        block_seconds = cls._get_block_minutes() * 60
         
-        # Se o IP estava bloqueado, desbloqueia
-        db = Database()
-        query = "UPDATE ips_bloqueados SET ativo = FALSE WHERE ip_address = %s"
-        db.execute(query, (ip_address,))
+        recent = [t for t in attempts if now - t < block_seconds]
+        
+        return len(recent) >= cls._get_max_attempts()
     
-    @staticmethod
-    def listar_bloqueados():
-        """Lista todos os IPs bloqueados (para admin)"""
-        db = Database()
-        query = """
-            SELECT *, 
-                   TIMESTAMPDIFF(MINUTE, NOW(), expira_em) as minutos_restantes
-            FROM ips_bloqueados 
-            WHERE ativo = TRUE AND expira_em > NOW()
-            ORDER BY data_bloqueio DESC
-        """
-        return db.fetch_all(query)
+    @classmethod
+    def clear_failed_attempts(cls, ip):
+        """Limpa tentativas falhas após login bem-sucedido"""
+        if ip:
+            if ip in cls._attempts:
+                del cls._attempts[ip]
+            if ip in cls._blocked_ips:
+                del cls._blocked_ips[ip]
+            logger.info(f"Tentativas limpas para IP: {ip}")
     
-    @staticmethod
-    def desbloquear(ip_address):
+    @classmethod
+    def get_block_time_remaining(cls, ip):
+        """Retorna tempo restante de bloqueio em minutos"""
+        if not ip:
+            return 0
+        
+        if ip in cls._blocked_ips:
+            remaining = (cls._blocked_ips[ip] - datetime.now()).total_seconds()
+            return max(0, int(remaining / 60)) + 1
+        
+        return 0
+    
+    @classmethod
+    def get_remaining_attempts(cls, ip):
+        """Retorna o número de tentativas restantes"""
+        if not ip or cls.is_blocked(ip):
+            return 0
+        
+        recent = [t for t in cls._attempts.get(ip, []) 
+                  if time.time() - t < cls._get_block_minutes() * 60]
+        
+        return max(0, cls._get_max_attempts() - len(recent))
+    
+    @classmethod
+    def unblock_ip(cls, ip):
         """Desbloqueia um IP manualmente"""
-        db = Database()
-        query = "UPDATE ips_bloqueados SET ativo = FALSE WHERE ip_address = %s"
-        db.execute(query, (ip_address,))
-        return True
+        if ip in cls._blocked_ips:
+            del cls._blocked_ips[ip]
+            cls.clear_failed_attempts(ip)
+            logger.info(f"IP {ip} desbloqueado manualmente")
+            return True
+        return False
     
-    @staticmethod
-    def estatisticas():
-        """Estatísticas de bloqueios para admin"""
-        db = Database()
-        
-        # Total de bloqueios ativos
-        ativos = db.fetch_one("""
-            SELECT COUNT(*) as total FROM ips_bloqueados 
-            WHERE ativo = TRUE AND expira_em > NOW()
-        """)
-        
-        # Bloqueios por motivo
-        por_motivo = db.fetch_all("""
-            SELECT motivo, COUNT(*) as total
-            FROM ips_bloqueados
-            WHERE data_bloqueio > DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY motivo
-        """) or []
-        
-        # Tentativas nas últimas 24h
-        tentativas = db.fetch_one("""
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN sucesso = TRUE THEN 1 ELSE 0 END) as sucessos,
-                SUM(CASE WHEN sucesso = FALSE THEN 1 ELSE 0 END) as falhas
-            FROM tentativas_login
-            WHERE data_tentativa > DATE_SUB(NOW(), INTERVAL 24 HOUR)
-        """) or {'total': 0, 'sucessos': 0, 'falhas': 0}
-        
-        return {
-            'ativos': ativos['total'] if ativos else 0,
-            'por_motivo': por_motivo,
-            'tentativas_24h': tentativas
-        }
+    @classmethod
+    def reset(cls):
+        """Reseta todas as tentativas (para testes)"""
+        cls._attempts.clear()
+        cls._blocked_ips.clear()
+        logger.info("IPBlocker resetado")
+
+
+# Instância global para compatibilidade com chamadas de método de instância
+ip_blocker = IPBlocker

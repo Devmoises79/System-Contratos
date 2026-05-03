@@ -1,24 +1,15 @@
+# models/__init__.py
 from models.empresa import Empresa
 from models.usuario import Usuario
 from models.contrato import Contrato
-from models.notificacao import Notificacao, SistemaNotificacoes
-from models.gamificacao import (
-    Conquista, 
-    ConquistaUsuario, 
-    SistemaReconhecimento, 
-    Nivel, 
-    EstatisticasGamificacao
-)
+from models.notificacao import Notificacao
+from models.gamificacao import Gamificacao, PontuacaoUsuario
 
 __all__ = [
-    'Empresa', 
+    'Empresa',
     'Usuario', 
-    'Contrato', 
-    'Notificacao', 
-    'SistemaNotificacoes',
-    'Conquista',
-    'ConquistaUsuario', 
-    'SistemaReconhecimento', 
-    'Nivel', 
-    'EstatisticasGamificacao'
+    'Contrato',
+    'Notificacao',
+    'Gamificacao',
+    'PontuacaoUsuario'
 ]

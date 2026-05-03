@@ -1,0 +1,43 @@
+/* static/css/gamificacao.css */
+/* Estilos para o sistema de gamificação */
+
+/* Toast de conquista */
+.toast-conquista {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.toast-nivel {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+/* Animações de conquista */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.conquista-efeito {
+    animation: bounce 0.5s ease;
+}
+
+/* Ranking */
+.ranking-item {
+    transition: transform 0.2s ease;
+}
+
+.ranking-item:hover {
+    transform: translateX(5px);
+}
+
+.ranking-posicao.top-1 {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #856404;
+}
+
+.ranking-posicao.top-2 {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+}
+
+.ranking-posicao.top-3 {
+    background: linear-gradient(135deg, #cd7f32, #daa520);
+}

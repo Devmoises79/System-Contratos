@@ -1,47 +1,244 @@
-<!-- templates/auth/recuperar_senha.html -->
 {% extends "base.html" %}
 
-{% block title %}Recuperar Senha - ValidaPy{% endblock %}
-
 {% block content %}
-<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -70px;">
-    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="card-custom p-4 p-lg-5 fade-in">
-            <div class="text-center mb-4">
-                <div class="logo-container mx-auto mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--azul-principal), var(--verde-principal));">
-                    <span class="logo-text" style="font-size: 1.8rem;">V</span>
-                </div>
-                <h2 class="fw-bold mb-2" style="color: var(--cinza-texto);">Recuperar Senha</h2>
-                <p class="text-muted small">Digite seu e-mail para receber as instruções</p>
+<div class="login-wrapper">
+    <div class="login-box">
+        <!-- Logo/Brand -->
+        <div class="login-brand text-center">
+            <div class="brand-icon">
+                <i class="fas fa-key"></i>
             </div>
-
+            <h2 class="brand-name">Recuperar Senha</h2>
+            <p class="brand-subtitle">Redefina sua senha em poucos passos</p>
+        </div>
+        
+        <!-- Form -->
+        <div class="login-form">
+            <h3 class="form-title">Esqueceu sua senha?</h3>
+            <p class="form-subtitle">
+                Digite seu e-mail e enviaremos um link para redefinir sua senha.
+            </p>
+            
             <form method="POST">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i> E-mail cadastrado
+                    </label>
+                    <input type="email" 
+                           name="email" 
+                           class="form-control" 
+                           placeholder="seu@email.com"
+                           required>
+                </div>
                 
-                <div class="mb-4">
-                    <label class="form-label fw-medium mb-2">E-mail cadastrado</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bi bi-envelope" style="color: var(--azul-principal);"></i>
-                        </span>
-                        <input type="email" class="form-control border-start-0" name="email" 
-                               placeholder="seu@email.com" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                    <i class="bi bi-send me-2"></i>
-                    Enviar Instruções
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-paper-plane"></i> Enviar Link
                 </button>
-
-                <div class="text-center">
-                    <a href="{{ url_for('login') }}" class="small text-decoration-none" style="color: var(--azul-principal);">
-                        <i class="bi bi-arrow-left me-1"></i>
-                        Voltar para o login
-                    </a>
-                </div>
             </form>
+            
+            <div class="login-footer-link">
+                <a href="{{ url_for('login') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Voltar para o login
+                </a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="login-footer">
+            <p>&copy; 2024 System Contratos. Todos os direitos reservados.</p>
         </div>
     </div>
 </div>
+
+<style>
+    .login-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0;
+        padding: 20px;
+        overflow: hidden;
+    }
+    
+    .login-box {
+        width: 100%;
+        max-width: 440px;
+        background: white;
+        border-radius: 24px;
+        padding: 40px 32px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.5s ease;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .brand-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+    }
+    
+    .brand-icon i {
+        font-size: 32px;
+        color: white;
+    }
+    
+    .brand-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1c23;
+        margin: 0 0 4px;
+        text-align: center;
+    }
+    
+    .brand-subtitle {
+        font-size: 13px;
+        color: #8898aa;
+        margin: 0;
+        text-align: center;
+    }
+    
+    .form-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #1a1c23;
+        margin: 0 0 8px;
+        text-align: center;
+    }
+    
+    .form-subtitle {
+        font-size: 13px;
+        color: #8898aa;
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #525f7f;
+        margin-bottom: 8px;
+    }
+    
+    .form-label i {
+        width: 18px;
+        margin-right: 6px;
+        color: #f5576c;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+    
+    .form-control:focus {
+        border-color: #f5576c;
+        box-shadow: 0 0 0 3px rgba(245,87,108,0.1);
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245,87,108,0.3);
+    }
+    
+    .btn-login i {
+        margin-right: 8px;
+    }
+    
+    .login-footer-link {
+        margin-top: 24px;
+        text-align: center;
+    }
+    
+    .back-link {
+        font-size: 13px;
+        color: #667eea;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+        color: #5a67d8;
+        text-decoration: underline;
+    }
+    
+    .login-footer {
+        margin-top: 32px;
+        padding-top: 20px;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .login-footer p {
+        font-size: 11px;
+        color: #8898aa;
+        margin: 0;
+    }
+    
+    @media (max-width: 480px) {
+        .login-box {
+            padding: 32px 24px;
+        }
+        
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+        }
+        
+        .brand-icon i {
+            font-size: 28px;
+        }
+        
+        .brand-name {
+            font-size: 20px;
+        }
+        
+        .form-title {
+            font-size: 20px;
+        }
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Contratos - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-file-signature me-2"></i> Contratos
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    <!-- Filtros e Busca -->
+    <div class="card-branco mb-4">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="searchInput" 
+                               placeholder="Buscar por número, contratante ou contratada..." 
+                               style="border-left: none;">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos os status</option>
+                        <option value="rascunho"> Rascunho</option>
+                        <option value="em_analise"> Em Análise</option>
+                        <option value="aguardando_aprovacao"> Aguardando Aprovação</option>
+                        <option value="ativo"> Ativo</option>
+                        <option value="encerrado"> Encerrado</option>
+                        <option value="cancelado"> Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn-outline-roxo w-100" id="clearFilters">
+                        <i class="fas fa-eraser me-1"></i> Limpar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{{ url_for('admin_empresa.novo_contrato') }}" class="btn-roxo w-100">
+                        <i class="fas fa-plus-circle me-1"></i> Novo Contrato
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabela de Contratos -->
+    <div class="card-branco">
+        <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-list me-2" style="color: #6B46C1;"></i>
+                Lista de Contratos
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom mb-0" id="contratosTable">
+                    <thead>
+                        <tr>
+                            <th>Nº Contrato</th>
+                            <th>Contratante</th>
+                            <th>Contratada</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if contratos and contratos|length > 0 %}
+                            {% for contrato in contratos %}
+                            <tr>
+                                <td>
+                                    <strong>{{ contrato.numero_contrato or 'CT-' ~ contrato.id }}</strong>
+                                    <br>
+                                    <small class="text-muted">ID: {{ contrato.id }}</small>
+                                 </br>
+                                <td>
+                                    {{ contrato.contratante_nome or 'N/A' }}
+                                    {% if contrato.contratante_cnpj %}
+                                    <br><small class="text-muted">{{ contrato.contratante_cnpj }}</small>
+                                    {% endif %}
+                                 </br>
+                                <td>
+                                    {{ contrato.contratada_nome or 'N/A' }}
+                                    {% if contrato.contratada_cnpj %}
+                                    <br><small class="text-muted">{{ contrato.contratada_cnpj }}</small>
+                                    {% endif %}
+                                 </br>
+                                <td>R$ {{ "%.2f"|format(contrato.valor|default(0)) }} </br>
+                                <td>
+                                    {% if contrato.status == 'ativo' %}
+                                        <span class="badge-ativo"><i class="fas fa-check-circle me-1"></i> Ativo</span>
+                                    {% elif contrato.status == 'em_analise' %}
+                                        <span class="badge-analise"><i class="fas fa-clock me-1"></i> Em Análise</span>
+                                    {% elif contrato.status == 'aguardando_aprovacao' %}
+                                        <span class="badge-warning-custom"><i class="fas fa-hourglass-half me-1"></i> Aguardando</span>
+                                    {% elif contrato.status == 'rascunho' %}
+                                        <span class="badge-rascunho"><i class="fas fa-pencil-alt me-1"></i> Rascunho</span>
+                                    {% elif contrato.status == 'encerrado' %}
+                                        <span class="badge-encerrado"><i class="fas fa-flag-checkered me-1"></i> Encerrado</span>
+                                    {% elif contrato.status == 'cancelado' %}
+                                        <span class="badge-cancelado"><i class="fas fa-ban me-1"></i> Cancelado</span>
+                                    {% else %}
+                                        <span class="badge-pendente">{{ contrato.status }}</span>
+                                    {% endif %}
+                                 </br>
+                                <td>
+                                    {% if contrato.data_criacao %}
+                                        {{ contrato.data_criacao.strftime('%d/%m/%Y') if contrato.data_criacao is not string else contrato.data_criacao[:10] }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                 </br>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('admin_empresa.ver_contrato', id=contrato.id) }}" 
+                                           class="btn btn-sm" 
+                                           style="background: #f3e8ff; color: #6B46C1; border-radius: 8px; padding: 6px 12px;">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('admin_empresa.editar_contrato', id=contrato.id) }}" 
+                                           class="btn btn-sm" 
+                                           style="background: #fff3e0; color: #ed8936; border-radius: 8px; padding: 6px 12px;">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                 </br>
+                              </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3" style="color: #CBD5E0;"></i>
+                                    <p class="text-muted mb-0">Nenhum contrato cadastrado</p>
+                                    <a href="{{ url_for('admin_empresa.novo_contrato') }}" class="btn-outline-roxo mt-3">
+                                        <i class="fas fa-plus-circle me-1"></i> Criar primeiro contrato
+                                    </a>
+                                 </td>
+                              </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 18px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 14px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #6B46C1;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+    }
+    .input-group-text {
+        border-radius: 12px 0 0 12px;
+        border: 1px solid #e2e8f0;
+    }
+    .badge-ativo {
+        background: linear-gradient(135deg, #10b981, #059669);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-analise {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-warning-custom {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-rascunho {
+        background: linear-gradient(135deg, #868e96, #6c757d);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-encerrado {
+        background: linear-gradient(135deg, #4a5568, #2d3748);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-cancelado {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+</style>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const clearBtn = document.getElementById('clearFilters');
+    const tableRows = document.querySelectorAll('#contratosTable tbody tr');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const statusCell = row.cells[4]?.textContent.toLowerCase() || '';
+            let statusMatch = true;
+            
+            if (statusValue) {
+                if (statusValue === 'ativo') statusMatch = statusCell.includes('ativo');
+                else if (statusValue === 'em_analise') statusMatch = statusCell.includes('em análise');
+                else if (statusValue === 'aguardando_aprovacao') statusMatch = statusCell.includes('aguardando');
+                else if (statusValue === 'rascunho') statusMatch = statusCell.includes('rascunho');
+                else if (statusValue === 'encerrado') statusMatch = statusCell.includes('encerrado');
+                else if (statusValue === 'cancelado') statusMatch = statusCell.includes('cancelado');
+                else statusMatch = true;
+            }
+            
+            const searchMatch = searchTerm === '' || text.includes(searchTerm);
+            
+            if (statusMatch && searchMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    if (searchInput) searchInput.addEventListener('keyup', filterTable);
+    if (statusFilter) statusFilter.addEventListener('change', filterTable);
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (statusFilter) statusFilter.value = '';
+            filterTable();
+        });
+    }
+</script>
+{% endblock %}

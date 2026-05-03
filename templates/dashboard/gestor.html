@@ -1,127 +1,624 @@
-<!-- templates/dashboard/gestor.html -->
 {% extends "base.html" %}
 
-{% block title %}Dashboard Gestor - ValidaPy{% endblock %}
+{% block title %}Dashboard Gestor - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-chart-line me-2"></i> Dashboard do Gestor
+{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Cabeçalho -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); margin-bottom: 0.25rem;">Dashboard do Gestor</h1>
-            <p style="color: var(--cinza-texto); opacity: 0.7; font-size: 1rem;">Visão geral dos contratos e aprovações</p>
+<div class="container-fluid px-0">
+    
+    <!-- Seção: Métricas da Empresa -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3 section-title">
+                <i class="fas fa-building me-2"></i> Métricas da Empresa
+            </h5>
         </div>
-        <span style="background: var(--azul-claro); color: var(--azul-principal); padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.9rem; font-weight: 500;">
-            <i class="bi bi-person-badge me-1"></i>
-            Gestor
-        </span>
     </div>
-
-    <!-- Cards de Estatísticas -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--azul-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-file-text" style="font-size: 1.5rem; color: var(--azul-principal);"></i>
+    
+    <!-- Cards de Métricas - Primeira Linha -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card-roxo card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Total de Contratos</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.total|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-file-signature fa-2x"></i>
+                        </div>
                     </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px;">TOTAL DE CONTRATOS</span>
+                    <div class="mt-2">
+                        <small class="opacity-50">Total geral da empresa</small>
+                    </div>
                 </div>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ stats.total }}</div>
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--amarelo-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-coin" style="font-size: 1.5rem; color: var(--amarelo-escuro);"></i>
+        <div class="col-md-3 mb-3">
+            <div class="card-preto card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Contratos Ativos</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.ativos|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
                     </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px;">VALOR TOTAL</span>
+                    <div class="mt-2">
+                        <small class="opacity-50">Em vigor</small>
+                    </div>
                 </div>
-                <div style="font-size: 2rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">R$ {{ "%.2f"|format(stats.total_valor) }}</div>
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width: 48px; height: 48px; background: var(--vermelho-claro); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-hourglass-split" style="font-size: 1.5rem; color: var(--vermelho-principal);"></i>
+        <div class="col-md-3 mb-3">
+            <div class="card-roxo card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Em Análise</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.em_analise|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
                     </div>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7; letter-spacing: 0.5px;">PENDENTES</span>
+                    <div class="mt-2">
+                        <small class="opacity-50">Aguardando análise</small>
+                    </div>
                 </div>
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--cinza-texto); line-height: 1;">{{ contratos_pendentes|length }}</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card-preto card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 opacity-75">Aguardando Aprovação</h6>
+                            <h2 class="mb-0 fw-bold counter-number">{{ stats.aguardando|default(0) }}</h2>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fas fa-hourglass-half fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="opacity-50">Pendentes de aprovação</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Contratos Pendentes -->
-    <div class="card-custom p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin: 0;">Contratos Pendentes de Aprovação</h5>
-            <a href="{{ url_for('listar_contratos') }}" style="color: var(--azul-principal); text-decoration: none;">
-                Ver todos <i class="bi bi-arrow-right ms-1"></i>
-            </a>
+    
+    <!-- Cards Financeiros -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card-detalhe card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-2 text-muted">Valor Total Previsto</h6>
+                            <h2 class="mb-0 fw-bold" style="color: #6B46C1;">
+                                R$ {{ "%.2f"|format(stats.total_valor|default(0)) }}
+                            </h2>
+                        </div>
+                        <div class="icon-box-small" style="background: #6B46C115;">
+                            <i class="fas fa-chart-line fa-2x" style="color: #6B46C1;"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-3 mb-0 small">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Soma de TODOS os contratos (previsto)
+                    </p>
+                </div>
+            </div>
         </div>
         
-        <div class="table-responsive">
-            <table class="table" style="border-collapse: separate; border-spacing: 0 8px;">
-                <thead>
-                    <tr>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Nº Contrato</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Contratante</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Valor</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Data</th>
-                        <th style="padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--cinza-texto); opacity: 0.7;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for contrato in contratos_pendentes %}
-                    <tr style="background: var(--branco-fundo); border-radius: 12px;">
-                        <td style="padding: 1rem 0.5rem;">
-                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; font-weight: 500;">
-                                {{ contrato.numero_contrato }}
-                            </a>
-                        </td>
-                        <td style="padding: 1rem 0.5rem;">{{ contrato.contratante_nome }}</td>
-                        <td style="padding: 1rem 0.5rem; font-weight: 600;">R$ {{ "%.2f"|format(contrato.valor) }}</td>
-                        <td style="padding: 1rem 0.5rem; color: var(--cinza-texto); opacity: 0.7;">{{ contrato.data_criacao.strftime('%d/%m/%Y') }}</td>
-                        <td style="padding: 1rem 0.5rem;">
-                            <a href="{{ url_for('ver_contrato', id=contrato.id) }}" style="color: var(--azul-principal); text-decoration: none; margin-right: 0.5rem;">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <button style="background: transparent; border: none; color: var(--azul-principal);">
-                                <i class="bi bi-check-circle"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4" style="color: var(--cinza-texto); opacity: 0.7;">
-                            Nenhum contrato pendente de aprovação.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-md-6 mb-3">
+            <div class="card-detalhe card-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-2 text-muted">Ticket Médio</h6>
+                            <h2 class="mb-0 fw-bold" style="color: #10b981;">
+                                R$ {{ "%.2f"|format(stats.media|default(0)) }}
+                            </h2>
+                        </div>
+                        <div class="icon-box-small" style="background: #10b98115;">
+                            <i class="fas fa-calculator fa-2x" style="color: #10b981;"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-3 mb-0 small">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Média dos contratos ATIVOS (R$ {{ "%.2f"|format(stats.total_valor_ativos|default(0)) }} / {{ stats.ativos|default(0) }} contrato(s))
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- Gráfico de Contratos por Mês -->
-    <div class="card-custom p-4">
-        <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 1.5rem;">Contratos por Mês</h5>
-        
-        <div class="position-relative" style="height: 200px;">
-            <div class="d-flex justify-content-around align-items-end h-100">
-                {% for mes in stats.por_mes[:6] %}
-                <div class="d-flex flex-column align-items-center" style="width: 60px;">
-                    <div style="height: {{ mes.quantidade * 15 }}px; width: 30px; background: var(--azul-principal); border-radius: 4px 4px 0 0;"></div>
-                    <span style="margin-top: 8px; font-size: 0.9rem;">{{ mes.mes }}</span>
+    
+    <!-- Contratos Pendentes de Aprovação -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-tabela card-hover">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-clock me-2" style="color: #f59e0b;"></i>
+                            Contratos Pendentes de Aprovação
+                        </h5>
+                        <a href="{{ url_for('listar_contratos') }}?status=aguardando_aprovacao" class="btn-outline-roxo btn-sm">
+                            Ver todos <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
                 </div>
-                {% endfor %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nº Contrato</th>
+                                    <th>Contratante</th>
+                                    <th>Valor</th>
+                                    <th>Solicitado por</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if contratos_pendentes and contratos_pendentes|length > 0 %}
+                                    {% for contrato in contratos_pendentes %}
+                                    <tr class="table-row-hover">
+                                        <td>
+                                            <strong>{{ contrato.numero_contrato }}</strong>
+                                            <br>
+                                            <small class="text-muted">ID: {{ contrato.id }}</small>
+                                         </br>
+                                        <td>{{ contrato.contratante_nome|truncate(35) if contrato.contratante_nome else '-' }}</br>
+                                        <td>R$ {{ "%.2f"|format(contrato.valor or 0) }}</br>
+                                        <td>
+                                            <i class="fas fa-user-circle me-1" style="color: #6B46C1;"></i>
+                                            {{ contrato.get_criador_nome() }}
+                                         </br>
+                                        <td>
+                                            <i class="fas fa-calendar me-1 text-muted"></i>
+                                            {{ contrato.data_solicitacao.strftime('%d/%m/%Y') if contrato.data_solicitacao else '-' }}
+                                         </br>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" 
+                                                   class="btn-action btn-view" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <form method="POST" action="{{ url_for('aprovar_contrato', id=contrato.id) }}" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Aprovar este contrato?')">
+                                                    <button type="submit" class="btn-action btn-approve" title="Aprovar">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('devolver_para_analista', id=contrato.id) }}" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Devolver este contrato para análise?')">
+                                                    <button type="submit" class="btn-action btn-reject" title="Rejeitar">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                         </br>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-check-circle fa-3x mb-3" style="color: #10b981;"></i>
+                                            <p class="text-muted mb-0">Nenhum contrato pendente de aprovação</p>
+                                            <small class="text-muted">Todos os contratos estão em dia</small>
+                                         </br>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contratos em Análise -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-tabela card-hover">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-search me-2" style="color: #3b82f6;"></i>
+                            Contratos em Análise
+                        </h5>
+                        <a href="{{ url_for('listar_contratos') }}?status=em_analise" class="btn-outline-roxo btn-sm">
+                            Ver todos <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nº Contrato</th>
+                                    <th>Contratante</th>
+                                    <th>Valor</th>
+                                    <th>Analista</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if contratos_em_analise and contratos_em_analise|length > 0 %}
+                                    {% for contrato in contratos_em_analise %}
+                                    <tr class="table-row-hover">
+                                        <td>
+                                            <strong>{{ contrato.numero_contrato }}</strong>
+                                            <br>
+                                            <small class="text-muted">ID: {{ contrato.id }}</small>
+                                         </br>
+                                        <td>{{ contrato.contratante_nome|truncate(35) if contrato.contratante_nome else '-' }}</br>
+                                        <td>R$ {{ "%.2f"|format(contrato.valor or 0) }}</br>
+                                        <td>
+                                            <i class="fas fa-user-check me-1" style="color: #3b82f6;"></i>
+                                            {{ contrato.get_atualizador_nome() or 'Não designado' }}
+                                         </br>
+                                        <td>
+                                            <i class="fas fa-calendar me-1 text-muted"></i>
+                                            {{ contrato.data_atualizacao.strftime('%d/%m/%Y') if contrato.data_atualizacao else '-' }}
+                                         </br>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ url_for('ver_contrato', id=contrato.id) }}" 
+                                                   class="btn-action btn-view" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <form method="POST" action="{{ url_for('enviar_para_gestor', id=contrato.id) }}" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Enviar este contrato para aprovação?')">
+                                                    <button type="submit" class="btn-action btn-send" title="Enviar para Aprovação">
+                                                        <i class="fas fa-paper-plane"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                         </br>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-inbox fa-3x mb-3" style="color: #CBD5E0;"></i>
+                                            <p class="text-muted mb-0">Nenhum contrato em análise</p>
+                                         </br>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Atalhos Rápidos -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('listar_contratos') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-file-contract fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Contratos</h5>
+                    <p class="text-muted small">Gerencie todos os contratos</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('metricas_empresa') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-chart-pie fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Métricas</h5>
+                    <p class="text-muted small">Visualize indicadores da empresa</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('gamificacao_ranking') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-trophy fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Ranking</h5>
+                    <p class="text-muted small">Veja o ranking da equipe</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card-atalho card-hover text-center" onclick="window.location.href='{{ url_for('notificacoes') }}'">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper-atalho mx-auto mb-3">
+                        <i class="fas fa-bell fa-2x"></i>
+                    </div>
+                    <h5 class="mb-1">Notificações</h5>
+                    <p class="text-muted small">Acompanhe as atividades</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Animações e Hover Effects */
+    .card-roxo, .card-preto, .card-detalhe, .card-tabela, .card-atalho {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    
+    .card-hover {
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .card-hover::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 35px rgba(0,0,0,0.15);
+    }
+    
+    .card-hover:hover::after {
+        opacity: 1;
+    }
+    
+    .icon-box, .icon-box-small, .icon-wrapper-atalho {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card-hover:hover .icon-box i,
+    .card-hover:hover .icon-box-small i,
+    .card-hover:hover .icon-wrapper-atalho i {
+        transform: scale(1.15) rotate(5deg);
+    }
+    
+    .section-title {
+        position: relative;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .section-title:hover {
+        transform: translateX(8px);
+        color: #6B46C1;
+    }
+    
+    .section-title i {
+        transition: transform 0.3s ease;
+    }
+    
+    .section-title:hover i {
+        transform: scale(1.1);
+    }
+    
+    .card-detalhe {
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .card-detalhe:hover {
+        background: linear-gradient(135deg, #fff, #f8f9ff);
+    }
+    
+    .card-atalho {
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .card-atalho:hover {
+        background: linear-gradient(135deg, #fff, #faf5ff);
+    }
+    
+    .icon-wrapper-atalho {
+        width: 60px;
+        height: 60px;
+        background: #f3e8ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .card-atalho:hover .icon-wrapper-atalho {
+        background: #6B46C1;
+    }
+    
+    .card-atalho:hover .icon-wrapper-atalho i {
+        color: white !important;
+    }
+    
+    .table-row-hover {
+        transition: all 0.2s ease;
+    }
+    
+    .table-row-hover:hover {
+        background: #faf5ff;
+        transform: scale(1.01);
+        cursor: pointer;
+    }
+    
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-view {
+        background: #f3e8ff;
+        color: #6B46C1;
+    }
+    
+    .btn-view:hover {
+        background: #6B46C1;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+    }
+    
+    .btn-approve {
+        background: #e8f5e9;
+        color: #10b981;
+    }
+    
+    .btn-approve:hover {
+        background: #10b981;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-reject {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+    
+    .btn-reject:hover {
+        background: #ef4444;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-send {
+        background: #e0f2fe;
+        color: #3b82f6;
+    }
+    
+    .btn-send:hover {
+        background: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .card-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+    }
+    
+    .card-preto {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        color: white;
+    }
+    
+    .table-custom thead {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+    }
+    
+    .table-custom thead th {
+        padding: 14px 20px;
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+    }
+    
+    .table-custom tbody td {
+        padding: 12px 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+        color: #1a202c;
+    }
+    
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 6px 16px;
+        font-weight: 600;
+        font-size: 12px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-roxo.btn-sm {
+        padding: 4px 12px;
+        font-size: 11px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Contador animado apenas para números inteiros (não para valores monetários)
+        const counters = document.querySelectorAll('.counter-number');
+        counters.forEach(counter => {
+            // Pular se for um card financeiro (contém R$)
+            const parentCard = counter.closest('.card-detalhe');
+            if (parentCard) return;
+            
+            let targetText = counter.innerText;
+            let target = parseInt(targetText);
+            
+            if (!isNaN(target) && target > 0) {
+                let current = 0;
+                let increment = target / 50;
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        counter.innerText = Math.ceil(current);
+                        setTimeout(updateCounter, 20);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCounter();
+            }
+        });
+    });
+</script>
 {% endblock %}

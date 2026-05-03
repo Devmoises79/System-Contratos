@@ -1,195 +1,194 @@
 {% extends "base.html" %}
 
+{% block title %}Métricas da Empresa - ValidaPy{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <div class="avatar-circle" style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                <span style="font-size: 1.5rem; font-weight: bold;">{{ session.usuario.nome[:2].upper() }}</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <h3 class="mb-0">Olá, {{ session.usuario.nome }}!</h3>
-                            <p class="mb-0 opacity-75">Este é seu espaço de autoconhecimento. Acompanhe sua evolução e desempenho.</p>
-                        </div>
-                        <div class="col-auto">
-                            <span class="badge bg-light text-dark">
-                                <i class="bi bi-calendar"></i> {{ now().strftime('%d/%m/%Y') }}
-                            </span>
-                        </div>
-                    </div>
+<div class="fade-in">
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('dashboard') }}" class="text-decoration-none me-3" style="color: var(--cinza-texto);">
+            <i class="bi bi-arrow-left-circle fs-4"></i>
+        </a>
+        <div>
+            <h1 class="fw-bold mb-2" style="color: var(--cinza-texto); font-size: 2rem;">
+                <i class="bi bi-building me-2" style="color: var(--azul-principal);"></i>
+                Métricas da Empresa
+            </h1>
+            <p class="text-muted">
+                <i class="bi bi-bar-chart me-1"></i>
+                Visão geral do desempenho da empresa
+            </p>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon azul mx-auto mb-2" style="width: 48px; height: 48px;">
+                    <i class="bi bi-file-text fs-3"></i>
                 </div>
+                <h6 class="fw-semibold mb-1 text-muted">Total de Contratos</h6>
+                <div class="display-6 fw-bold" style="color: var(--azul-principal);">{{ stats.total_contratos }}</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon verde mx-auto mb-2" style="width: 48px; height: 48px;">
+                    <i class="bi bi-cash-stack fs-3"></i>
+                </div>
+                <h6 class="fw-semibold mb-1 text-muted">Valor Total</h6>
+                <div class="fw-bold fs-5" style="color: var(--verde-principal);">R$ {{ "%.2f"|format(stats.valor_total) }}</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon amarelo mx-auto mb-2" style="width: 48px; height: 48px;">
+                    <i class="bi bi-people fs-3"></i>
+                </div>
+                <h6 class="fw-semibold mb-1 text-muted">Usuários Ativos</h6>
+                <div class="display-6 fw-bold" style="color: var(--amarelo-escuro);">{{ stats.total_usuarios }}</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card-custom p-3 text-center">
+                <div class="card-icon vermelho mx-auto mb-2" style="width: 48px; height: 48px;">
+                    <i class="bi bi-trophy fs-3"></i>
+                </div>
+                <h6 class="fw-semibold mb-1 text-muted">Média por Usuário</h6>
+                <div class="fw-bold fs-5" style="color: var(--vermelho-principal);">
+                    {{ "%.1f"|format(stats.total_contratos / stats.total_usuarios if stats.total_usuarios > 0 else 0) }}
+                </div>
+                <small class="text-muted">contratos/usuário</small>
             </div>
         </div>
     </div>
 
-    <!-- KPIs Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-file-text-fill fs-1 text-primary"></i>
-                    <h2 class="mb-0 mt-2">{{ stats.total_contratos or 0 }}</h2>
-                    <small class="text-muted">Total de Contratos</small>
-                    <div class="mt-2">
-                        <span class="badge bg-info">Criados por você</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
-                    <h2 class="mb-0 mt-2">{{ stats.ativos or 0 }}</h2>
-                    <small class="text-muted">Contratos Ativos</small>
-                    <div class="mt-2">
-                        <span class="badge bg-success">Em vigor</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-clock-history fs-1 text-warning"></i>
-                    <h2 class="mb-0 mt-2">{{ stats.aguardando or 0 }}</h2>
-                    <small class="text-muted">Aguardando Aprovação</small>
-                    <div class="mt-2">
-                        <span class="badge bg-warning">Pendentes</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-star-fill fs-1 text-info"></i>
-                    <h2 class="mb-0 mt-2">{{ taxa_acerto }}%</h2>
-                    <small class="text-muted">Taxa de Acerto</small>
-                    <div class="mt-2">
-                        <span class="badge {% if taxa_acerto > 80 %}bg-success{% elif taxa_acerto > 50 %}bg-warning{% else %}bg-danger{% endif %}">
-                            {% if taxa_acerto > 80 %}Excelente{% elif taxa_acerto > 50 %}Bom{% else %}Melhorar{% endif %}
+    <!-- Gráficos -->
+    <div class="row g-4 mb-4">
+        <!-- Contratos por Status -->
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                    <i class="bi bi-pie-chart me-2" style="color: var(--azul-principal);"></i>
+                    Contratos por Status
+                </h5>
+                
+                {% if contratos_por_status %}
+                <canvas id="statusChart" height="250"></canvas>
+                <div class="mt-4">
+                    {% for item in contratos_por_status %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% if item.status == 'ativo' %}🟢 Ativo
+                            {% elif item.status == 'rascunho' %}🟡 Rascunho
+                            {% elif item.status == 'em_analise' %}🔵 Em Análise
+                            {% elif item.status == 'aguardando_aprovacao' %}🟠 Aguardando
+                            {% elif item.status == 'encerrado' %}⚫ Encerrado
+                            {% else %}🟣 {{ item.status }}{% endif %}
                         </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Performance Individual -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Evolução Mensal</h5>
-                    <small>Quantidade de contratos por mês</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="evolucaoChart" height="250"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Distribuição por Status</h5>
-                    <small>Situação dos seus contratos</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="statusChart" height="250"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Qualidade vs Quantidade -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart-steps"></i> Qualidade vs Quantidade</h5>
-                    <small>Relação entre contratos criados e taxa de acerto</small>
-                </div>
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <div class="progress" style="height: 30px;">
-                                <div class="progress-bar bg-success" style="width: {{ taxa_acerto }}%;">
-                                    Acertos: {{ taxa_acerto }}%
-                                </div>
-                                <div class="progress-bar bg-danger" style="width: {{ 100 - taxa_acerto }}%;">
-                                    Correções: {{ 100 - taxa_acerto }}%
-                                </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="progress" style="width: 150px; height: 6px;">
+                                <div class="progress-bar" style="width: {{ (item.total / stats.total_contratos * 100) if stats.total_contratos > 0 else 0 }}%;"></div>
                             </div>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <div class="display-6">{{ stats.total_contratos or 0 }}</div>
-                            <small>Total de contratos</small>
+                            <span class="fw-bold">{{ item.total }}</span>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">Nenhum contrato registrado</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Evolução Mensal -->
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                    <i class="bi bi-calendar-week me-2" style="color: var(--verde-principal);"></i>
+                    Evolução Mensal
+                </h5>
+                
+                {% if contratos_por_mes %}
+                <canvas id="evolucaoChart" height="250"></canvas>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">Nenhum contrato registrado</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Insights e Recomendações -->
+    <!-- Top Contratos -->
     <div class="row">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Insights para seu Desenvolvimento</h5>
+        <div class="col-md-12">
+            <div class="card-custom p-4">
+                <h5 class="fw-semibold mb-4 d-flex align-items-center">
+                    <i class="bi bi-trophy me-2" style="color: var(--amarelo-escuro);"></i>
+                    Top 5 Contratos por Valor
+                </h5>
+                
+                {% if top_contratos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nº Contrato</th>
+                                <th>Contratante</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contrato in top_contratos %}
+                            <tr>
+                                <td>
+                                    {% if loop.index == 1 %}🥇
+                                    {% elif loop.index == 2 %}🥈
+                                    {% elif loop.index == 3 %}🥉
+                                    {% else %}{{ loop.index }}º{% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="text-decoration-none fw-medium">
+                                        {{ contrato.numero_contrato }}
+                                    </a>
+                                </td>
+                                <td>{{ contrato.contratante_nome }}</td>
+                                <td class="fw-bold text-success">R$ {{ "%.2f"|format(contrato.valor) }}</td>
+                                <td>
+                                    {% if contrato.status == 'ativo' %}
+                                    <span class="badge badge-azul">Ativo</span>
+                                    {% else %}
+                                    <span class="badge badge-cinza">{{ contrato.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('ver_contrato', id=contrato.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="card-body">
-                    {% if taxa_acerto > 80 %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-trophy-fill"></i>
-                        <strong>Excelente performance!</strong>
-                        <p class="mb-0 mt-2">Sua taxa de acerto está acima da média. Continue mantendo esse padrão de qualidade!</p>
-                    </div>
-                    {% elif taxa_acerto > 50 %}
-                    <div class="alert alert-warning">
-                        <i class="bi bi-arrow-up-circle"></i>
-                        <strong>Bom progresso!</strong>
-                        <p class="mb-0 mt-2">Você está no caminho certo. Revise os detalhes antes de enviar para aumentar sua taxa de aprovação direta.</p>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-question-circle"></i>
-                        <strong>Área de oportunidade</strong>
-                        <p class="mb-0 mt-2">Que tal revisar os contratos com mais atenção antes de enviar? Pequenos ajustes podem aumentar sua taxa de acerto!</p>
-                    </div>
-                    {% endif %}
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">Nenhum contrato encontrado</p>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Próximos Passos</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        {% if stats.total_contratos < 10 %}
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle text-muted"></i> Complete 10 contratos para desbloquear conquistas
-                        </li>
-                        {% endif %}
-                        {% if taxa_acerto < 70 %}
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle text-muted"></i> Atingir 70% de taxa de acerto
-                        </li>
-                        {% endif %}
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle text-muted"></i> Acompanhar métricas semanalmente
-                        </li>
-                    </ul>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -197,59 +196,154 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Gráfico de Evolução
-const evolucaoCtx = document.getElementById('evolucaoChart').getContext('2d');
-new Chart(evolucaoCtx, {
-    type: 'line',
-    data: {
-        labels: [{% for item in evolucao %}'{{ item.mes }}',{% endfor %}],
-        datasets: [{
-            label: 'Contratos Criados',
-            data: [{% for item in evolucao %}{{ item.total }},{% endfor %}],
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-            tension: 0.3,
-            fill: true
-        }, {
-            label: 'Contratos Ativos',
-            data: [{% for item in evolucao %}{{ item.ativos }},{% endfor %}],
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            tension: 0.3,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { position: 'top' }
+    // Gráfico de Status
+    {% if contratos_por_status %}
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusLabels = [];
+    const statusData = [];
+    const statusColors = [];
+    
+    {% for item in contratos_por_status %}
+        {% if item.status == 'ativo' %}
+            statusLabels.push('Ativo');
+            statusColors.push('#10b981');
+        {% elif item.status == 'rascunho' %}
+            statusLabels.push('Rascunho');
+            statusColors.push('#f59e0b');
+        {% elif item.status == 'em_analise' %}
+            statusLabels.push('Em Análise');
+            statusColors.push('#3b82f6');
+        {% elif item.status == 'aguardando_aprovacao' %}
+            statusLabels.push('Aguardando');
+            statusColors.push('#f59e0b');
+        {% elif item.status == 'encerrado' %}
+            statusLabels.push('Encerrado');
+            statusColors.push('#6b7280');
+        {% else %}
+            statusLabels.push('{{ item.status }}');
+            statusColors.push('#8b5cf6');
+        {% endif %}
+        statusData.push({{ item.total }});
+    {% endfor %}
+    
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: statusColors,
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = statusData.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.raw / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
         }
-    }
-});
+    });
+    {% endif %}
 
-// Gráfico de Status
-const statusCtx = document.getElementById('statusChart').getContext('2d');
-new Chart(statusCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Ativos', 'Aguardando Aprovação', 'Em Análise', 'Outros'],
-        datasets: [{
-            data: [
-                {{ stats.ativos or 0 }},
-                {{ stats.aguardando or 0 }},
-                {{ stats.em_analise or 0 }},
-                {{ (stats.total_contratos or 0) - ((stats.ativos or 0) + (stats.aguardando or 0) + (stats.em_analise or 0)) }}
-            ],
-            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#6b7280']
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'bottom' }
+    // Gráfico de Evolução Mensal
+    {% if contratos_por_mes %}
+    const evolucaoCtx = document.getElementById('evolucaoChart').getContext('2d');
+    new Chart(evolucaoCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in contratos_por_mes %}'{{ item.mes_nome }}',{% endfor %}],
+            datasets: [
+                {
+                    label: 'Quantidade',
+                    data: [{% for item in contratos_por_mes %}{{ item.total }},{% endfor %}],
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 8,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Valor Total (R$)',
+                    data: [{% for item in contratos_por_mes %}{{ item.valor_total }},{% endfor %}],
+                    backgroundColor: '#10b981',
+                    borderRadius: 8,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.dataset.label === 'Valor Total (R$)') {
+                                return `R$ ${context.raw.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                            }
+                            return `${context.dataset.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade de Contratos'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Valor Total (R$)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            }
         }
-    }
-});
+    });
+    {% endif %}
 </script>
+
+<style>
+.badge-azul {
+    background: var(--azul-claro);
+    color: var(--azul-principal);
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+}
+.badge-cinza {
+    background: var(--cinza-claro);
+    color: var(--cinza-texto);
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+}
+</style>
 {% endblock %}
