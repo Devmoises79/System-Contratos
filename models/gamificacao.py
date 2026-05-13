@@ -10,14 +10,15 @@ from core.logging_config import logger
 class Gamificacao:
     """Modelo de gamificação para gestão de pontos e conquistas"""
     
-    # Constantes de pontuação
     PONTOS_POR_CONTRATO_CRIADO = 10
-    PONTOS_POR_CONTRATO_APROVADO = 50
-    PONTOS_POR_CONTRATO_REJEITADO = -5
-    PONTOS_POR_CONTRATO_EDITADO = 2
+    PONTOS_POR_CONTRATO_APROVADO = 10
+    PONTOS_POR_CONTRATO_REJEITADO = 5      # REJEITAR/DEVOLVER = +5 pontos
+    PONTOS_POR_CONTRATO_EDITADO = 5
     PONTOS_POR_DASHBOARD_ACESSADO = 1
     PONTOS_POR_CLIENTE_CADASTRADO = 15
     PONTOS_POR_AVALIACAO_POSITIVA = 20
+    PONTOS_POR_ENVIO_ANALISE = 5           # Enviar para análise = +5 pontos
+    PONTOS_POR_ENVIO_GESTOR = 10           # Enviar para gestor = +10 pontos
     
     # Níveis e pontuação necessária
     NIVEIS = {

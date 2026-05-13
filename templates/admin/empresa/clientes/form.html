@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar Cliente' if cliente else 'Novo Cliente' }} - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-user-tie me-2"></i> {{ 'Editar Cliente' if cliente else 'Novo Cliente' }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="card-branco">
+        <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-{{ 'edit' if cliente else 'plus-circle' }} me-2" style="color: #6B46C1;"></i>
+                {{ 'Editar Cliente' if cliente else 'Cadastrar Novo Cliente' }}
+            </h5>
+            <p class="text-muted mt-2 small">
+                Preencha os dados do cliente/contratante
+            </p>
+        </div>
+        
+        <div class="card-body p-4">
+            <form method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="row g-4">
+                    <!-- Dados Principais -->
+                    <div class="col-12">
+                        <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                            <i class="fas fa-info-circle me-2"></i> Informações Principais
+                        </h6>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nome / Razão Social <span class="text-danger">*</span></label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="nome" 
+                               value="{{ cliente.nome if cliente else '' }}"
+                               placeholder="Nome completo ou razão social"
+                               required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">CPF / CNPJ</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="documento"
+                               name="documento" 
+                               value="{{ cliente.documento if cliente else '' }}"
+                               placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" 
+                               class="form-control" 
+                               name="email" 
+                               value="{{ cliente.email if cliente else '' }}"
+                               placeholder="cliente@empresa.com">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Telefone</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="telefone"
+                               name="telefone" 
+                               value="{{ cliente.telefone if cliente else '' }}"
+                               placeholder="(00) 00000-0000">
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Endereço</label>
+                        <textarea class="form-control" 
+                                  name="endereco" 
+                                  rows="2" 
+                                  placeholder="Rua, número, bairro, cidade - UF">{{ cliente.endereco if cliente else '' }}</textarea>
+                    </div>
+                    
+                    <!-- Dados do Contato -->
+                    <div class="col-12 mt-2">
+                        <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                            <i class="fas fa-address-card me-2"></i> Pessoa de Contato
+                        </h6>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nome do Contato</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="contato_nome" 
+                               value="{{ cliente.contato_nome if cliente else '' }}"
+                               placeholder="Nome da pessoa para contato">
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Telefone do Contato</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="contato_telefone"
+                               name="contato_telefone" 
+                               value="{{ cliente.contato_telefone if cliente else '' }}"
+                               placeholder="(00) 00000-0000">
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Email do Contato</label>
+                        <input type="email" 
+                               class="form-control" 
+                               name="contato_email" 
+                               value="{{ cliente.contato_email if cliente else '' }}"
+                               placeholder="contato@empresa.com">
+                    </div>
+                    
+                    <!-- Status e Observações -->
+                    <div class="col-12 mt-2">
+                        <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                            <i class="fas fa-cog me-2"></i> Configurações
+                        </h6>
+                    </div>
+                    
+                    {% if cliente %}
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="ativo" id="ativo" 
+                                   {% if cliente.ativo %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="ativo">
+                                <i class="fas fa-check-circle text-success me-1"></i> Cliente ativo
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Observações</label>
+                        <textarea class="form-control" 
+                                  name="observacoes" 
+                                  rows="3" 
+                                  placeholder="Informações adicionais sobre o cliente...">{{ cliente.observacoes if cliente else '' }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Botões -->
+                <div class="d-flex justify-content-end gap-3 mt-4 pt-3" style="border-top: 1px solid #e2e8f0;">
+                    <a href="{{ url_for('admin_clientes.index') }}" class="btn-outline-roxo">
+                        <i class="fas fa-times me-2"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn-roxo">
+                        <i class="fas fa-save me-2"></i> {{ 'Salvar Alterações' if cliente else 'Cadastrar Cliente' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .form-control {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 14px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #6B46C1;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+        outline: none;
+    }
+    textarea.form-control {
+        resize: vertical;
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 26px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .form-check-input:checked {
+        background-color: #6B46C1;
+        border-color: #6B46C1;
+    }
+</style>
+
+<script>
+    // Formatação automática de CNPJ/CPF
+    const docInput = document.getElementById('documento');
+    if (docInput) {
+        docInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length <= 11) {
+                // CPF
+                if (value.length > 3) value = value.replace(/^(\d{3})(\d)/, '$1.$2');
+                if (value.length > 6) value = value.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+                if (value.length > 9) value = value.replace(/\.(\d{3})(\d)/, '.$1-$2');
+            } else {
+                // CNPJ
+                if (value.length > 2) value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                if (value.length > 5) value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                if (value.length > 8) value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                if (value.length > 12) value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            
+            e.target.value = value;
+        });
+    }
+    
+    // Formatação de telefone
+    function formatarTelefone(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+            if (value.length > 2) value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            if (value.length > 7) value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            input.value = value;
+        }
+    }
+    
+    const telInput = document.getElementById('telefone');
+    if (telInput) {
+        telInput.addEventListener('input', () => formatarTelefone(telInput));
+    }
+    
+    const contatoTelInput = document.getElementById('contato_telefone');
+    if (contatoTelInput) {
+        contatoTelInput.addEventListener('input', () => formatarTelefone(contatoTelInput));
+    }
+</script>
+{% endblock %}

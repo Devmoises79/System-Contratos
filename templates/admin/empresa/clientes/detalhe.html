@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Cliente - System Contratos{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-user-tie me-2"></i> Detalhes do Cliente
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-branco">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div>
+                        <h4 class="mb-1 fw-bold">{{ cliente.nome }}</h4>
+                        <p class="text-muted mb-0 small">
+                            <i class="fas fa-id-card me-1"></i> 
+                            {{ cliente.documento or 'Documento não informado' }}
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('admin_clientes.index') }}" class="btn-outline-roxo me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Voltar
+                        </a>
+                        <a href="{{ url_for('admin_clientes.editar', id=cliente.id) }}" class="btn-roxo">
+                            <i class="fas fa-edit me-1"></i> Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Informações do Cliente -->
+        <div class="col-md-6">
+            <div class="card-info card-hover">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-info-circle me-2"></i> Informações do Cliente
+                    </h6>
+                    
+                    <div class="info-row">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="fas fa-building mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Nome / Razão Social</small>
+                                <strong>{{ cliente.nome }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="fas fa-id-card mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">CPF / CNPJ</small>
+                                <strong>{{ cliente.documento or '-' }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="fas fa-envelope mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Email</small>
+                                <strong>{{ cliente.email or '-' }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="fas fa-phone mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Telefone</small>
+                                <strong>{{ cliente.telefone or '-' }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="fas fa-map-marker-alt mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Endereço</small>
+                                <strong>{{ cliente.endereco or '-' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pessoa de Contato -->
+        <div class="col-md-6">
+            <div class="card-info card-hover">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-address-card me-2"></i> Pessoa de Contato
+                    </h6>
+                    
+                    <div class="info-row">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="fas fa-user mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Nome</small>
+                                <strong>{{ cliente.contato_nome or '-' }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="fas fa-phone-alt mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Telefone</small>
+                                <strong>{{ cliente.contato_telefone or '-' }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="fas fa-envelope mt-1" style="color: #6B46C1; width: 24px;"></i>
+                            <div>
+                                <small class="text-muted d-block">Email</small>
+                                <strong>{{ cliente.contato_email or '-' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Observações -->
+        {% if cliente.observacoes %}
+        <div class="col-12">
+            <div class="card-info card-hover">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-comment me-2"></i> Observações
+                    </h6>
+                    <div class="observacoes-box">
+                        <p class="mb-0">{{ cliente.observacoes }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Status -->
+        <div class="col-12">
+            <div class="card-info card-hover">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color: #6B46C1;">
+                        <i class="fas fa-chart-simple me-2"></i> Status
+                    </h6>
+                    <div class="d-flex align-items-center gap-3">
+                        {% if cliente.ativo %}
+                            <span class="badge-ativo"><i class="fas fa-check-circle me-1"></i> Ativo</span>
+                        {% else %}
+                            <span class="badge-cancelado"><i class="fas fa-ban me-1"></i> Inativo</span>
+                        {% endif %}
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Cadastrado em: {{ cliente.data_criacao.strftime('%d/%m/%Y') if cliente.data_criacao else '-' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contratos do Cliente -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card-info card-hover">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-file-signature me-2" style="color: #6B46C1;"></i>
+                        Contratos do Cliente
+                        <span class="badge-analise ms-2" style="font-size: 11px;">{{ total_contratos }} contratos</span>
+                    </h5>
+                    <p class="text-muted small mt-1">
+                        <i class="fas fa-dollar-sign me-1"></i>
+                        Valor total: R$ {{ "%.2f"|format(valor_total) }}
+                    </p>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nº Contrato</th>
+                                    <th>Contratada</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if contratos and contratos|length > 0 %}
+                                    {% for contrato in contratos %}
+                                    <tr class="table-row-hover">
+                                        <td>
+                                            <strong>{{ contrato.numero_contrato or 'CT-' ~ contrato.id }}</strong>
+                                            <br>
+                                            <small class="text-muted">ID: {{ contrato.id }}</small>
+                                         </br>
+                                        <td>{{ contrato.contratada_nome or '-' }}</br>
+                                        <td>R$ {{ "%.2f"|format(contrato.valor or 0) }}</br>
+                                        <td>
+                                            {% if contrato.status == 'ativo' %}
+                                                <span class="badge-ativo"> Ativo</span>
+                                            {% elif contrato.status == 'em_analise' %}
+                                                <span class="badge-analise"> Em Análise</span>
+                                            {% elif contrato.status == 'aguardando_aprovacao' %}
+                                                <span class="badge-aguardando"> Aguardando</span>
+                                            {% elif contrato.status == 'rascunho' %}
+                                                <span class="badge-rascunho"> Rascunho</span>
+                                            {% elif contrato.status == 'encerrado' %}
+                                                <span class="badge-encerrado"> Encerrado</span>
+                                            {% else %}
+                                                <span class="badge-cancelado"> Cancelado</span>
+                                            {% endif %}
+                                         </br>
+                                        <td>{{ contrato.data_criacao.strftime('%d/%m/%Y') if contrato.data_criacao else '-' }}</br>
+                                        <td>
+                                            <a href="{{ url_for('admin_empresa.ver_contrato', id=contrato.id) }}" 
+                                               class="btn-action btn-view" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                         </br>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-inbox fa-3x mb-3" style="color: #CBD5E0;"></i>
+                                            <p class="text-muted mb-0">Nenhum contrato vinculado a este cliente</p>
+                                            <a href="{{ url_for('admin_empresa.novo_contrato') }}" class="btn-outline-roxo mt-3">
+                                                <i class="fas fa-plus-circle me-1"></i> Criar contrato
+                                            </a>
+                                         </br>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-branco, .card-info {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+    }
+    .observacoes-box {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 16px;
+        border-left: 4px solid #6B46C1;
+    }
+    .info-row {
+        margin-top: 8px;
+    }
+    .badge-ativo {
+        background: linear-gradient(135deg, #10b981, #059669);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-analise {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-aguardando {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-rascunho {
+        background: linear-gradient(135deg, #868e96, #6c757d);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-encerrado {
+        background: linear-gradient(135deg, #4a5568, #2d3748);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .badge-cancelado {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .btn-view {
+        background: #f3e8ff;
+        color: #6B46C1;
+    }
+    .btn-view:hover {
+        background: #6B46C1;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+    }
+    .btn-roxo {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        border: none;
+        color: white;
+        border-radius: 40px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-roxo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 70, 193, 0.3);
+        color: white;
+    }
+    .btn-outline-roxo {
+        border: 2px solid #6B46C1;
+        color: #6B46C1;
+        background: white;
+        border-radius: 40px;
+        padding: 8px 26px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-outline-roxo:hover {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .table-custom thead {
+        background: linear-gradient(135deg, #6B46C1, #553C9A);
+        color: white;
+    }
+    .table-custom thead th {
+        padding: 12px 16px;
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+    }
+    .table-custom tbody td {
+        padding: 12px 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .table-row-hover:hover {
+        background: #faf5ff;
+    }
+</style>
+{% endblock %}

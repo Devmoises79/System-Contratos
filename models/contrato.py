@@ -212,23 +212,30 @@ class Contrato:
         return True
     
     def aprovar(self, usuario_id):
-        query = """
-            UPDATE contratos 
-            SET status = 'ativo', 
-                aprovado_por = %s,
-                data_aprovacao = NOW(),
-                solicitado_aprovacao = FALSE,
-                data_solicitacao = NULL,
-                data_atualizacao = NOW()
-            WHERE id = %s
-        """
-        Database.execute(query, (usuario_id, self.id))
-        self.status = 'ativo'
-        self.aprovado_por = usuario_id
-        self.data_aprovacao = datetime.now()
-        self.solicitado_aprovacao = False
-        self.data_solicitacao = None
-        return True
+        """Aprova o contrato"""
+        try:
+            query = """
+                UPDATE contratos 
+                SET status = 'ativo', 
+                    solicitado_aprovacao = FALSE,
+                    data_solicitacao = NULL,
+                    data_aprovacao = NOW(),
+                    atualizado_por = %s,
+                    data_atualizacao = NOW()
+                WHERE id = %s
+            """
+            Database.execute(query, (usuario_id, self.id))
+            
+            self.status = 'ativo'
+            self.solicitado_aprovacao = False
+            self.data_solicitacao = None
+            self.data_aprovacao = datetime.now()
+            self.atualizado_por = usuario_id
+            return True
+            
+        except Exception as e:
+            print(f"Erro ao aprovar contrato: {e}")
+            return False
     
     def cancelar(self, usuario_id, motivo=None):
         query = """
